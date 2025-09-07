@@ -46,8 +46,10 @@
       <h3 class="section-title">Stats <span class="points">Points: {{ points_available }}</span></h3>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-name">Strength</div>
-          <div class="stat-icon-strength"></div>
+          <div class="stat-name">
+            <span class="stat-icon">💪</span>
+            Strength
+          </div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('strength')">−</button>
             <div class="stat-value">{{ strength_total }}</div><div class="stat-breakdown">({{ strength }} + {{ strength_mod }})</div>
@@ -56,8 +58,10 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-name">Constitution</div>
-          <div class="stat-icon-constitution"></div>
+          <div class="stat-name">
+            <span class="stat-icon">❤️</span>
+            Constitution
+          </div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('constitution')">−</button>
             <div class="stat-value">{{ constitution_total }}</div><div class="stat-breakdown">({{ constitution }} + {{ constitution_mod }})</div>
@@ -66,8 +70,10 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-name">Agility</div>
-          <div class="stat-icon-agility"></div>
+          <div class="stat-name">
+            <span class="stat-icon">🏃‍♂️</span>
+            Agility
+          </div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('agility')">−</button>
             <div class="stat-value">{{ agility_total }}</div><div class="stat-breakdown">({{ agility }} + {{ agility_mod }})</div>
@@ -76,8 +82,10 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-name">Intelligence</div>
-          <div class="stat-icon-intelligence"></div>
+          <div class="stat-name">
+            <span class="stat-icon">🧠</span>
+            Intelligence
+          </div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('intelligence')">−</button>
             <div class="stat-value">{{ intelligence_total }}</div><div class="stat-breakdown">({{ intelligence }} + {{ intelligence_mod }})</div>

@@ -16,6 +16,8 @@ class Hero(models.Model):
     health = models.IntegerField(default=100)
     current_health = models.IntegerField(default=100)
 
+    is_in_combat = models.BooleanField(default=False)
+
     def calculate_max_health(self):
         """Calculate max health based on constitution, level, and class"""
         base_health = self.hero_class.base_health if self.hero_class else 100
@@ -46,6 +48,26 @@ class Hero(models.Model):
         if self.health == 0:
             return 0
         return (self.current_health / self.health) * 100
+
+    def take_damage(self, damage):
+        """
+        Deal damage to hero and start healing if not at full health
+        """
+        self.current_health = max(0, self.current_health - damage)
+        self.save()
+
+        # Start healing if hero is not at full health
+        if self.current_health < self.health and self.current_health > 0:
+            # Import here to avoid circular imports
+            from .windows_tasks import start_hero_healing
+            start_hero_healing(self.id)
+
+    def heal(self, amount):
+        """
+        Heal hero by specified amount
+        """
+        self.current_health = min(self.health, self.current_health + amount)
+        self.save()
 
     def __str__(self):
         return self.name

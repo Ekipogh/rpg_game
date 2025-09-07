@@ -11,12 +11,18 @@
 .hero-header {
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
     margin-bottom: 30px;
     background: #ffffff;
     border-radius: 8px;
     padding: 24px;
     border: 1px solid #e2e8f0;
+}
+
+.hero-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .hero-avatar {
@@ -50,6 +56,33 @@
     font-size: 1.1rem;
     color: #667eea;
     font-weight: 600;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+}
+
+.exit-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f56565;
+    color: white;
+    border: 1px solid #f56565;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.exit-btn:hover {
+    opacity: 0.8;
+}
+
+.btn-icon {
+    font-size: 1rem;
 }
 
 .hero-cards-grid {
@@ -181,6 +214,12 @@
     border-color: #a8e6cf;
 }
 
+.heal-btn {
+    background: #ffd93d;
+    color: #2d3748;
+    border-color: #ffd93d;
+}
+
 .action-btn:hover {
     opacity: 0.8;
 }
@@ -274,4 +313,22 @@
 
 .stat-card h3 {
     margin: 0 0 8px 0;
+}
+
+.hero-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.exit-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }

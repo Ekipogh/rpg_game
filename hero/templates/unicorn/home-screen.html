@@ -1,12 +1,20 @@
 {% load static %}
 <div class="home-screen">
     <div class="hero-header">
-        <div class="hero-avatar">
-            <div class="{{ hero.hero_class.name|lower }}-icon hero-icon"></div>
+        <div class="hero-info">
+            <div class="hero-avatar">
+                <div class="{{ hero.hero_class.name|lower }}-icon hero-icon"></div>
+            </div>
+            <div class="hero-title">
+                <h1>{{ hero.name }}</h1>
+                <p class="hero-class">{{ hero.hero_class.name }}</p>
+            </div>
         </div>
-        <div class="hero-title">
-            <h1>{{ hero.name }}</h1>
-            <p class="hero-class">{{ hero.hero_class.name }}</p>
+        <div class="hero-actions">
+            <button class="exit-btn" unicorn:click="exit_game">
+                <span class="btn-icon">🚪</span>
+                Exit
+            </button>
         </div>
     </div>
 
@@ -32,9 +40,9 @@
                 <h3>Health</h3>
                 <div class="health-bar-container">
                     <div class="health-bar">
-                        <div class="health-fill" style="width: {{ hero.health_percentage }}%"></div>
+                        <div class="health-fill" style="width: {{ hero.health_percentage }}%" id="health-fill"></div>
                     </div>
-                    <span class="health-text">{{ hero.current_health }} / {{ hero.health }} HP</span>
+                    <span class="health-text" id="health-text">{{ hero.current_health }} / {{ hero.health }} HP</span>
                 </div>
             </div>
         </div>
@@ -81,8 +89,14 @@
                     </button>
                     <button class="action-btn rest-btn" unicorn:click="rest">
                         <span class="btn-icon">🛌</span>
-                        Rest
+                        Rest (Instant)
                     </button>
+                    {% if hero.current_health < hero.health %}
+                    <button class="action-btn heal-btn" unicorn:click="start_healing">
+                        <span class="btn-icon">⏰</span>
+                        Start Healing
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>

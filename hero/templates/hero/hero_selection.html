@@ -4,6 +4,7 @@
   <head>
     <link rel="stylesheet" href="{% static 'css/hero_selection.css' %}" />
     {% unicorn_scripts %}
+    <title>Select Your Hero</title>
   </head>
   <body>
     {% csrf_token %}
@@ -21,6 +22,9 @@
         {% empty %}
           <p>No heroes available. Please create a character.</p>
         {% endfor %}
+      </div>
+      <div class="create-button-container">
+        <a href="{% url 'create_character' %}" class="btn create-btn">Create New Hero</a>
       </div>
     </div>
   </body>
