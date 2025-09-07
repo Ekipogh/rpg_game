@@ -30,9 +30,9 @@
           <p>Wizard</p>
         </div>
 
-        <div class="class-card {% if selected_class == 'Archer' %}selected{% endif %}" unicorn:click="select_class('Archer')">
-          <img src="{% static 'images/archer.png' %}" alt="Archer" />
-          <p>Archer</p>
+        <div class="class-card {% if selected_class == 'Ranger' %}selected{% endif %}" unicorn:click="select_class('Ranger')">
+          <img src="{% static 'images/ranger.png' %}" alt="Ranger" />
+          <p>Ranger</p>
         </div>
       </div>
       {% for error_list in unicorn.errors.selected_class %}
@@ -47,36 +47,40 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-name">Strength</div>
+          <div class="stat-icon-strength"></div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('strength')">−</button>
-            <div class="stat-value">{{ strength }}</div>
+            <div class="stat-value">{{ strength_total }}</div><div class="stat-breakdown">({{ strength }} + {{ strength_mod }})</div>
             <button class="btn small" unicorn:click="increase_stat('strength')">+</button>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-name">Constitution</div>
+          <div class="stat-icon-constitution"></div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('constitution')">−</button>
-            <div class="stat-value">{{ constitution }}</div>
+            <div class="stat-value">{{ constitution_total }}</div><div class="stat-breakdown">({{ constitution }} + {{ constitution_mod }})</div>
             <button class="btn small" unicorn:click="increase_stat('constitution')">+</button>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-name">Agility</div>
+          <div class="stat-icon-agility"></div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('agility')">−</button>
-            <div class="stat-value">{{ agility }}</div>
+            <div class="stat-value">{{ agility_total }}</div><div class="stat-breakdown">({{ agility }} + {{ agility_mod }})</div>
             <button class="btn small" unicorn:click="increase_stat('agility')">+</button>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-name">Intelligence</div>
+          <div class="stat-icon-intelligence"></div>
           <div class="stat-controls">
             <button class="btn small" unicorn:click="decrease_stat('intelligence')">−</button>
-            <div class="stat-value">{{ intelligence }}</div>
+            <div class="stat-value">{{ intelligence_total }}</div><div class="stat-breakdown">({{ intelligence }} + {{ intelligence_mod }})</div>
             <button class="btn small" unicorn:click="increase_stat('intelligence')">+</button>
           </div>
         </div>

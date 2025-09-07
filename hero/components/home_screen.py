@@ -13,3 +13,10 @@ class HomeScreenView(UnicornView):
         """Handle navigation to shop screen"""
         # Add navigation logic here
         pass
+
+    def rest(self):
+        """Restore hero's health"""
+        # You can access the hero from the parent context
+        # For now, just a placeholder - you might want to implement
+        # actual rest logic or redirect to a rest view
+        pass

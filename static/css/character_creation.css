@@ -93,11 +93,12 @@
 .stat-name { font-weight:600; color:#333; }
 .stat-controls {
   display:flex;
-  flex-direction:column; /* stack buttons vertically */
+  flex-direction:column;
   align-items:center;
   gap:8px;
 }
 .stat-value { min-width:44px; text-align:center; font-weight:700; font-size:1.05rem; }
+.stat-breakdown { font-size:0.85rem; color:#666; margin-left:6px; }
 
 .btn {
   background:#f1f5ff;
@@ -124,4 +125,32 @@
   font-size: 0.875rem;
   margin-top: 4px;
   display: block;
+}
+
+.stat-icon-strength {
+  width: 64px;
+  height: 64px;
+  background: url('../images/strength_icon.png') no-repeat center center;
+  background-size: contain;
+}
+
+.stat-icon-constitution {
+  width: 64px;
+  height: 64px;
+  background: url('../images/constitution_icon.png') no-repeat center center;
+  background-size: contain;
+}
+
+.stat-icon-agility {
+  width: 64px;
+  height: 64px;
+  background: url('../images/agility_icon.png') no-repeat center center;
+  background-size: contain;
+}
+
+.stat-icon-intelligence {
+  width: 64px;
+  height: 64px;
+  background: url('../images/intelligence_icon.png') no-repeat center center;
+  background-size: contain;
 }
