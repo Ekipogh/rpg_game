@@ -1,0 +1,96 @@
+{% load unicorn %}
+{% load static %}
+<div class="cf-container">
+  <header class="cf-header">
+    <h2>Create a Character</h2>
+    <p class="cf-sub">Choose a class and distribute your stat points.</p>
+  </header>
+
+  <div class="cf-card">
+    <label class="cf-field">
+      <span class="cf-label">Name</span>
+      <input type="text" class="cf-input" unicorn:model="name" placeholder="Enter character name" />
+      {% for error_list in unicorn.errors.name %}
+        {% for message in error_list.message %}
+          <span class="cf-error">{{ message }}</span>
+        {% endfor %}
+      {% endfor %}
+    </label>
+
+    <section class="cf-section">
+      <h3 class="section-title">Select a Class</h3>
+      <div class="class-options">
+        <div class="class-card {% if selected_class == 'Warrior' %}selected{% endif %}" unicorn:click="select_class('Warrior')">
+          <img src="{% static 'images/warrior.png' %}" alt="Warrior" />
+          <p>Warrior</p>
+        </div>
+
+        <div class="class-card {% if selected_class == 'Wizard' %}selected{% endif %}" unicorn:click="select_class('Wizard')">
+          <img src="{% static 'images/wizard.png' %}" alt="Wizard" />
+          <p>Wizard</p>
+        </div>
+
+        <div class="class-card {% if selected_class == 'Archer' %}selected{% endif %}" unicorn:click="select_class('Archer')">
+          <img src="{% static 'images/archer.png' %}" alt="Archer" />
+          <p>Archer</p>
+        </div>
+      </div>
+      {% for error_list in unicorn.errors.selected_class %}
+        {% for message in error_list.message %}
+          <span class="cf-error">{{ message }}</span>
+        {% endfor %}
+      {% endfor %}
+    </section>
+
+    <section class="cf-section">
+      <h3 class="section-title">Stats <span class="points">Points: {{ points_available }}</span></h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-name">Strength</div>
+          <div class="stat-controls">
+            <button class="btn small" unicorn:click="decrease_stat('strength')">−</button>
+            <div class="stat-value">{{ strength }}</div>
+            <button class="btn small" unicorn:click="increase_stat('strength')">+</button>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-name">Constitution</div>
+          <div class="stat-controls">
+            <button class="btn small" unicorn:click="decrease_stat('constitution')">−</button>
+            <div class="stat-value">{{ constitution }}</div>
+            <button class="btn small" unicorn:click="increase_stat('constitution')">+</button>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-name">Agility</div>
+          <div class="stat-controls">
+            <button class="btn small" unicorn:click="decrease_stat('agility')">−</button>
+            <div class="stat-value">{{ agility }}</div>
+            <button class="btn small" unicorn:click="increase_stat('agility')">+</button>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-name">Intelligence</div>
+          <div class="stat-controls">
+            <button class="btn small" unicorn:click="decrease_stat('intelligence')">−</button>
+            <div class="stat-value">{{ intelligence }}</div>
+            <button class="btn small" unicorn:click="increase_stat('intelligence')">+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% for error_list in unicorn.errors.points_available %}
+      {% for message in error_list.message %}
+        <span class="cf-error">{{ message }}</span>
+      {% endfor %}
+    {% endfor %}
+    {% csrf_token %}
+
+    <div class="cf-actions">
+      <button class="btn primary" unicorn:click="submit">Continue</button>
+    </div>
+  </div>
+</div>

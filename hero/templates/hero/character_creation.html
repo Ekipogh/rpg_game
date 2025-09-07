@@ -1,0 +1,12 @@
+{% load static %}
+{% load unicorn %}
+<html>
+  <head>
+    <link rel="stylesheet" href="{% static 'css/character_creation.css' %}">
+    {% unicorn_scripts %}
+  </head>
+  <body>
+    {% csrf_token %}
+    {% unicorn 'character-form' %}
+  </body>
+</html>
