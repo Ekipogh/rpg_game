@@ -1,6 +1,104 @@
+{% load static %}
 <div class="home-screen">
-    <h1>Welcome, {{ hero.name }}!</h1>
-    <p>Class: {{ hero.hero_class.name }}</p>
-    <p>Level: {{ hero.level }}</p>
-    <div class="{{ hero.hero_class.name|lower }}-icon hero-icon"></div>
+    <div class="hero-header">
+        <div class="hero-info">
+            <div class="hero-avatar">
+                <div class="{{ hero.hero_class.name|lower }}-icon hero-icon"></div>
+            </div>
+            <div class="hero-title">
+                <h1>{{ hero.name }}</h1>
+                <p class="hero-class">{{ hero.hero_class.name }}</p>
+            </div>
+        </div>
+        <div class="hero-actions">
+            <button class="exit-btn" unicorn:click="exit_game">
+                <span class="btn-icon">🚪</span>
+                Exit
+            </button>
+        </div>
+    </div>
+
+    <div class="hero-cards-grid">
+        <!-- Level & Experience Card -->
+        <div class="info-card level-card">
+            <div class="card-icon">⭐</div>
+            <div class="card-content">
+                <h3>Level {{ hero.level }}</h3>
+                <div class="xp-bar-container">
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: {{ hero.experience_percentage }}%"></div>
+                    </div>
+                    <span class="xp-text">{{ hero.experience }} / {{ hero.next_level_xp }} XP</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Card -->
+        <div class="info-card health-card">
+            <div class="card-icon">❤️</div>
+            <div class="card-content">
+                <h3>Health</h3>
+                <div class="health-bar-container">
+                    <div class="health-bar">
+                        <div class="health-fill" style="width: {{ hero.health_percentage }}%" id="health-fill"></div>
+                    </div>
+                    <span class="health-text" id="health-text">{{ hero.current_health }} / {{ hero.health }} HP</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="info-card stats-card">
+            <div class="card-icon">💪</div>
+            <div class="card-content">
+                <h3>Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">STR</span>
+                        <span class="stat-value">{{ hero.strength }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">AGI</span>
+                        <span class="stat-value">{{ hero.agility }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">INT</span>
+                        <span class="stat-value">{{ hero.intelligence }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">CON</span>
+                        <span class="stat-value">{{ hero.constitution }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Card -->
+        <div class="info-card actions-card">
+            <div class="card-icon">⚔️</div>
+            <div class="card-content">
+                <h3>Actions</h3>
+                <div class="action-buttons">
+                    <button class="action-btn battle-btn" unicorn:click="navigate_to_battle">
+                        <span class="btn-icon">⚔️</span>
+                        Battle
+                    </button>
+                    <button class="action-btn shop-btn" unicorn:click="navigate_to_shop">
+                        <span class="btn-icon">🛒</span>
+                        Shop
+                    </button>
+                    <button class="action-btn rest-btn" unicorn:click="rest">
+                        <span class="btn-icon">🛌</span>
+                        Rest (Instant)
+                    </button>
+                    {% if hero.current_health < hero.health %}
+                    <button class="action-btn heal-btn" unicorn:click="start_healing">
+                        <span class="btn-icon">⏰</span>
+                        Start Healing
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

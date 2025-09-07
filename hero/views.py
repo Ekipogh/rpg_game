@@ -7,9 +7,9 @@ from hero.models import HeroClass, Hero
 
 def home_view(request):
     hero_id = request.session.get('hero_id')
-    if not hero_id:
+    hero = Hero.objects.filter(id=hero_id).first() if hero_id else None
+    if not hero:
         return redirect('index')
-    hero = Hero.objects.get(id=hero_id)
     return render(request, 'hero/home.html', {'hero': hero})
 
 
