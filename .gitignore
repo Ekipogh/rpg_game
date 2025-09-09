@@ -120,3 +120,4 @@ static/dist/
 
 .vscode/
 healing_state.json
+daemon_commands.json
