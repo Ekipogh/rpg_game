@@ -119,3 +119,4 @@ static/collected/
 static/dist/
 
 .vscode/
+healing_state.json
