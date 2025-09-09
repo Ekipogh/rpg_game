@@ -2,7 +2,6 @@
 Windows-compatible healing daemon for RPG game
 Uses threading instead of Django-RQ to avoid Windows compatibility issues
 """
-from hero.models import Hero
 import os
 import sys
 import django
@@ -19,6 +18,9 @@ sys.path.append(str(project_dir))
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
+
+from hero.models import Hero
+from django.db.models import F
 
 
 class HealingDaemon:
@@ -43,8 +45,7 @@ class HealingDaemon:
                 with open(self.state_file, 'r') as f:
                     data = json.load(f)
                     self.healing_heroes = {int(k): v for k, v in data.items()}
-                    print(
-                        f"📄 Loaded healing state for {len(self.healing_heroes)} heroes")
+                    print(f"📄 Loaded healing state for {len(self.healing_heroes)} heroes")
             except Exception as e:
                 print(f"⚠️  Could not load healing state: {e}")
 
@@ -55,7 +56,7 @@ class HealingDaemon:
             data = {}
             for hero_id, info in self.healing_heroes.items():
                 data[hero_id] = {
-                    'last_heal': info.get('last_heal', datetime.now().isoformat()),
+                    'last_heal': info.get('last_heal', datetime.now().isoformat()).isoformat(),
                     'active': True
                 }
 
@@ -128,15 +129,13 @@ class HealingDaemon:
 
                 # Heal the hero
                 old_health = hero.current_health
-                hero.current_health = min(
-                    hero.current_health + self.heal_amount, hero.health)
+                hero.current_health = min(hero.current_health + self.heal_amount, hero.health)
                 hero.save()
 
                 # Update last heal time
                 self.healing_heroes[hero_id]['last_heal'] = datetime.now()
 
-                print(
-                    f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+                print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
 
                 # Wait for next heal
                 time.sleep(self.heal_interval)
@@ -165,8 +164,7 @@ class HealingDaemon:
             # Stop ongoing healing since hero is now full
             self.stop_hero_healing(hero_id)
 
-            print(
-                f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.health} HP")
             return True
 
         except Hero.DoesNotExist:
@@ -181,8 +179,7 @@ class HealingDaemon:
             hero.current_health = max(0, hero.current_health - damage)
             hero.save()
 
-            print(
-                f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
 
             # Start healing if hero is alive and not at full health
             if hero.current_health > 0 and hero.current_health < hero.health:
@@ -207,8 +204,7 @@ class HealingDaemon:
             try:
                 hero = Hero.objects.get(id=hero_id)
                 last_heal = info.get('last_heal', 'Unknown')
-                print(
-                    f"   🏥 {hero.name}: {hero.current_health}/{hero.health} HP (Last heal: {last_heal})")
+                print(f"   🏥 {hero.name}: {hero.current_health}/{hero.health} HP (Last heal: {last_heal})")
             except Hero.DoesNotExist:
                 print(f"   ❌ Hero {hero_id}: Not found")
 
@@ -242,8 +238,7 @@ class HealingDaemon:
                     heroes = Hero.objects.all()
                     print(f"\n👥 All Heroes:")
                     for hero in heroes:
-                        print(
-                            f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.health} HP")
+                        print(f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.health} HP")
                 elif cmd == 'heal' and len(command) > 1:
                     hero_id = int(command[1])
                     self.start_hero_healing(hero_id)
@@ -275,7 +270,8 @@ class HealingDaemon:
                 heroes = Hero.objects.filter(
                     is_in_combat=False, current_health__lt=F('health'))
                 for hero in heroes:
-                    self.start_hero_healing(hero.id)
+                    if hero.id not in self.healing_heroes:
+                        self.start_hero_healing(hero.id)
                 time.sleep(30)  # Check every 30 seconds
             except Exception as e:
                 print(f"Error in passive mode: {e}")
@@ -311,8 +307,7 @@ if __name__ == '__main__':
         elif command == 'passive':
             daemon.run_passive_mode()
         else:
-            print(
-                "Usage: python healing_daemon.py [status|heal <id>|damage <id> <amount>|rest <id>]")
+            print("Usage: python healing_daemon.py [status|heal <id>|damage <id> <amount>|rest <id>]")
     else:
         # Run in interactive mode
         daemon.run_interactive()
