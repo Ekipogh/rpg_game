@@ -77,9 +77,6 @@ def damage_hero(hero_id, damage):
 
         print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
 
-        # Start healing if hero is alive and not at full health
-        if hero.current_health > 0 and hero.current_health < hero.health:
-            start_hero_healing(hero_id)
 
         return True
 
