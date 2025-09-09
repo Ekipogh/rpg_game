@@ -1,13 +1,14 @@
+{% extends 'base.html' %}
 {% load static %}
 {% load unicorn %}
-<html>
-  <head>
-    <link rel="stylesheet" href="{% static 'css/character_creation.css' %}">
-    {% unicorn_scripts %}
-    <title>Create a Character</title>
-  </head>
-  <body>
-    {% csrf_token %}
-    {% unicorn 'character-form' %}
-  </body>
-</html>
+{% block title %}
+  Create a Character
+{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/character_creation.css' %}" />
+  {% unicorn_scripts %}
+{% endblock %}
+{% block content %}
+  {% csrf_token %}
+  {% unicorn 'character-form' %}
+{% endblock %}

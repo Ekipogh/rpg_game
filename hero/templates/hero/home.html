@@ -1,13 +1,12 @@
+{% extends 'base.html' %}
 {% load static %}
 {% load unicorn %}
-<html>
-  <head>
+{% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}" />
-    {% unicorn_scripts %}
-    <title>{{ hero.name }} - Home</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
+{% endblock %}
+{% block title %}{{ hero.name }} - Home{% endblock %}
+{% block content %}
     {% csrf_token %}
     {% unicorn 'home-screen' %}
     <script type="text/javascript">
@@ -33,5 +32,4 @@
 
         setInterval(heal, 30000); // Heal 1 HP every 30 seconds
     </script>
-  </body>
-</html>
+{% endblock %}
