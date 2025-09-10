@@ -14,9 +14,14 @@
         // for demonstration purposes only
         // reload the page to display actual health from backend
         var current_health = {{ hero.current_health }};
-        var max_health = {{ hero.health }};
+        var max_health = {{ hero.max_health }};
         var healthFill = document.getElementById("health-fill");
         var healthText = document.getElementById("health-text");
+
+        var current_mana = {{ hero.current_mana }};
+        var max_mana = {{ hero.max_mana }};
+        var manaFill = document.getElementById("mana-fill");
+        var manaText = document.getElementById("mana-text");
 
         function heal() {
             if (current_health < max_health) {
@@ -30,6 +35,20 @@
             }
         }
 
+        function manaRestore()
+        {
+            if (current_mana < max_mana) {
+                current_mana += 1;
+                if (current_mana > max_mana) {
+                    current_mana = max_mana;
+                }
+                var manaPercentage = (current_mana / max_mana) * 100;
+                manaFill.style.width = manaPercentage + "%";
+                manaText.textContent = current_mana + " / " + max_mana + " MP";
+            }
+        }
+
         setInterval(heal, 30000); // Heal 1 HP every 30 seconds
+        setInterval(manaRestore, 30000); // Restore 1 MP every 30 seconds
     </script>
 {% endblock %}

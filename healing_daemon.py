@@ -70,7 +70,7 @@ class HealingDaemon:
         try:
             hero = Hero.objects.get(id=hero_id)
 
-            if hero.current_health >= hero.health:
+            if hero.current_health >= hero.max_health:
                 print(f"✅ {hero.name} is already at full health")
                 return False
 
@@ -116,7 +116,7 @@ class HealingDaemon:
                 hero = Hero.objects.get(id=hero_id)
 
                 # Check if hero needs healing
-                if hero.current_health >= hero.health:
+                if hero.current_health >= hero.max_health:
                     print(f"✅ {hero.name} is fully healed! Stopping healing.")
                     self.stop_hero_healing(hero_id)
                     break
@@ -129,13 +129,13 @@ class HealingDaemon:
 
                 # Heal the hero
                 old_health = hero.current_health
-                hero.current_health = min(hero.current_health + self.heal_amount, hero.health)
+                hero.current_health = min(hero.current_health + self.heal_amount, hero.max_health)
                 hero.save()
 
                 # Update last heal time
                 self.healing_heroes[hero_id]['last_heal'] = datetime.now()
 
-                print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+                print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
                 # Wait for next heal
                 time.sleep(self.heal_interval)
@@ -153,18 +153,18 @@ class HealingDaemon:
         try:
             hero = Hero.objects.get(id=hero_id)
 
-            if hero.current_health >= hero.health:
+            if hero.current_health >= hero.max_health:
                 print(f"✅ {hero.name} is already at full health")
                 return False
 
             old_health = hero.current_health
-            hero.current_health = hero.health
+            hero.current_health = hero.max_health
             hero.save()
 
             # Stop ongoing healing since hero is now full
             self.stop_hero_healing(hero_id)
 
-            print(f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.max_health} HP")
             return True
 
         except Hero.DoesNotExist:
@@ -179,10 +179,10 @@ class HealingDaemon:
             hero.current_health = max(0, hero.current_health - damage)
             hero.save()
 
-            print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
             # Start healing if hero is alive and not at full health
-            if hero.current_health > 0 and hero.current_health < hero.health:
+            if hero.current_health > 0 and hero.current_health < hero.max_health:
                 self.start_hero_healing(hero_id)
 
             return True
@@ -204,7 +204,7 @@ class HealingDaemon:
             try:
                 hero = Hero.objects.get(id=hero_id)
                 last_heal = info.get('last_heal', 'Unknown')
-                print(f"   🏥 {hero.name}: {hero.current_health}/{hero.health} HP (Last heal: {last_heal})")
+                print(f"   🏥 {hero.name}: {hero.current_health}/{hero.max_health} HP (Last heal: {last_heal})")
             except Hero.DoesNotExist:
                 print(f"   ❌ Hero {hero_id}: Not found")
 
@@ -238,7 +238,7 @@ class HealingDaemon:
                     heroes = Hero.objects.all()
                     print(f"\n👥 All Heroes:")
                     for hero in heroes:
-                        print(f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.health} HP")
+                        print(f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.max_health} HP")
                 elif cmd == 'heal' and len(command) > 1:
                     hero_id = int(command[1])
                     self.start_hero_healing(hero_id)

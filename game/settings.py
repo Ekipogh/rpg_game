@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_unicorn',
     'hero',
+    'item',
 ]
 
 MIDDLEWARE = [

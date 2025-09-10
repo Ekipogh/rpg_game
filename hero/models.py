@@ -13,8 +13,10 @@ class Hero(models.Model):
     agility = models.IntegerField(default=10)
     intelligence = models.IntegerField(default=10)
 
-    health = models.IntegerField(default=100)
+    max_health = models.IntegerField(default=100)
     current_health = models.IntegerField(default=100)
+    max_mana = models.IntegerField(default=50)
+    current_mana = models.IntegerField(default=50)
 
     is_in_combat = models.BooleanField(default=False)
 
@@ -27,8 +29,8 @@ class Hero(models.Model):
 
     def update_health(self):
         """Update health values based on current stats"""
-        self.health = self.calculate_max_health()
-        self.current_health = self.health
+        self.max_health = self.calculate_max_health()
+        self.current_health = self.max_health
 
     @property
     def next_level_xp(self):
@@ -45,9 +47,16 @@ class Hero(models.Model):
     @property
     def health_percentage(self):
         """Calculate health percentage for progress bar"""
-        if self.health == 0:
+        if self.max_health == 0:
             return 0
-        return (self.current_health / self.health) * 100
+        return (self.current_health / self.max_health) * 100
+
+    @property
+    def mana_percentage(self):
+        """Calculate mana percentage for progress bar"""
+        if self.max_mana == 0:
+            return 0
+        return (self.current_mana / self.max_mana) * 100
 
     def take_damage(self, damage):
         """
@@ -57,7 +66,7 @@ class Hero(models.Model):
         self.save()
 
         # Start healing if hero is not at full health
-        if self.current_health < self.health and self.current_health > 0:
+        if self.current_health < self.max_health and self.current_health > 0:
             # Import here to avoid circular imports
             from .windows_tasks import start_hero_healing
             start_hero_healing(self.id)
@@ -66,7 +75,7 @@ class Hero(models.Model):
         """
         Heal hero by specified amount
         """
-        self.current_health = min(self.health, self.current_health + amount)
+        self.current_health = min(self.max_health, self.current_health + amount)
         self.save()
 
     def __str__(self):

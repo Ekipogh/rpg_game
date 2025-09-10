@@ -20,7 +20,7 @@ class HeroModelTest(TestCase):
         self.hero.level = 3
         self.hero.update_health()
         expected_health = self.hero.calculate_max_health()
-        self.assertEqual(self.hero.health, expected_health)
+        self.assertEqual(self.hero.max_health, expected_health)
         self.assertEqual(self.hero.current_health, expected_health)
 
     def test_experience_percentage(self):
@@ -34,14 +34,14 @@ class HeroModelTest(TestCase):
         self.assertEqual(self.hero.experience_percentage, 0)
 
     def test_health_percentage(self):
-        self.hero.health = 200
+        self.hero.max_health = 200
         self.hero.current_health = 100
         self.assertEqual(self.hero.health_percentage, 50)
         self.hero.current_health = 200
         self.assertEqual(self.hero.health_percentage, 100)
         self.hero.current_health = 0
         self.assertEqual(self.hero.health_percentage, 0)
-        self.hero.health = 0
+        self.hero.max_health = 0
         self.assertEqual(self.hero.health_percentage, 0)
 
     def test_take_damage(self):
@@ -54,14 +54,14 @@ class HeroModelTest(TestCase):
         self.assertEqual(self.hero.current_health, 0)
 
     def test_take_damage_starts_healing(self):
-        self.hero.current_health = self.hero.health
+        self.hero.current_health = self.hero.max_health
         self.hero.take_damage(10)
-        self.assertTrue(self.hero.current_health < self.hero.health)
+        self.assertTrue(self.hero.current_health < self.hero.max_health)
 
     def test_take_damage_no_healing_if_full_health(self):
-        self.hero.current_health = self.hero.health
+        self.hero.current_health = self.hero.max_health
         self.hero.take_damage(0)
-        self.assertEqual(self.hero.current_health, self.hero.health)
+        self.assertEqual(self.hero.current_health, self.hero.max_health)
 
     def test_heal(self):
         self.hero.current_health = 50
@@ -69,12 +69,12 @@ class HeroModelTest(TestCase):
         self.assertEqual(self.hero.current_health, 80)
         # Test that health does not exceed max health
         self.hero.heal(200)
-        self.assertEqual(self.hero.current_health, self.hero.health)
+        self.assertEqual(self.hero.current_health, self.hero.max_health)
 
     def test_heal_no_effect_if_full_health(self):
-        self.hero.current_health = self.hero.health
+        self.hero.current_health = self.hero.max_health
         self.hero.heal(10)
-        self.assertEqual(self.hero.current_health, self.hero.health)
+        self.assertEqual(self.hero.current_health, self.hero.max_health)
 
     def test_str_method(self):
         self.assertEqual(str(self.hero), "Test Hero")
@@ -98,7 +98,7 @@ class HeroCreationTest(TestCase):
         self.assertEqual(hero.name, "New Hero")
         self.assertEqual(hero.hero_class, hero_class)
         self.assertEqual(hero.level, 1)
-        self.assertEqual(hero.current_health, hero.health)
+        self.assertEqual(hero.current_health, hero.max_health)
         self.assertEqual(hero.experience, 0)
         self.assertEqual(hero.strength, 10)
         self.assertEqual(hero.constitution, 10)

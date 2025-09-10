@@ -44,7 +44,14 @@
           <div class="health-bar">
             <div class="health-fill" style="width: {{ hero.health_percentage }}%" id="health-fill"></div>
           </div>
-          <span class="health-text" id="health-text">{{ hero.current_health }} / {{ hero.health }} HP</span>
+          <span class="health-text" id="health-text">{{ hero.current_health }} / {{ hero.max_health }} HP</span>
+        </div>
+        <h3>Mana</h3>
+        <div class="health-bar-container">
+          <div class="health-bar">
+            <div class="mana-fill" style="width: {{ hero.mana_percentage }}%" id="mana-fill"></div>
+          </div>
+          <span class="health-text" id="mana-text">{{ hero.current_mana }} / {{ hero.max_mana }} MP</span>
         </div>
       </div>
     </div>
