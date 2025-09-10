@@ -58,6 +58,22 @@ class Hero(models.Model):
             return 0
         return (self.current_mana / self.max_mana) * 100
 
+    @property
+    def health_regeneration_rate(self):
+        """Calculate health regeneration rate based on constitution per second"""
+        if self.constitution <= 10:
+            return 5  # Base regen rate
+        else:
+            return 5 + (self.constitution - 10) // 2  # +1 HP regen per 2 points above 10
+
+    @property
+    def mana_regeneration_rate(self):
+        """Calculate mana regeneration rate based on intelligence per second"""
+        if self.intelligence <= 10:
+            return 5  # Base regen rate
+        else:
+            return 5 + (self.intelligence - 10) // 2  # +1 MP regen per 2 points above 10
+
     def take_damage(self, damage):
         """
         Deal damage to hero and start healing if not at full health

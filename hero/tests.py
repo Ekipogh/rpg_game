@@ -76,6 +76,59 @@ class HeroModelTest(TestCase):
         self.hero.heal(10)
         self.assertEqual(self.hero.current_health, self.hero.max_health)
 
+    def test_health_regeneration_rate_base(self):
+        """Test base health regeneration rate for constitution <= 10"""
+        self.hero.constitution = 10
+        self.assertEqual(self.hero.health_regeneration_rate, 5)
+
+        self.hero.constitution = 8
+        self.assertEqual(self.hero.health_regeneration_rate, 5)
+
+    def test_health_regeneration_rate_bonus(self):
+        """Test health regeneration rate with constitution bonus"""
+        self.hero.constitution = 12  # +1 bonus (12-10)//2 = 1
+        self.assertEqual(self.hero.health_regeneration_rate, 6)
+
+        self.hero.constitution = 14  # +2 bonus (14-10)//2 = 2
+        self.assertEqual(self.hero.health_regeneration_rate, 7)
+
+        self.hero.constitution = 16  # +3 bonus (16-10)//2 = 3
+        self.assertEqual(self.hero.health_regeneration_rate, 8)
+
+    def test_mana_regeneration_rate_base(self):
+        """Test base mana regeneration rate for intelligence <= 10"""
+        self.hero.intelligence = 10
+        self.assertEqual(self.hero.mana_regeneration_rate, 5)
+
+        self.hero.intelligence = 8
+        self.assertEqual(self.hero.mana_regeneration_rate, 5)
+
+    def test_mana_regeneration_rate_bonus(self):
+        """Test mana regeneration rate with intelligence bonus"""
+        self.hero.intelligence = 12  # +1 bonus (12-10)//2 = 1
+        self.assertEqual(self.hero.mana_regeneration_rate, 6)
+
+        self.hero.intelligence = 14  # +2 bonus (14-10)//2 = 2
+        self.assertEqual(self.hero.mana_regeneration_rate, 7)
+
+        self.hero.intelligence = 18  # +4 bonus (18-10)//2 = 4
+        self.assertEqual(self.hero.mana_regeneration_rate, 9)
+
+    def test_mana_percentage(self):
+        """Test mana percentage calculation"""
+        self.hero.max_mana = 100
+        self.hero.current_mana = 50
+        self.assertEqual(self.hero.mana_percentage, 50)
+
+        self.hero.current_mana = 100
+        self.assertEqual(self.hero.mana_percentage, 100)
+
+        self.hero.current_mana = 0
+        self.assertEqual(self.hero.mana_percentage, 0)
+
+        self.hero.max_mana = 0
+        self.assertEqual(self.hero.mana_percentage, 0)
+
     def test_str_method(self):
         self.assertEqual(str(self.hero), "Test Hero")
         self.assertEqual(str(self.hero_class), "Warrior")

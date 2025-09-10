@@ -1,10 +1,663 @@
-<html>
-    <head>
-        <title>Item Detail</title>
-    </head>
-    <body>
-        <h1>Item Detail Page</h1>
-        <p>Item ID: {{ item_id }}</p>
-        <!-- Additional item details can be added here -->
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} - Item Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
+            background: #f8f9fa;
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .item-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .item-header {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .item-icon-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .weapon-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+        .armor-icon { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .consumable-icon { background: linear-gradient(135deg, #a8e6cf, #88d8a3); }
+        .offhand-icon { background: linear-gradient(135deg, #ffd93d, #ffc93d); }
+        .generic-icon { background: linear-gradient(135deg, #cbd5e0, #a0aec0); color: #2d3748; }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0 0 12px 0;
+            line-height: 1.2;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .item-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .badge-type {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-value {
+            background: #f7fafc;
+            color: #667eea;
+            border: 2px solid #e2e8f0;
+        }
+
+        .badge-rarity {
+            background: #48bb78;
+            color: white;
+        }
+
+        .item-description {
+            color: #4a5568;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+            flex-direction: column;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 1rem;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2d3748;
+            border-color: #e2e8f0;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
+        .item-details {
+            display: grid;
+            gap: 24px;
+        }
+
+        .details-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f7fafc;
+            padding: 20px 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-content {
+            padding: 32px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .stat-item:hover {
+            background: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .properties-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .property-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .property-item:last-child {
+            border-bottom: none;
+        }
+
+        .property-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1rem;
+        }
+
+        .property-value {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .effects-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .effect-item {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s ease;
+        }
+
+        .effect-item:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .effect-name {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .effect-description {
+            font-size: 1rem;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .item-container {
+                padding: 16px;
+            }
+
+            .item-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }
+
+            .item-title {
+                font-size: 2rem;
+            }
+
+            .item-actions {
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .section-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .item-actions {
+                flex-direction: column;
+            }
+
+            .item-meta {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="item-container">
+        <!-- Item Header -->
+        <div class="item-header">
+            <div class="item-icon-large
+                {% if item_type == 'Weapon' %}weapon-icon
+                {% elif item_type == 'Armor' %}armor-icon
+                {% elif item_type == 'Consumable' %}consumable-icon
+                {% elif item_type == 'OffHand' %}offhand-icon
+                {% else %}generic-icon{% endif %}">
+                {% if item_type == 'Weapon' %}⚔️
+                {% elif item_type == 'Armor' %}🛡️
+                {% elif item_type == 'Consumable' %}🧪
+                {% elif item_type == 'OffHand' %}🛡️
+                {% else %}📦{% endif %}
+            </div>
+
+            <div class="item-info">
+                <h1 class="item-title">{{ item.name }}</h1>
+                <div class="item-meta">
+                    <span class="item-badge badge-type">{{ item_type|default:"Item" }}</span>
+                    <span class="item-badge badge-value">💰 {{ item.value|default:0 }} gold</span>
+                    {% if item.value >= 1000 %}
+                    <span class="item-badge badge-rarity">✨ Legendary</span>
+                    {% elif item.value >= 500 %}
+                    <span class="item-badge badge-rarity">🔥 Rare</span>
+                    {% elif item.value >= 100 %}
+                    <span class="item-badge badge-rarity">⭐ Uncommon</span>
+                    {% endif %}
+                </div>
+                <p class="item-description">{{ item.description|default:"A mysterious item with unknown properties. Its true power awaits discovery by brave adventurers." }}</p>
+            </div>
+
+            <div class="item-actions">
+                {% if item_type == 'Consumable' %}
+                <button class="btn btn-success" onclick="useItem({{ item.id }})">
+                    🧪 Use Item
+                </button>
+                {% elif item_type == 'Weapon' or item_type == 'Armor' or item_type == 'OffHand' %}
+                <button class="btn btn-primary" onclick="equipItem({{ item.id }})">
+                    ⚡ Equip Item
+                </button>
+                {% endif %}
+                <a href="/inventory/" class="btn btn-secondary">
+                    🎒 Back to Inventory
+                </a>
+            </div>
+        </div>
+
+        <!-- Item Details -->
+        <div class="item-details">
+            {% if item_type == 'Weapon' %}
+            <!-- Weapon Stats -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>⚔️</span>
+                        Weapon Statistics
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Attack Damage</div>
+                            <div class="stat-value">{{ item.damage|default:0 }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Weapon Class</div>
+                            <div class="stat-value">{{ item.weapon_type|default:"Unknown"|title }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Equipment Slot</div>
+                            <div class="stat-value">{{ item.equipment_slot|default:"weapon"|title }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif item_type == 'Armor' %}
+            <!-- Armor Stats -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>🛡️</span>
+                        Armor Statistics
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Defense Rating</div>
+                            <div class="stat-value">{{ item.defense|default:0 }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Armor Type</div>
+                            <div class="stat-value">{{ item.armor_type|default:"Unknown"|title }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Equipment Slot</div>
+                            <div class="stat-value">{{ item.equipment_slot|default:"chest"|title }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif item_type == 'OffHand' %}
+            <!-- Off-Hand Stats -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>🛡️</span>
+                        Off-Hand Statistics
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Block Power</div>
+                            <div class="stat-value">{{ item.block|default:0 }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Shield Type</div>
+                            <div class="stat-value">{{ item.shield_type|default:"Unknown"|title }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Equipment Slot</div>
+                            <div class="stat-value">{{ item.equipment_slot|default:"shield"|title }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif item_type == 'Consumable' %}
+            <!-- Consumable Effects -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>🧪</span>
+                        Magical Effects
+                    </h2>
+                </div>
+                <div class="section-content">
+                    {% if item.heal_amount > 0 or item.mana_restore > 0 or item.duration > 0 %}
+                    <div class="effects-list">
+                        {% if item.heal_amount > 0 %}
+                        <div class="effect-item">
+                            <div class="effect-name">
+                                <span>❤️</span>
+                                Health Restoration
+                            </div>
+                            <div class="effect-description">Instantly restores {{ item.heal_amount }} health points when consumed, healing wounds and revitalizing the body.</div>
+                        </div>
+                        {% endif %}
+
+                        {% if item.mana_restore > 0 %}
+                        <div class="effect-item">
+                            <div class="effect-name">
+                                <span>💫</span>
+                                Mana Restoration
+                            </div>
+                            <div class="effect-description">Replenishes {{ item.mana_restore }} mana points when consumed, restoring magical energy for spellcasting.</div>
+                        </div>
+                        {% endif %}
+
+                        {% if item.duration > 0 %}
+                        <div class="effect-item">
+                            <div class="effect-name">
+                                <span>⏰</span>
+                                Temporary Enhancement
+                            </div>
+                            <div class="effect-description">Provides a powerful temporary effect that lasts for {{ item.duration }} seconds, enhancing your abilities.</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">❓</div>
+                        <h3>Mysterious Properties</h3>
+                        <p>This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Item Properties -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>📋</span>
+                        Item Information
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="properties-list">
+                        <div class="property-item">
+                            <span class="property-label">Item Identifier</span>
+                            <span class="property-value">#{{ item.id }}</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Market Value</span>
+                            <span class="property-value">{{ item.value|default:0 }} gold pieces</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Item Category</span>
+                            <span class="property-value">{{ item_type|default:"Generic Item" }}</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Class Requirement</span>
+                            <span class="property-value">
+                                {% if item.hero_class_restriction %}
+                                    {{ item.hero_class_restriction.name }} Only
+                                {% else %}
+                                    All Classes Welcome
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if item_type != 'Consumable' %}
+                        <div class="property-item">
+                            <span class="property-label">Equipment Slot</span>
+                            <span class="property-value">{{ item.equipment_slot|default:"None"|title }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function useItem(itemId) {
+            if (confirm('🧪 Are you sure you want to use this consumable item? This action cannot be undone.')) {
+                // Add loading state
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '⏳ Using...';
+                button.disabled = true;
+
+                fetch(`/item/${itemId}/use/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + (data.message || 'Item used successfully!'));
+                        window.location.href = '/inventory/';
+                    } else {
+                        alert('❌ ' + (data.error || 'Failed to use item.'));
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ An error occurred while using the item.');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function equipItem(itemId) {
+            if (confirm('⚡ Do you want to equip this item? It will replace any currently equipped item in this slot.')) {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '⏳ Equipping...';
+                button.disabled = true;
+
+                fetch(`/item/${itemId}/equip/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + (data.message || 'Item equipped successfully!'));
+                        window.location.reload();
+                    } else {
+                        alert('❌ ' + (data.error || 'Failed to equip item.'));
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ An error occurred while equipping the item.');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function getCsrfToken() {
+            const csrfCookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='));
+
+            if (csrfCookie) {
+                return csrfCookie.split('=')[1];
+            }
+
+            // Fallback: try to find CSRF token in meta tag or hidden input
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                return metaTag.getAttribute('content');
+            }
+
+            const hiddenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (hiddenInput) {
+                return hiddenInput.value;
+            }
+
+            return '';
+        }
+    </script>
+</body>
 </html>
