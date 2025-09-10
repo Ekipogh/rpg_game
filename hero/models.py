@@ -1,4 +1,5 @@
 from django.db import models
+from item.models import Item, InventoryItem
 
 # Create your models here.
 class Hero(models.Model):
@@ -19,6 +20,9 @@ class Hero(models.Model):
     current_mana = models.IntegerField(default=50)
 
     is_in_combat = models.BooleanField(default=False)
+
+    # inventory and equipment
+    # Inventory and Equipment are related via OneToOneField on item models
 
     def calculate_max_health(self):
         """Calculate max health based on constitution, level, and class"""
@@ -93,6 +97,15 @@ class Hero(models.Model):
         """
         self.current_health = min(self.max_health, self.current_health + amount)
         self.save()
+
+    def add_to_inventory(self, item, quantity=1):
+        """Add item to hero's inventory"""
+        inventory_item, created = InventoryItem.objects.get_or_create(hero=self, item=item)
+        if not created:
+            inventory_item.quantity += quantity
+        else:
+            inventory_item.quantity = quantity
+        inventory_item.save()
 
     def __str__(self):
         return self.name

@@ -5,12 +5,14 @@ from polymorphic.models import PolymorphicModel
 
 class EquipmentSlots(enum.Enum):
     HEAD = "head"
-    CHEST = "chest"
+    ARMOR = "armor"
+    MAIN_HAND = "main_hand"
+    OFFHAND = "offhand"
+    CONSUMABLE_1 = "consumable_1"
+    CONSUMABLE_2 = "consumable_2"
+    CONSUMABLE_3 = "consumable_3"
     LEGS = "legs"
-    FEET = "feet"
     HANDS = "hands"
-    WEAPON = "weapon"
-    SHIELD = "shield"
 
     @classmethod
     def choices(cls):
@@ -50,7 +52,7 @@ class Weapon(Item):
     damage = models.IntegerField(default=10)
     weapon_type = models.CharField(max_length=50, default='sword')
     equipment_slot = models.CharField(
-        max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.WEAPON.value)
+        max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.MAIN_HAND.value)
 
     @property
     def item_type(self):
@@ -64,7 +66,7 @@ class OffHand(Item):
     block = models.IntegerField(default=5)
     shield_type = models.CharField(max_length=50, default='wooden')
     equipment_slot = models.CharField(
-        max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.SHIELD.value)
+        max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.OFFHAND.value)
 
     @property
     def item_type(self):
@@ -119,3 +121,33 @@ class Consumable(Item):
             hero.current_mana = min(
                 hero.current_mana + self.mana_restore, hero.max_mana)
             hero.save()
+
+class Inventory(models.Model):
+    id = models.AutoField(primary_key=True)
+    # One-to-one: each Hero has exactly one Inventory; access via hero.inventory
+    hero = models.OneToOneField('hero.Hero', on_delete=models.CASCADE, related_name='inventory')
+    updated_at = models.DateTimeField(auto_now=True)
+
+class InventoryItem(models.Model):
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('inventory', 'item')
+
+class Equipment(models.Model):
+    id = models.AutoField(primary_key=True)
+    # One-to-one: each Hero has exactly one Equipment set; access via hero.equipment
+    hero = models.OneToOneField('hero.Hero', on_delete=models.CASCADE, related_name='equipment')
+    updated_at = models.DateTimeField(auto_now=True)
+
+class EquipmentSlot(models.Model):
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='slots')
+    slot = models.CharField(max_length=50, choices=EquipmentSlots.choices())
+    item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('equipment', 'slot')
+
+    SLOT_CHOICES = EquipmentSlots.choices()

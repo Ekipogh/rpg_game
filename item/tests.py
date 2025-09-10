@@ -9,7 +9,7 @@ class ItemTests(TestCase):
         self.assertEqual(weapon.name, "Sword of Testing")
         self.assertEqual(weapon.damage, 15)
         self.assertEqual(weapon.weapon_type, "sword")
-        self.assertEqual(weapon.equipment_slot, EquipmentSlots.WEAPON.value)
+        self.assertEqual(weapon.equipment_slot, EquipmentSlots.MAIN_HAND.value)
 
     def test_create_armor(self):
         armor = Armor.objects.create(name="Shield of Testing", defense=10, armor_type="plate")
@@ -23,7 +23,7 @@ class ItemTests(TestCase):
         self.assertEqual(offhand.name, "Buckler of Testing")
         self.assertEqual(offhand.block, 8)
         self.assertEqual(offhand.shield_type, "wooden")
-        self.assertEqual(offhand.equipment_slot, EquipmentSlots.SHIELD.value)
+        self.assertEqual(offhand.equipment_slot, EquipmentSlots.OFFHAND.value)
 
     def test_create_consumable_health(self):
         consumable = Consumable.objects.create(name="Health Potion", heal_amount=50, mana_restore=0, duration=0)
@@ -51,12 +51,14 @@ class ItemTests(TestCase):
     def test_equipment_slot_choices(self):
         expected_choices = [
             (EquipmentSlots.HEAD.value, 'Head'),
-            (EquipmentSlots.CHEST.value, 'Chest'),
+            (EquipmentSlots.ARMOR.value, 'Armor'),
+            (EquipmentSlots.MAIN_HAND.value, 'Main_hand'),
+            (EquipmentSlots.OFFHAND.value, 'Offhand'),
+            (EquipmentSlots.CONSUMABLE_1.value, 'Consumable_1'),
+            (EquipmentSlots.CONSUMABLE_2.value, 'Consumable_2'),
+            (EquipmentSlots.CONSUMABLE_3.value, 'Consumable_3'),
             (EquipmentSlots.LEGS.value, 'Legs'),
-            (EquipmentSlots.FEET.value, 'Feet'),
             (EquipmentSlots.HANDS.value, 'Hands'),
-            (EquipmentSlots.WEAPON.value, 'Weapon'),
-            (EquipmentSlots.SHIELD.value, 'Shield'),
         ]
         self.assertEqual(EquipmentSlots.choices(), expected_choices)
 
