@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from item.views import inventory_view  # Import the inventory view directly
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('hero.urls')),
+    path('item/', include('item.urls')),
     path('unicorn/', include('django_unicorn.urls')),
+    path('inventory/', inventory_view, name='inventory'),  # Direct route to inventory
 ]

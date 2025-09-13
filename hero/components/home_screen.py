@@ -18,19 +18,8 @@ class HomeScreenView(UnicornView):
         # Add navigation logic here
         pass
 
-    def rest(self):
-        """Restore hero's health instantly"""
-        hero_id = self.request.session.get('hero_id')
-        if hero_id:
-            rest_hero(hero_id)
-            # Refresh the page to show updated health
-            return
-
-    def start_healing(self):
-        """Start gradual healing over time"""
-        hero_id = self.request.session.get('hero_id')
-        if hero_id:
-            start_hero_healing(hero_id)
+    def navigate_to_inventory(self):
+        return redirect('inventory')
 
     def exit_game(self):
         """Handle exiting the game"""

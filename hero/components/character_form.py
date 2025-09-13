@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 from hero.models import Hero, HeroClass
+from item.models import Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable
 
 
 class CharacterFormView(UnicornView):
@@ -78,9 +79,37 @@ class CharacterFormView(UnicornView):
             intelligence=self.intelligence,
         )
         hero.update_health()
+        # add some starting items
+        sword = Weapon.objects.get(name="Rusty Sword")
+        shield = OffHand.objects.get(name="Wooden Shield")
+        armor = Armor.objects.get(name="Leather Armor")
+        bow = Weapon.objects.get(name="Simple Bow")
+        quiver = OffHand.objects.get(name="Quiver of Arrows")
+        robe = Armor.objects.get(name="Cloth Robe")
+        staff = Weapon.objects.get(name="Wooden Staff")
+        spellbook = OffHand.objects.get(name="Beginner's Spellbook")
+        healing_potion = Consumable.objects.get(name="Minor Healing Potion")
+        mana_potion = Consumable.objects.get(name="Minor Mana Potion")
+
+        if hero_class.name == "Warrior":
+            hero.add_to_inventory(sword)
+            hero.add_to_inventory(shield)
+            hero.add_to_inventory(armor)
+            hero.add_to_inventory(healing_potion, quantity=3)
+        elif hero_class.name == "Ranger":
+            hero.add_to_inventory(bow)
+            hero.add_to_inventory(quiver)
+            hero.add_to_inventory(armor)
+            hero.add_to_inventory(healing_potion, quantity=2)
+            hero.add_to_inventory(mana_potion, quantity=1)
+        elif hero_class.name == "Wizard":
+            hero.add_to_inventory(staff)
+            hero.add_to_inventory(spellbook)
+            hero.add_to_inventory(robe)
+            hero.add_to_inventory(mana_potion, quantity=3)
+            hero.add_to_inventory(healing_potion, quantity=1)
         hero.save()
         return redirect('select_hero', hero_id=hero.id)
-
 
     def validate_form(self):
         errors = {}

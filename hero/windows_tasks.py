@@ -50,8 +50,8 @@ def rest_hero(hero_id):
     try:
         hero = Hero.objects.get(id=hero_id)
 
-        if hero.current_health < hero.health:
-            hero.current_health = hero.health
+        if hero.current_health < hero.max_health:
+            hero.current_health = hero.max_health
             hero.save()
             print(f"💤 {hero.name} rested and is now at full health!")
 
@@ -75,7 +75,7 @@ def damage_hero(hero_id, damage):
         hero.current_health = max(0, hero.current_health - damage)
         hero.save()
 
-        print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+        print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
 
         return True
@@ -90,10 +90,10 @@ def simple_heal_hero(hero_id, heal_amount=5):
     try:
         hero = Hero.objects.get(id=hero_id)
         old_health = hero.current_health
-        hero.current_health = min(hero.current_health + heal_amount, hero.health)
+        hero.current_health = min(hero.current_health + heal_amount, hero.max_health)
         hero.save()
 
-        print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+        print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
         return True
 
     except Hero.DoesNotExist:
@@ -125,7 +125,7 @@ def heal_hero_over_time_simple(hero_id, duration_seconds=300):
             while (time.time() - start_time) < duration_seconds:
                 hero = Hero.objects.get(id=hero_id)
 
-                if hero.current_health >= hero.health:
+                if hero.current_health >= hero.max_health:
                     print(f"✅ {hero.name} is fully healed!")
                     break
 
@@ -134,10 +134,10 @@ def heal_hero_over_time_simple(hero_id, duration_seconds=300):
                     break
 
                 old_health = hero.current_health
-                hero.current_health = min(hero.current_health + 1, hero.health)
+                hero.current_health = min(hero.current_health + 1, hero.max_health)
                 hero.save()
 
-                print(f"❤️  Background heal: {hero.name} {old_health} → {hero.current_health}/{hero.health} HP")
+                print(f"❤️  Background heal: {hero.name} {old_health} → {hero.current_health}/{hero.max_health} HP")
 
                 time.sleep(30)  # Wait 30 seconds
 

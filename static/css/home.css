@@ -138,6 +138,12 @@
     transition: width 0.3s ease;
 }
 
+.mana-fill {
+    height: 100%;
+    background: #4299e1;
+    transition: width 0.3s ease;
+}
+
 .xp-text, .health-text {
     font-size: 0.9rem;
     color: #4a5568;
