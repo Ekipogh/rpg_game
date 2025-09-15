@@ -124,9 +124,10 @@ class Consumable(Item):
 
 class Inventory(models.Model):
     id = models.AutoField(primary_key=True)
-    # One-to-one: each Hero has exactly one Inventory; access via hero.inventory
-    hero = models.OneToOneField('hero.Hero', on_delete=models.CASCADE, related_name='inventory')
     updated_at = models.DateTimeField(auto_now=True)
+
+    def all(self):
+        return InventoryItem.objects.filter(inventory=self)
 
 class InventoryItem(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)

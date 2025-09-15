@@ -4,100 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ item.name }} - Item Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
             background: #f8f9fa;
-            min-height: 100vh;
-            color: #2d3748;
         }
-
-        .item-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .item-header {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
         .item-icon-large {
             width: 90px;
             height: 90px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 3rem;
-            color: white;
-            flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .weapon-icon { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
-        .armor-icon { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
-        .consumable-icon { background: linear-gradient(135deg, #a8e6cf, #88d8a3); }
-        .offhand-icon { background: linear-gradient(135deg, #ffd93d, #ffc93d); }
-        .generic-icon { background: linear-gradient(135deg, #cbd5e0, #a0aec0); color: #2d3748; }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin: 0 0 12px 0;
-            line-height: 1.2;
-        }
-
-        .item-meta {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .item-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .badge-type {
-            background: #667eea;
-            color: white;
-        }
-
-        .badge-value {
-            background: #f7fafc;
-            color: #667eea;
-            border: 2px solid #e2e8f0;
-        }
-
-        .badge-rarity {
-            background: #48bb78;
-            color: white;
-        }
-
-        .item-description {
+        .weapon-icon { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .armor-icon { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .consumable-icon { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .offhand-icon { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        .generic-icon { background: linear-gradient(135deg, #6c757d, #545b62); }
+    </style>
+</head>
+<body>
+    <div class="container py-4" style="max-width: 900px;">
+        <!-- Item Header -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="item-icon-large {{ item.item_type|default:'generic' }}-icon text-white rounded d-flex align-items-center justify-content-center me-4 flex-shrink-0">
+                        {% if item.item_type == 'weapon' %}⚔️
+                        {% elif item.item_type == 'armor' %}🛡️
+                        {% elif item.item_type == 'consumable' %}🧪
+                        {% elif item.item_type == 'offhand' %}🛡️
+                        {% else %}📦{% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <h1 class="mb-3 fw-bold">{{ item.name }}</h1>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-primary fs-6">{{ item.item_type|default:'Item'|title }}</span>
+                            {% if item.value %}
+                                <span class="badge bg-outline-primary border fs-6">{{ item.value }} gold</span>
+                            {% endif %}
+                            {% if item.rarity %}
+                                <span class="badge bg-success fs-6">{{ item.rarity|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if item.description %}
+                            <p class="text-muted mb-0">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
             color: #4a5568;
             font-size: 1.1rem;
             line-height: 1.6;
@@ -142,301 +98,103 @@
         .btn-success {
             background: #48bb78;
             color: white;
-            border-color: #48bb78;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-        }
-
-        .item-details {
-            display: grid;
-            gap: 24px;
-        }
-
-        .details-section {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .section-header {
-            background: #f7fafc;
-            padding: 20px 32px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-content {
-            padding: 32px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-
-        .stat-item:hover {
-            background: #edf2f7;
-            transform: translateY(-2px);
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #4a5568;
-            font-weight: 500;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .properties-list {
-            display: grid;
-            gap: 0;
-        }
-
-        .property-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .property-item:last-child {
-            border-bottom: none;
-        }
-
-        .property-label {
-            font-weight: 600;
-            color: #4a5568;
-            font-size: 1rem;
-        }
-
-        .property-value {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 1rem;
-        }
-
-        .effects-list {
-            display: grid;
-            gap: 16px;
-        }
-
-        .effect-item {
-            background: #f7fafc;
-            border-radius: 8px;
-            padding: 20px;
-            border-left: 4px solid #667eea;
-            transition: all 0.2s ease;
-        }
-
-        .effect-item:hover {
-            background: #edf2f7;
-            transform: translateX(4px);
-        }
-
-        .effect-name {
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .effect-description {
-            font-size: 1rem;
-            color: #4a5568;
-            line-height: 1.5;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #a0aec0;
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .item-container {
-                padding: 16px;
-            }
-
-            .item-header {
-                flex-direction: column;
-                text-align: center;
-                padding: 24px;
-            }
-
-            .item-title {
-                font-size: 2rem;
-            }
-
-            .item-actions {
-                width: 100%;
-                flex-direction: row;
-                justify-content: center;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .section-content {
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .item-actions {
-                flex-direction: column;
-            }
-
-            .item-meta {
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="item-container">
-        <!-- Item Header -->
-        <div class="item-header">
-            <div class="item-icon-large
-                {% if item_type == 'Weapon' %}weapon-icon
-                {% elif item_type == 'Armor' %}armor-icon
-                {% elif item_type == 'Consumable' %}consumable-icon
-                {% elif item_type == 'OffHand' %}offhand-icon
-                {% else %}generic-icon{% endif %}">
-                {% if item_type == 'Weapon' %}⚔️
-                {% elif item_type == 'Armor' %}🛡️
-                {% elif item_type == 'Consumable' %}🧪
-                {% elif item_type == 'OffHand' %}🛡️
-                {% else %}📦{% endif %}
-            </div>
-
-            <div class="item-info">
-                <h1 class="item-title">{{ item.name }}</h1>
-                <div class="item-meta">
-                    <span class="item-badge badge-type">{{ item_type|default:"Item" }}</span>
-                    <span class="item-badge badge-value">💰 {{ item.value|default:0 }} gold</span>
-                    {% if item.value >= 1000 %}
-                    <span class="item-badge badge-rarity">✨ Legendary</span>
-                    {% elif item.value >= 500 %}
-                    <span class="item-badge badge-rarity">🔥 Rare</span>
-                    {% elif item.value >= 100 %}
-                    <span class="item-badge badge-rarity">⭐ Uncommon</span>
+        <!-- Navigation Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    {% if item.item_type == 'consumable' %}
+                        <button class="btn btn-success" onclick="useItem({{ item.id }})">
+                            🧪 Use Item
+                        </button>
+                    {% elif item.item_type == 'weapon' or item.item_type == 'armor' or item.item_type == 'offhand' %}
+                        <button class="btn btn-primary" onclick="equipItem({{ item.id }})">
+                            ⚡ Equip Item
+                        </button>
                     {% endif %}
+                    <a href="/inventory/" class="btn btn-outline-secondary">
+                        🎒 Back to Inventory
+                    </a>
                 </div>
-                <p class="item-description">{{ item.description|default:"A mysterious item with unknown properties. Its true power awaits discovery by brave adventurers." }}</p>
-            </div>
-
-            <div class="item-actions">
-                {% if item_type == 'Consumable' %}
-                <button class="btn btn-success" onclick="useItem({{ item.id }})">
-                    🧪 Use Item
-                </button>
-                {% elif item_type == 'Weapon' or item_type == 'Armor' or item_type == 'OffHand' %}
-                <button class="btn btn-primary" onclick="equipItem({{ item.id }})">
-                    ⚡ Equip Item
-                </button>
-                {% endif %}
-                <a href="/inventory/" class="btn btn-secondary">
-                    🎒 Back to Inventory
-                </a>
             </div>
         </div>
 
         <!-- Item Details -->
-        <div class="item-details">
-            {% if item_type == 'Weapon' %}
+        <div class="row">
+            {% if item.item_type == 'weapon' %}
             <!-- Weapon Stats -->
-            <div class="details-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>⚔️</span>
-                        Weapon Statistics
-                    </h2>
-                </div>
-                <div class="section-content">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">Attack Damage</div>
-                            <div class="stat-value">{{ item.damage|default:0 }}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Weapon Class</div>
-                            <div class="stat-value">{{ item.weapon_type|default:"Unknown"|title }}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Equipment Slot</div>
-                            <div class="stat-value">{{ item.equipment_slot|default:"weapon"|title }}</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">⚔️</span>Weapon Statistics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Attack Damage</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.damage|default:0 }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Weapon Class</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.weapon_type|default:"Unknown"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:"weapon"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {% elif item_type == 'Armor' %}
+            {% elif item.item_type == 'armor' %}
             <!-- Armor Stats -->
-            <div class="details-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>🛡️</span>
-                        Armor Statistics
-                    </h2>
-                </div>
-                <div class="section-content">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">Defense Rating</div>
-                            <div class="stat-value">{{ item.defense|default:0 }}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Armor Type</div>
-                            <div class="stat-value">{{ item.armor_type|default:"Unknown"|title }}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Equipment Slot</div>
-                            <div class="stat-value">{{ item.equipment_slot|default:"chest"|title }}</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🛡️</span>Armor Statistics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Defense Rating</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.defense|default:0 }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Armor Type</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.armor_type|default:"Unknown"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:"chest"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -457,109 +215,253 @@
                             <div class="stat-label">Block Power</div>
                             <div class="stat-value">{{ item.block|default:0 }}</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Shield Type</div>
-                            <div class="stat-value">{{ item.shield_type|default:"Unknown"|title }}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Equipment Slot</div>
-                            <div class="stat-value">{{ item.equipment_slot|default:"shield"|title }}</div>
+            {% elif item.item_type == 'offhand' %}
+            <!-- Off-Hand Stats -->
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🛡️</span>Off-Hand Statistics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Block Rating</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.block|default:0 }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Shield Type</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.shield_type|default:"Unknown"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light text-center h-100">
+                                    <div class="card-body">
+                                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
+                                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:"shield"|title }}</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {% elif item_type == 'Consumable' %}
+            {% elif item.item_type == 'consumable' %}
             <!-- Consumable Effects -->
-            <div class="details-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>🧪</span>
-                        Magical Effects
-                    </h2>
-                </div>
-                <div class="section-content">
-                    {% if item.heal_amount > 0 or item.mana_restore > 0 or item.duration > 0 %}
-                    <div class="effects-list">
-                        {% if item.heal_amount > 0 %}
-                        <div class="effect-item">
-                            <div class="effect-name">
-                                <span>❤️</span>
-                                Health Restoration
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🧪</span>Magical Effects
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if item.heal_amount > 0 or item.mana_restore > 0 or item.duration > 0 %}
+                        <div class="row g-3">
+                            {% if item.heal_amount > 0 %}
+                            <div class="col-12">
+                                <div class="card border-danger">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-danger">
+                                            <span class="me-2">❤️</span>Health Restoration
+                                        </h6>
+                                        <p class="card-text">Instantly restores {{ item.heal_amount }} health points when consumed, healing wounds and revitalizing the body.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="effect-description">Instantly restores {{ item.heal_amount }} health points when consumed, healing wounds and revitalizing the body.</div>
-                        </div>
-                        {% endif %}
+                            {% endif %}
 
-                        {% if item.mana_restore > 0 %}
-                        <div class="effect-item">
-                            <div class="effect-name">
-                                <span>💫</span>
-                                Mana Restoration
+                            {% if item.mana_restore > 0 %}
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-info">
+                                            <span class="me-2">💫</span>Mana Restoration
+                                        </h6>
+                                        <p class="card-text">Replenishes {{ item.mana_restore }} mana points when consumed, restoring magical energy for spellcasting.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="effect-description">Replenishes {{ item.mana_restore }} mana points when consumed, restoring magical energy for spellcasting.</div>
-                        </div>
-                        {% endif %}
+                            {% endif %}
 
-                        {% if item.duration > 0 %}
-                        <div class="effect-item">
-                            <div class="effect-name">
-                                <span>⏰</span>
-                                Temporary Enhancement
+                            {% if item.duration > 0 %}
+                            <div class="col-12">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-warning">
+                                            <span class="me-2">⏰</span>Temporary Enhancement
+                                        </h6>
+                                        <p class="card-text">Provides a powerful temporary effect that lasts for {{ item.duration }} seconds, enhancing your abilities.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="effect-description">Provides a powerful temporary effect that lasts for {{ item.duration }} seconds, enhancing your abilities.</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">❓</div>
+                            <h5>Mysterious Properties</h5>
+                            <p class="text-muted">This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
                         </div>
                         {% endif %}
                     </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <div class="empty-icon">❓</div>
-                        <h3>Mysterious Properties</h3>
-                        <p>This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
             {% endif %}
 
             <!-- Item Properties -->
-            <div class="details-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>📋</span>
-                        Item Information
-                    </h2>
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">📋</span>Item Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-semibold text-muted">Item Identifier</td>
+                                        <td class="fw-semibold">#{{ item.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold text-muted">Market Value</td>
+                                        <td class="fw-semibold">{{ item.value|default:0 }} gold pieces</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold text-muted">Item Category</td>
+                                        <td class="fw-semibold">{{ item.item_type|default:"Generic Item"|title }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold text-muted">Class Requirement</td>
+                                        <td class="fw-semibold">
+                                            {% if item.hero_class_restriction %}
+                                                {{ item.hero_class_restriction.name }} Only
+                                            {% else %}
+                                                All Classes Welcome
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if item.item_type != 'consumable' %}
+                                    <tr>
+                                        <td class="fw-semibold text-muted">Equipment Slot</td>
+                                        <td class="fw-semibold">{{ item.equipment_slot|default:"None"|title }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="section-content">
-                    <div class="properties-list">
-                        <div class="property-item">
-                            <span class="property-label">Item Identifier</span>
-                            <span class="property-value">#{{ item.id }}</span>
-                        </div>
-                        <div class="property-item">
-                            <span class="property-label">Market Value</span>
-                            <span class="property-value">{{ item.value|default:0 }} gold pieces</span>
-                        </div>
-                        <div class="property-item">
-                            <span class="property-label">Item Category</span>
-                            <span class="property-value">{{ item_type|default:"Generic Item" }}</span>
-                        </div>
-                        <div class="property-item">
-                            <span class="property-label">Class Requirement</span>
-                            <span class="property-value">
-                                {% if item.hero_class_restriction %}
-                                    {{ item.hero_class_restriction.name }} Only
-                                {% else %}
-                                    All Classes Welcome
-                                {% endif %}
-                            </span>
-                        </div>
-                        {% if item_type != 'Consumable' %}
-                        <div class="property-item">
-                            <span class="property-label">Equipment Slot</span>
-                            <span class="property-value">{{ item.equipment_slot|default:"None"|title }}</span>
-                        </div>
-                        {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function useItem(itemId) {
+            if (confirm('🧪 Are you sure you want to use this consumable item? This action cannot be undone.')) {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '⏳ Using...';
+                button.disabled = true;
+
+                fetch(`/item/${itemId}/use/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + (data.message || 'Item used successfully!'));
+                        window.location.href = '/inventory/';
+                    } else {
+                        alert('❌ ' + (data.error || 'Failed to use item.'));
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ An error occurred while using the item.');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function equipItem(itemId) {
+            if (confirm('⚡ Do you want to equip this item? It will replace any currently equipped item in this slot.')) {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '⏳ Equipping...';
+                button.disabled = true;
+
+                fetch(`/item/${itemId}/equip/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + (data.message || 'Item equipped successfully!'));
+                        window.location.reload();
+                    } else {
+                        alert('❌ ' + (data.error || 'Failed to equip item.'));
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ An error occurred while equipping the item.');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function getCsrfToken() {
+            const csrfCookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='));
+
+            if (csrfCookie) {
+                return csrfCookie.split('=')[1];
+            }
+
+            // Fallback: try to find CSRF token in meta tag or hidden input
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                return metaTag.getAttribute('content');
+            }
+
+            const hiddenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (hiddenInput) {
+                return hiddenInput.value;
+            }
+
+            return '';
+        }
+    </script>
+</body>
+</html>
                     </div>
                 </div>
             </div>

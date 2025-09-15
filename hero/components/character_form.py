@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 from hero.models import Hero, HeroClass
-from item.models import Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable
+from item.models import Inventory, Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable
 
 
 class CharacterFormView(UnicornView):
@@ -70,6 +70,7 @@ class CharacterFormView(UnicornView):
             return
         print(f"Creating character: {self.name}, Class: {self.selected_class}")
         hero_class = HeroClass.objects.get(name=self.selected_class)
+        inventory = Inventory.objects.create()
         hero = Hero.objects.create(
             name=self.name,
             hero_class=hero_class,
@@ -77,6 +78,7 @@ class CharacterFormView(UnicornView):
             constitution=self.constitution,
             agility=self.agility,
             intelligence=self.intelligence,
+            inventory=inventory
         )
         hero.update_health()
         # add some starting items

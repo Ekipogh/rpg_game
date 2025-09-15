@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 
-from item.models import Item, Weapon, Armor, Consumable
+from hero.models import Hero
+from item.models import Inventory, Item, OffHand, Weapon, Armor, Consumable
 
 # Create your views here.
 
@@ -150,40 +151,56 @@ def equip_armor(hero, armor):
 
 def inventory_view(request):
     """
-    Single view that displays all items categorized by type
-    Perfect demonstration of polymorphic querying
+    Display the hero's inventory, categorized by item type.
     """
     # Get hero from session
     hero_id = request.session.get('hero_id')
     if not hero_id:
-        all_items = Item.objects.all()  # For demo purposes
+        inventory_items = []
+        # For demo purposes, create mock inventory items
+        for item in Item.objects.all():
+            inventory_items.append(type('MockInventoryItem', (), {'item': item, 'quantity': 1})())
     else:
-        # TODO: Filter by hero's inventory when you implement that
-        all_items = Item.objects.all()
+        hero = get_object_or_404(Hero, id=hero_id)
+        inventory = hero.inventory
+        if inventory is None:
+            inventory_items = []
+        else:
+            inventory_items = inventory.all()  # Assuming Inventory has a method to get all items
 
     # Categorize items automatically using polymorphic types
     weapons = []
+    offhands = []
     armor = []
     consumables = []
     other_items = []
 
-    for item in all_items:
+    item_count = 0
+    items_value = 0
+
+    for inventory_item in inventory_items:
+        item = inventory_item.item
+        quantity = inventory_item.quantity
         if isinstance(item, Weapon):
             weapons.append(item)
         elif isinstance(item, Armor):
             armor.append(item)
         elif isinstance(item, Consumable):
             consumables.append(item)
+        elif isinstance(item, OffHand):
+            offhands.append(item)
         else:
             other_items.append(item)
+        item_count += quantity
+        items_value += item.value * quantity
 
     context = {
         'weapons': weapons,
         'armor': armor,
         'consumables': consumables,
         'other_items': other_items,
-        'total_items': len(all_items),
-        'total_value': sum(item.value for item in all_items),
+        'total_items': item_count,
+        'total_value': items_value,
     }
 
     return render(request, 'item/inventory.html', context)

@@ -7,5 +7,6 @@ urlpatterns = [
          name='create_character'),
     path('', views.index, name='index'),
     path('select-hero/', views.hero_selection_view, name='hero_selection'),
-    path('select-hero/<int:hero_id>/', views.select_hero, name='select_hero')
+    path('select-hero/<int:hero_id>/', views.select_hero, name='select_hero'),
+    path('delete-hero/<int:hero_id>/', views.delete_hero, name='delete_hero')
 ]

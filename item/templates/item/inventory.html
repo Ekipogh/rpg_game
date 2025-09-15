@@ -4,223 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - RPG Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
-            background: #f8f9fa;
-            min-height: 100vh;
-            color: #2d3748;
-        }
-
-        .inventory-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .inventory-header {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-info h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin: 0 0 4px 0;
-        }
-
-        .header-subtitle {
-            color: #667eea;
-            font-weight: 600;
-            font-size: 1rem;
-            margin: 0;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #2d3748;
-            border-color: #e2e8f0;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .inventory-grid {
-            display: grid;
-            gap: 24px;
-        }
-
-        .category-section {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .category-header {
-            background: #f7fafc;
-            padding: 16px 24px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .category-header h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .category-icon {
-            font-size: 1.2rem;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            padding: 24px;
-        }
-
-        .item-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 16px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .item-card:hover {
-            border-color: #667eea;
-            transform: translateY(-1px);
-        }
-
-        .item-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-        }
-
-        .weapon-icon { background: #ff6b6b; }
-        .armor-icon { background: #4ecdc4; }
-        .consumable-icon { background: #a8e6cf; }
-        .offhand-icon { background: #ffd93d; }
-
-        .item-name {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 1rem;
-            margin: 0;
-        }
-
-        .item-value {
-            font-size: 0.85rem;
-            color: #667eea;
-            font-weight: 500;
-        }
-
-        .item-description {
-            color: #4a5568;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
-
-        .item-stats {
-            background: #f7fafc;
-            border-radius: 4px;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            color: #4a5568;
-            font-weight: 500;
-        }
-
-        .empty-category {
-            text-align: center;
-            padding: 40px 24px;
-            color: #a0aec0;
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        @media (max-width: 768px) {
-            .inventory-container {
-                padding: 16px;
-            }
-
-            .inventory-header {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
-            }
-
-            .items-grid {
-                grid-template-columns: 1fr;
-                padding: 16px;
-            }
-        }
-    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Inventory Header -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1 fw-bold">Inventory</h1>
+                    <p class="text-muted mb-0">Manage your items and equipment</p>
+                </div>
+                <div>
+                    <a href="/" class="btn btn-outline-secondary me-2">
+                        🏠 Home
+                    </a>
+                    <span class="badge bg-primary fs-6">{{ items|length }} items</span>
+                </div>
+            </div>
+        </div>
 </head>
 <body>
     <div class="inventory-container">
@@ -241,147 +44,220 @@
         </div>
 
         <!-- Main Content -->
-        <div class="inventory-grid">
+        <div class="row mt-4">
             <!-- Weapons Section -->
             {% if weapons %}
-            <div class="category-section">
-                <div class="category-header">
-                    <h2><span class="category-icon">⚔️</span> Weapons ({{ weapons|length }})</h2>
-                </div>
-                <div class="items-grid">
-                    {% for weapon in weapons %}
-                    <div class="item-card" onclick="viewItem({{ weapon.id }})">
-                        <div class="item-header">
-                            <div class="item-icon weapon-icon">⚔️</div>
-                            <div>
-                                <h3 class="item-name">{{ weapon.name }}</h3>
-                                <span class="item-value">{{ weapon.value|default:0 }} gold</span>
-                            </div>
-                        </div>
-                        <div class="item-description">{{ weapon.description|default:"A reliable weapon for combat." }}</div>
-                        <div class="item-stats">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:"sword"|title }}</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">⚔️</span>Weapons ({{ weapons|length }})
+                        </h5>
                     </div>
-                    {% endfor %}
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for weapon in weapons %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }}" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-danger text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <span>⚔️</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ weapon.name }}</h6>
+                                                <small class="text-primary">{{ weapon.value|default:0 }} gold</small>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ weapon.description|default:"A reliable weapon for combat." }}</p>
+                                        <div class="bg-light rounded p-2">
+                                            <small class="text-muted">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:"sword"|title }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Armor Section -->
             {% if armor %}
-            <div class="category-section">
-                <div class="category-header">
-                    <h2><span class="category-icon">🛡️</span> Armor ({{ armor|length }})</h2>
-                </div>
-                <div class="items-grid">
-                    {% for armor_piece in armor %}
-                    <div class="item-card" onclick="viewItem({{ armor_piece.id }})">
-                        <div class="item-header">
-                            <div class="item-icon armor-icon">🛡️</div>
-                            <div>
-                                <h3 class="item-name">{{ armor_piece.name }}</h3>
-                                <span class="item-value">{{ armor_piece.value|default:0 }} gold</span>
-                            </div>
-                        </div>
-                        <div class="item-description">{{ armor_piece.description|default:"Protective gear for adventurers." }}</div>
-                        <div class="item-stats">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:"leather"|title }}</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🛡️</span>Armor ({{ armor|length }})
+                        </h5>
                     </div>
-                    {% endfor %}
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for armor_piece in armor %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }}" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-info text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <span>🛡️</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ armor_piece.name }}</h6>
+                                                <small class="text-primary">{{ armor_piece.value|default:0 }} gold</small>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ armor_piece.description|default:"Protective gear for adventurers." }}</p>
+                                        <div class="bg-light rounded p-2">
+                                            <small class="text-muted">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:"leather"|title }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Off-Hand Items Section -->
             {% if offhands %}
-            <div class="category-section">
-                <div class="category-header">
-                    <h2><span class="category-icon">🛡️</span> Off-Hand ({{ offhands|length }})</h2>
-                </div>
-                <div class="items-grid">
-                    {% for offhand in offhands %}
-                    <div class="item-card" onclick="viewItem({{ offhand.id }})">
-                        <div class="item-header">
-                            <div class="item-icon offhand-icon">🛡️</div>
-                            <div>
-                                <h3 class="item-name">{{ offhand.name }}</h3>
-                                <span class="item-value">{{ offhand.value|default:0 }} gold</span>
-                            </div>
-                        </div>
-                        <div class="item-description">{{ offhand.description|default:"A useful off-hand item." }}</div>
-                        <div class="item-stats">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:"wooden"|title }}</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🛡️</span>Off-Hand ({{ offhands|length }})
+                        </h5>
                     </div>
-                    {% endfor %}
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for offhand in offhands %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }}" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-warning text-dark rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <span>🛡️</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ offhand.name }}</h6>
+                                                <small class="text-primary">{{ offhand.value|default:0 }} gold</small>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ offhand.description|default:"A useful off-hand item." }}</p>
+                                        <div class="bg-light rounded p-2">
+                                            <small class="text-muted">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:"wooden"|title }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Consumables Section -->
             {% if consumables %}
-            <div class="category-section">
-                <div class="category-header">
-                    <h2><span class="category-icon">🧪</span> Consumables ({{ consumables|length }})</h2>
-                </div>
-                <div class="items-grid">
-                    {% for consumable in consumables %}
-                    <div class="item-card" onclick="viewItem({{ consumable.id }})">
-                        <div class="item-header">
-                            <div class="item-icon consumable-icon">🧪</div>
-                            <div>
-                                <h3 class="item-name">{{ consumable.name }}</h3>
-                                <span class="item-value">{{ consumable.value|default:0 }} gold</span>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">🧪</span>Consumables ({{ consumables|length }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for consumable in consumables %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }}" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-success text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <span>🧪</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ consumable.name }}</h6>
+                                                <small class="text-primary">{{ consumable.value|default:0 }} gold</small>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ consumable.description|default:"A consumable item with special effects." }}</p>
+                                        <div class="bg-light rounded p-2">
+                                            <small class="text-muted">
+                                                {% if consumable.heal_amount > 0 %}+{{ consumable.heal_amount }} HP{% endif %}
+                                                {% if consumable.mana_restore > 0 %}{% if consumable.heal_amount > 0 %} • {% endif %}+{{ consumable.mana_restore }} MP{% endif %}
+                                                {% if consumable.duration > 0 %}{% if consumable.heal_amount > 0 or consumable.mana_restore > 0 %} • {% endif %}{{ consumable.duration }}s duration{% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="item-description">{{ consumable.description|default:"A consumable item with special effects." }}</div>
-                        <div class="item-stats">
-                            {% if consumable.heal_amount > 0 %}+{{ consumable.heal_amount }} HP{% endif %}
-                            {% if consumable.mana_restore > 0 %}{% if consumable.heal_amount > 0 %} • {% endif %}+{{ consumable.mana_restore }} MP{% endif %}
-                            {% if consumable.duration > 0 %}{% if consumable.heal_amount > 0 or consumable.mana_restore > 0 %} • {% endif %}{{ consumable.duration }}s duration{% endif %}
+                            {% endfor %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
             {% endif %}
 
             <!-- Other Items Section -->
             {% if other_items %}
-            <div class="category-section">
-                <div class="category-header">
-                    <h2><span class="category-icon">📦</span> Other Items ({{ other_items|length }})</h2>
-                </div>
-                <div class="items-grid">
-                    {% for item in other_items %}
-                    <div class="item-card" onclick="viewItem({{ item.id }})">
-                        <div class="item-header">
-                            <div class="item-icon" style="background: #cbd5e0;">📦</div>
-                            <div>
-                                <h3 class="item-name">{{ item.name }}</h3>
-                                <span class="item-value">{{ item.value|default:0 }} gold</span>
-                            </div>
-                        </div>
-                        <div class="item-description">{{ item.description|default:"A mysterious item." }}</div>
-                        <div class="item-stats">General Item</div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <span class="me-2">📦</span>Other Items ({{ other_items|length }})
+                        </h5>
                     </div>
-                    {% endfor %}
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for item in other_items %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card item-card h-100" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-secondary text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <span>📦</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ item.name }}</h6>
+                                                <small class="text-primary">{{ item.value|default:0 }} gold</small>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ item.description|default:"A mysterious item." }}</p>
+                                        <div class="bg-light rounded p-2">
+                                            <small class="text-muted">General Item</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Empty Inventory -->
             {% if total_items == 0 %}
-            <div class="category-section">
-                <div class="empty-category">
-                    <div class="empty-icon">🎒</div>
-                    <h2>Your inventory is empty</h2>
-                    <p>Start your adventure to collect items!</p>
-                    <a href="/" class="btn btn-primary" style="margin-top: 16px;">
-                        🏠 Start Adventure
-                    </a>
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;">🎒</div>
+                        <h3 class="mb-3">Your inventory is empty</h3>
+                        <p class="text-muted mb-4">Start your adventure to collect items!</p>
+                        <a href="/" class="btn btn-primary">
+                            🏠 Start Adventure
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endif %}
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function viewItem(itemId) {
             window.location.href = `/item/${itemId}/`;

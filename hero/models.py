@@ -1,13 +1,16 @@
 from django.db import models
-from item.models import Item, InventoryItem
+from item.models import InventoryItem
 
 # Create your models here.
+
+
 class Hero(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
-    hero_class = models.ForeignKey('HeroClass', on_delete=models.CASCADE, null=False)
+    hero_class = models.ForeignKey(
+        'HeroClass', on_delete=models.CASCADE, null=False)
     # stats
     strength = models.IntegerField(default=10)
     constitution = models.IntegerField(default=10)
@@ -21,13 +24,14 @@ class Hero(models.Model):
 
     is_in_combat = models.BooleanField(default=False)
 
-    # inventory and equipment
-    # Inventory and Equipment are related via OneToOneField on item models
+    inventory = models.ForeignKey(
+        'item.Inventory', on_delete=models.CASCADE, null=True, blank=True)
 
     def calculate_max_health(self):
         """Calculate max health based on constitution, level, and class"""
         base_health = self.hero_class.base_health if self.hero_class else 100
-        constitution_bonus = (self.constitution - 10) * 2  # +2 HP per point above 10
+        constitution_bonus = (self.constitution - 10) * \
+            2  # +2 HP per point above 10
         level_bonus = (self.level - 1) * 5  # +5 HP per level
         return base_health + constitution_bonus + level_bonus
 
@@ -68,7 +72,8 @@ class Hero(models.Model):
         if self.constitution <= 10:
             return 5  # Base regen rate
         else:
-            return 5 + (self.constitution - 10) // 2  # +1 HP regen per 2 points above 10
+            # +1 HP regen per 2 points above 10
+            return 5 + (self.constitution - 10) // 2
 
     @property
     def mana_regeneration_rate(self):
@@ -76,7 +81,8 @@ class Hero(models.Model):
         if self.intelligence <= 10:
             return 5  # Base regen rate
         else:
-            return 5 + (self.intelligence - 10) // 2  # +1 MP regen per 2 points above 10
+            # +1 MP regen per 2 points above 10
+            return 5 + (self.intelligence - 10) // 2
 
     def take_damage(self, damage):
         """
@@ -95,12 +101,14 @@ class Hero(models.Model):
         """
         Heal hero by specified amount
         """
-        self.current_health = min(self.max_health, self.current_health + amount)
+        self.current_health = min(
+            self.max_health, self.current_health + amount)
         self.save()
 
     def add_to_inventory(self, item, quantity=1):
         """Add item to hero's inventory"""
-        inventory_item, created = InventoryItem.objects.get_or_create(hero=self, item=item)
+        inventory_item, created = InventoryItem.objects.get_or_create(
+            inventory=self.inventory, item=item, quantity=quantity)
         if not created:
             inventory_item.quantity += quantity
         else:
