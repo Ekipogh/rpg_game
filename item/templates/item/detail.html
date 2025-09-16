@@ -39,12 +39,12 @@
                     <div class="flex-grow-1">
                         <h1 class="mb-3 fw-bold">{{ item.name }}</h1>
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <span class="badge bg-primary fs-6">{{ item.item_type|default:'Item'|title }}</span>
+                            <span class="badge text-bg-primary fs-6">{{ item.item_type|default:'Item'|title }}</span>
                             {% if item.value %}
-                                <span class="badge bg-outline-primary border fs-6">{{ item.value }} gold</span>
+                                <span class="badge text-bg-light border fs-6">{{ item.value }} gold</span>
                             {% endif %}
                             {% if item.rarity %}
-                                <span class="badge bg-success fs-6">{{ item.rarity|title }}</span>
+                                <span class="badge text-bg-success fs-6">{{ item.rarity|title }}</span>
                             {% endif %}
                         </div>
                         {% if item.description %}
@@ -54,50 +54,6 @@
                 </div>
             </div>
         </div>
-            color: #4a5568;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        .item-actions {
-            display: flex;
-            gap: 12px;
-            flex-shrink: 0;
-            flex-direction: column;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            font-size: 1rem;
-            min-width: 140px;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #2d3748;
-            border-color: #e2e8f0;
-        }
-
-        .btn-success {
-            background: #48bb78;
-            color: white;
         <!-- Navigation Actions -->
         <div class="row mb-4">
             <div class="col-12">

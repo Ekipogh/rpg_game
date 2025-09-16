@@ -1,30 +1,29 @@
 {% load static %}
 <div class="container-fluid py-4 text-center" style="background: #f8f9fa; min-height: 100vh;">
   <!-- Hero Header -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-body d-flex justify-content-between align-items-center">
-      <a href="" class="text-decoration-none text-dark">
-        <div class="d-flex align-items-center">
-          <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3"
-               style="width: 80px; height: 80px;">
-            <div class="{{ hero.hero_class.name|lower }}-icon"
-                 style="width: 60px; height: 60px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+  <div class="row justify-content-center">
+    <div class="card shadow-sm mb-4 w-50">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <a href="" class="text-decoration-none text-dark">
+          <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+              <div class="{{ hero.hero_class.name|lower }}-icon" style="width: 60px; height: 60px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+            </div>
+            <div>
+              <h1 class="mb-1 fw-bold">{{ hero.name }}</h1>
+              <p class="text-primary fw-semibold mb-0">{{ hero.hero_class.name }}</p>
+            </div>
           </div>
-          <div>
-            <h1 class="mb-1 fw-bold">{{ hero.name }}</h1>
-            <p class="text-primary fw-semibold mb-0">{{ hero.hero_class.name }}</p>
-          </div>
+        </a>
+        <div>
+          <button class="btn btn-danger d-flex align-items-center" unicorn:click="exit_game">
+            <span class="me-2">🚪</span>
+            Exit
+          </button>
         </div>
-      </a>
-      <div>
-        <button class="btn btn-danger d-flex align-items-center" unicorn:click="exit_game">
-          <span class="me-2">🚪</span>
-          Exit
-        </button>
       </div>
     </div>
   </div>
-
   <!-- Hero Cards Grid -->
   <div class="row g-4 justify-content-md-center">
     <!-- Level & Experience Card -->
@@ -37,9 +36,7 @@
           <h5 class="card-title fw-semibold">Level {{ hero.level }}</h5>
           <div class="mb-2">
             <div class="progress" style="height: 12px;">
-              <div class="progress-bar bg-success" role="progressbar"
-                   style="width: {{ hero.experience_percentage }}%"
-                   aria-valuenow="{{ hero.experience_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar bg-success" role="progressbar" style="width: {{ hero.experience_percentage }}%" aria-valuenow="{{ hero.experience_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
           <small class="text-muted">{{ hero.experience }} / {{ hero.next_level_xp }} XP</small>
@@ -57,9 +54,7 @@
           <h5 class="card-title fw-semibold">Health</h5>
           <div class="mb-2">
             <div class="progress" style="height: 12px;">
-              <div class="progress-bar bg-danger" role="progressbar"
-                   style="width: {{ hero.health_percentage }}%"
-                   id="health-fill" aria-valuenow="{{ hero.health_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar bg-danger" role="progressbar" style="width: {{ hero.health_percentage }}%" id="health-fill" aria-valuenow="{{ hero.health_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
           <small class="text-muted" id="health-text">{{ hero.current_health }} / {{ hero.max_health }} HP</small>
@@ -67,9 +62,7 @@
           <h6 class="mt-3 fw-semibold">Mana</h6>
           <div class="mb-2">
             <div class="progress" style="height: 12px;">
-              <div class="progress-bar bg-info" role="progressbar"
-                   style="width: {{ hero.mana_percentage }}%"
-                   id="mana-fill" aria-valuenow="{{ hero.mana_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar bg-info" role="progressbar" style="width: {{ hero.mana_percentage }}%" id="mana-fill" aria-valuenow="{{ hero.mana_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
           <small class="text-muted" id="mana-text">{{ hero.current_mana }} / {{ hero.max_mana }} MP</small>
@@ -138,13 +131,6 @@
               Inventory
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-            Inventory
-          </button>
         </div>
       </div>
     </div>

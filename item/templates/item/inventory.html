@@ -8,19 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid py-4">
+    <div class="container-md py-4">
         <!-- Inventory Header -->
         <div class="card shadow-sm mb-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
                 <div>
                     <h1 class="mb-1 fw-bold">Inventory</h1>
                     <p class="text-muted mb-0">Manage your items and equipment</p>
                 </div>
                 <div>
-                    <a href="/" class="btn btn-outline-secondary me-2">
+                    <a href="/home" class="btn btn-outline-secondary me-2">
                         🏠 Home
                     </a>
-                    <span class="badge bg-primary fs-6">{{ items|length }} items</span>
                 </div>
             </div>
         </div>
@@ -32,14 +31,6 @@
             <div class="header-info">
                 <h1>🎒 Inventory</h1>
                 <p class="header-subtitle">{{ total_items|default:0 }} items • {{ total_value|default:0 }} gold total</p>
-            </div>
-            <div class="header-actions">
-                <a href="/" class="btn btn-secondary">
-                    🏠 Home
-                </a>
-                <button class="btn btn-primary">
-                    📊 Sort Items
-                </button>
             </div>
         </div>
 
