@@ -1,0 +1,23 @@
+/* Base CSS - Minimal custom styles for RPG Game */
+
+/* Class icon backgrounds for hero avatars */
+.warrior-icon {
+    background-image: url('../images/warrior.png');
+}
+
+.wizard-icon {
+    background-image: url('../images/wizard.png');
+}
+
+.archer-icon {
+    background-image: url('../images/archer.png');
+}
+
+.ranger-icon {
+    background-image: url('../images/ranger.png');
+}
+
+/* Global font family override */
+body {
+    font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+}

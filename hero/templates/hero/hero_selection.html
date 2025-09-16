@@ -1,29 +1,60 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 {% load unicorn %}
 {% block extra_head %}
-  <link rel="stylesheet" href="{% static 'css/hero_selection.css' %}" />
   {% unicorn_scripts %}
 {% endblock %}
-{% block title %}Select Your Hero{% endblock %}
+{% block title %}
+  Select Your Hero
+{% endblock %}
 {% block content %}
-<div class="hero-selection">
-  <h1 class="hs_header">Select Your Hero</h1>
-  <div class="hero-cards-container">
-    {% for hero in heroes %}
-      <div class="hero-card">
-        <h2>{{ hero.name }}</h2>
-        <p>Class: {{ hero.hero_class.name }}</p>
-        <p>Level: {{ hero.level }}</p>
-        <div class="{{ hero.hero_class.name|lower }}-icon hero-icon"></div>
-        <a href="{% url 'select_hero' hero.id %}" class="btn select-btn">Select</a>
-      </div>
-    {% empty %}
-      <p>No heroes available. Please create a character.</p>
-    {% endfor %}
+  <div class="container-fluid py-4" style="background: #f8f9fa; min-height: 100vh;">
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold text-primary">Select Your Hero</h1>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-center gap-4">
+      {% for hero in heroes %}
+        <div class="card shadow-sm" style="width: fit-content; min-width: 250px; max-width: 300px;">
+          <div class="card-body text-center">
+            <div class="mb-3">
+              <div class="rounded-circle bg-primary mx-auto d-flex align-items-center justify-content-center"
+                   style="width: 80px; height: 80px;">
+                <div class="{{ hero.hero_class.name|lower }}-icon"
+                     style="width: 60px; height: 60px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+              </div>
+            </div>
+            <h4 class="card-title fw-bold">{{ hero.name }}</h4>
+            <p class="card-text text-muted">
+              <strong>Class:</strong> {{ hero.hero_class.name }}<br>
+              <strong>Level:</strong> {{ hero.level }}
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'select_hero' hero.id %}" class="btn btn-primary mb-2">Select Hero</a>
+              <a href="{% url 'delete_hero' hero.id %}"
+                 class="btn btn-outline-danger btn-sm"
+                 onclick="return confirm('Are you sure you want to delete this hero?');">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center">
+          <div class="card shadow-sm">
+            <div class="card-body py-5">
+              <h3 class="text-muted">No Heroes Available</h3>
+              <p class="text-muted">Create your first character to begin your adventure!</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{% url 'create_character' %}" class="btn btn-success btn-lg">
+        ➕ Create New Hero
+      </a>
+    </div>
   </div>
-  <div class="create-button-container">
-    <a href="{% url 'create_character' %}" class="btn create-btn">Create New Hero</a>
-  </div>
-</div>
 {% endblock %}

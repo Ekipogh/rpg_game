@@ -1,108 +1,170 @@
 {% load unicorn %}
 {% load static %}
-<div class="cf-container">
-  <header class="cf-header">
-    <h2>Create a Character</h2>
-    <p class="cf-sub">Choose a class and distribute your stat points.</p>
-  </header>
+<div class="container py-4" style="max-width: 800px; background: #f8f9fa; min-height: 100vh;">
+  <div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary">Create a Character</h2>
+    <p class="lead text-muted">Choose a class and distribute your stat points.</p>
+  </div>
 
-  <div class="cf-card">
-    <label class="cf-field">
-      <span class="cf-label">Name</span>
-      <input type="text" class="cf-input" unicorn:model="name" placeholder="Enter character name" />
-      {% for error_list in unicorn.errors.name %}
-        {% for message in error_list.message %}
-          <span class="cf-error">{{ message }}</span>
+  <div class="card shadow">
+    <div class="card-body p-4">
+      <!-- Name Input -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Character Name</label>
+        <input type="text" class="form-control form-control-lg" unicorn:model="name" placeholder="Enter character name" />
+        {% for error_list in unicorn.errors.name %}
+          {% for message in error_list.message %}
+            <div class="text-danger small mt-1">{{ message }}</div>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
-    </label>
+      </div>
 
-    <section class="cf-section">
-      <h3 class="section-title">Select a Class</h3>
-      <div class="class-options">
-        <div class="class-card {% if selected_class == 'Warrior' %}selected{% endif %}" unicorn:click="select_class('Warrior')">
-          <img src="{% static 'images/warrior.png' %}" alt="Warrior" />
-          <p>Warrior</p>
+      <!-- Class Selection -->
+      <div class="mb-4">
+        <h5 class="fw-semibold mb-3">Select a Class</h5>
+        <div class="row g-3">
+          <div class="col-4">
+            <div class="card h-100 {% if selected_class == 'Warrior' %}border-primary bg-primary bg-opacity-10{% else %}border-light{% endif %}"
+                 style="cursor: pointer;" unicorn:click="select_class('Warrior')">
+              <div class="card-body text-center p-3">
+                <img src="{% static 'images/warrior.png' %}" alt="Warrior" class="img-fluid mb-2" style="max-height: 60px;" />
+                <h6 class="card-title mb-0 {% if selected_class == 'Warrior' %}text-primary fw-bold{% endif %}">Warrior</h6>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="card h-100 {% if selected_class == 'Wizard' %}border-primary bg-primary bg-opacity-10{% else %}border-light{% endif %}"
+                 style="cursor: pointer;" unicorn:click="select_class('Wizard')">
+              <div class="card-body text-center p-3">
+                <img src="{% static 'images/wizard.png' %}" alt="Wizard" class="img-fluid mb-2" style="max-height: 60px;" />
+                <h6 class="card-title mb-0 {% if selected_class == 'Wizard' %}text-primary fw-bold{% endif %}">Wizard</h6>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="card h-100 {% if selected_class == 'Ranger' %}border-primary bg-primary bg-opacity-10{% else %}border-light{% endif %}"
+                 style="cursor: pointer;" unicorn:click="select_class('Ranger')">
+              <div class="card-body text-center p-3">
+                <img src="{% static 'images/ranger.png' %}" alt="Ranger" class="img-fluid mb-2" style="max-height: 60px;" />
+                <h6 class="card-title mb-0 {% if selected_class == 'Ranger' %}text-primary fw-bold{% endif %}">Ranger</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% for error_list in unicorn.errors.selected_class %}
+          {% for message in error_list.message %}
+            <div class="text-danger small mt-2">{{ message }}</div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+      <!-- Stats Section -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-semibold mb-0">Attribute Points</h5>
+          <span class="badge bg-primary fs-6">Points Available: {{ points_available }}</span>
         </div>
 
-        <div class="class-card {% if selected_class == 'Wizard' %}selected{% endif %}" unicorn:click="select_class('Wizard')">
-          <img src="{% static 'images/wizard.png' %}" alt="Wizard" />
-          <p>Wizard</p>
-        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <span class="me-2" style="font-size: 1.2rem;">💪</span>
+                    <div>
+                      <h6 class="mb-0">Strength</h6>
+                      <small class="text-muted">({{ strength }} + {{ strength_mod }})</small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary btn-sm me-2" unicorn:click="decrease_stat('strength')">−</button>
+                    <span class="fw-bold fs-5 mx-2">{{ strength_total }}</span>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" unicorn:click="increase_stat('strength')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div class="class-card {% if selected_class == 'Ranger' %}selected{% endif %}" unicorn:click="select_class('Ranger')">
-          <img src="{% static 'images/ranger.png' %}" alt="Ranger" />
-          <p>Ranger</p>
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <span class="me-2" style="font-size: 1.2rem;">❤️</span>
+                    <div>
+                      <h6 class="mb-0">Constitution</h6>
+                      <small class="text-muted">({{ constitution }} + {{ constitution_mod }})</small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary btn-sm me-2" unicorn:click="decrease_stat('constitution')">−</button>
+                    <span class="fw-bold fs-5 mx-2">{{ constitution_total }}</span>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" unicorn:click="increase_stat('constitution')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <span class="me-2" style="font-size: 1.2rem;">🏃‍♂️</span>
+                    <div>
+                      <h6 class="mb-0">Agility</h6>
+                      <small class="text-muted">({{ agility }} + {{ agility_mod }})</small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary btn-sm me-2" unicorn:click="decrease_stat('agility')">−</button>
+                    <span class="fw-bold fs-5 mx-2">{{ agility_total }}</span>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" unicorn:click="increase_stat('agility')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <span class="me-2" style="font-size: 1.2rem;">🧠</span>
+                    <div>
+                      <h6 class="mb-0">Intelligence</h6>
+                      <small class="text-muted">({{ intelligence }} + {{ intelligence_mod }})</small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary btn-sm me-2" unicorn:click="decrease_stat('intelligence')">−</button>
+                    <span class="fw-bold fs-5 mx-2">{{ intelligence_total }}</span>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" unicorn:click="increase_stat('intelligence')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {% for error_list in unicorn.errors.selected_class %}
+
+      {% for error_list in unicorn.errors.points_available %}
         {% for message in error_list.message %}
-          <span class="cf-error">{{ message }}</span>
+          <div class="text-danger small mb-3">{{ message }}</div>
         {% endfor %}
       {% endfor %}
-    </section>
 
-    <section class="cf-section">
-      <h3 class="section-title">Stats <span class="points">Points: {{ points_available }}</span></h3>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-name">
-            <span class="stat-icon">💪</span>
-            Strength
-          </div>
-          <div class="stat-controls">
-            <button class="btn small" unicorn:click="decrease_stat('strength')">−</button>
-            <div class="stat-value">{{ strength_total }}</div><div class="stat-breakdown">({{ strength }} + {{ strength_mod }})</div>
-            <button class="btn small" unicorn:click="increase_stat('strength')">+</button>
-          </div>
-        </div>
+      {% csrf_token %}
 
-        <div class="stat-card">
-          <div class="stat-name">
-            <span class="stat-icon">❤️</span>
-            Constitution
-          </div>
-          <div class="stat-controls">
-            <button class="btn small" unicorn:click="decrease_stat('constitution')">−</button>
-            <div class="stat-value">{{ constitution_total }}</div><div class="stat-breakdown">({{ constitution }} + {{ constitution_mod }})</div>
-            <button class="btn small" unicorn:click="increase_stat('constitution')">+</button>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-name">
-            <span class="stat-icon">🏃‍♂️</span>
-            Agility
-          </div>
-          <div class="stat-controls">
-            <button class="btn small" unicorn:click="decrease_stat('agility')">−</button>
-            <div class="stat-value">{{ agility_total }}</div><div class="stat-breakdown">({{ agility }} + {{ agility_mod }})</div>
-            <button class="btn small" unicorn:click="increase_stat('agility')">+</button>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-name">
-            <span class="stat-icon">🧠</span>
-            Intelligence
-          </div>
-          <div class="stat-controls">
-            <button class="btn small" unicorn:click="decrease_stat('intelligence')">−</button>
-            <div class="stat-value">{{ intelligence_total }}</div><div class="stat-breakdown">({{ intelligence }} + {{ intelligence_mod }})</div>
-            <button class="btn small" unicorn:click="increase_stat('intelligence')">+</button>
-          </div>
-        </div>
+      <div class="text-center">
+        <button class="btn btn-success btn-lg px-5" unicorn:click="submit">Create Character</button>
       </div>
-    </section>
-    {% for error_list in unicorn.errors.points_available %}
-      {% for message in error_list.message %}
-        <span class="cf-error">{{ message }}</span>
-      {% endfor %}
-    {% endfor %}
-    {% csrf_token %}
-
-    <div class="cf-actions">
-      <button class="btn primary" unicorn:click="submit">Continue</button>
     </div>
   </div>
 </div>
