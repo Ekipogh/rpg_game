@@ -38,3 +38,12 @@ def select_hero(request, hero_id):
     hero = Hero.objects.get(id=hero_id)
     request.session['hero_id'] = hero.id
     return redirect('home')
+
+
+def delete_hero(request, hero_id):
+    hero = Hero.objects.get(id=hero_id)
+    hero.delete()
+    # If the deleted hero was the current session hero, clear it
+    if request.session.get('hero_id') == hero_id:
+        request.session.pop('hero_id', None)
+    return redirect('hero_selection')

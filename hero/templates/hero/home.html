@@ -2,7 +2,6 @@
 {% load static %}
 {% load unicorn %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% endblock %}
 {% block title %}{{ hero.name }} - Home{% endblock %}
@@ -14,13 +13,20 @@
         // for demonstration purposes only
         // reload the page to display actual health from backend
         var current_health = {{ hero.current_health }};
-        var max_health = {{ hero.health }};
+        var max_health = {{ hero.max_health }};
         var healthFill = document.getElementById("health-fill");
         var healthText = document.getElementById("health-text");
+        var healthRegenRate = {{ hero.health_regeneration_rate }};
+
+        var current_mana = {{ hero.current_mana }};
+        var max_mana = {{ hero.max_mana }};
+        var manaFill = document.getElementById("mana-fill");
+        var manaText = document.getElementById("mana-text");
+        var manaRegenRate = {{ hero.mana_regeneration_rate }};
 
         function heal() {
             if (current_health < max_health) {
-                current_health += 1;
+                current_health += healthRegenRate;
                 if (current_health > max_health) {
                     current_health = max_health;
                 }
@@ -30,6 +36,20 @@
             }
         }
 
-        setInterval(heal, 30000); // Heal 1 HP every 30 seconds
+        function manaRestore()
+        {
+            if (current_mana < max_mana) {
+                current_mana += manaRegenRate;
+                if (current_mana > max_mana) {
+                    current_mana = max_mana;
+                }
+                var manaPercentage = (current_mana / max_mana) * 100;
+                manaFill.style.width = manaPercentage + "%";
+                manaText.textContent = current_mana + " / " + max_mana + " MP";
+            }
+        }
+
+        setInterval(heal, 1000); // Heal 1 HP every second
+        setInterval(manaRestore, 1000); // Restore 1 MP every second
     </script>
 {% endblock %}

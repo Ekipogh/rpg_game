@@ -26,17 +26,21 @@ from django.db.models import F
 class HealingDaemon:
     def __init__(self):
         self.healing_heroes = {}  # {hero_id: {'last_heal': datetime, 'thread': thread}}
+        # {hero_id: {'last_restore': datetime, 'thread': thread}}
+        self.mana_restoring_heroes = {}
         self.running = True
-        self.heal_interval = 30  # seconds
-        self.heal_amount = 1  # HP per heal
+
+        # TODO: replace with hero stat based configuration
+        self.heal_interval = 1  # seconds
+
+        # mana restoration settings
+        self.mana_restore_interval = 1  # seconds
 
         # File to store healing state (persist across restarts)
         self.state_file = project_dir / 'healing_state.json'
         self.load_state()
 
         print(f"🏥 Healing Daemon started at {datetime.now()}")
-        print(f"⏱️  Healing interval: {self.heal_interval} seconds")
-        print(f"❤️  Heal amount: {self.heal_amount} HP")
 
     def load_state(self):
         """Load healing state from file"""
@@ -45,7 +49,8 @@ class HealingDaemon:
                 with open(self.state_file, 'r') as f:
                     data = json.load(f)
                     self.healing_heroes = {int(k): v for k, v in data.items()}
-                    print(f"📄 Loaded healing state for {len(self.healing_heroes)} heroes")
+                    print(
+                        f"📄 Loaded healing state for {len(self.healing_heroes)} heroes")
             except Exception as e:
                 print(f"⚠️  Could not load healing state: {e}")
 
@@ -70,7 +75,7 @@ class HealingDaemon:
         try:
             hero = Hero.objects.get(id=hero_id)
 
-            if hero.current_health >= hero.health:
+            if hero.current_health >= hero.max_health:
                 print(f"✅ {hero.name} is already at full health")
                 return False
 
@@ -94,6 +99,7 @@ class HealingDaemon:
             self.save_state()
 
             print(f"🚀 Started healing {hero.name} (ID: {hero_id})")
+            print(f"Healing rate {hero.health_regeneration_rate} HP/sec")
             return True
 
         except Hero.DoesNotExist:
@@ -116,26 +122,22 @@ class HealingDaemon:
                 hero = Hero.objects.get(id=hero_id)
 
                 # Check if hero needs healing
-                if hero.current_health >= hero.health:
+                if hero.current_health >= hero.max_health:
                     print(f"✅ {hero.name} is fully healed! Stopping healing.")
-                    self.stop_hero_healing(hero_id)
-                    break
-
-                # Check if hero is dead
-                if hero.current_health <= 0:
-                    print(f"💀 {hero.name} is dead. Stopping healing.")
                     self.stop_hero_healing(hero_id)
                     break
 
                 # Heal the hero
                 old_health = hero.current_health
-                hero.current_health = min(hero.current_health + self.heal_amount, hero.health)
+                hero.current_health = min(
+                    hero.current_health + hero.health_regeneration_rate, hero.max_health)
                 hero.save()
 
                 # Update last heal time
                 self.healing_heroes[hero_id]['last_heal'] = datetime.now()
 
-                print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+                print(
+                    f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
                 # Wait for next heal
                 time.sleep(self.heal_interval)
@@ -148,23 +150,107 @@ class HealingDaemon:
                 print(f"⚠️  Error healing hero {hero_id}: {e}")
                 time.sleep(5)  # Wait a bit before retrying
 
+    def _restore_mana_loop(self, hero_id):
+        """Main mana restoration loop for a specific hero"""
+        while hero_id in self.mana_restoring_heroes and self.running:
+            try:
+                hero = Hero.objects.get(id=hero_id)
+
+                # Check if hero needs mana restoration
+                if hero.current_mana >= hero.max_mana:
+                    print(
+                        f"✅ {hero.name} is fully restored! Stopping mana restoration.")
+                    self.stop_mana_restoration(hero_id)
+                    break
+
+                # Restore mana
+                old_mana = hero.current_mana
+                hero.current_mana = min(
+                    hero.current_mana + hero.mana_regeneration_rate, hero.max_mana)
+                hero.save()
+
+                # Update last restore time
+                self.mana_restoring_heroes[hero_id]['last_restore'] = datetime.now(
+                )
+
+                print(
+                    f"🔮 Restored {hero.name}: {old_mana} → {hero.current_mana}/{hero.max_mana} MP")
+
+                # Wait for next restore
+                time.sleep(self.mana_restore_interval)
+
+            except Hero.DoesNotExist:
+                print(
+                    f"❌ Hero {hero_id} no longer exists. Stopping mana restoration.")
+                self.stop_mana_restoration(hero_id)
+                break
+            except Exception as e:
+                print(f"⚠️  Error restoring mana for hero {hero_id}: {e}")
+                time.sleep(5)  # Wait a bit before retrying
+
+    def stop_mana_restoration(self, hero_id):
+        """Stop mana restoration process for a hero"""
+        if hero_id in self.mana_restoring_heroes:
+            del self.mana_restoring_heroes[hero_id]
+            self.save_state()
+            print(f"⏹️  Stopped mana restoration for hero {hero_id}")
+            return True
+        return False
+
+    def start_restoring_mana(self, hero_id):
+        """Start mana restoration process for a hero"""
+        try:
+            hero = Hero.objects.get(id=hero_id)
+
+            if hero.current_mana >= hero.max_mana:
+                print(f"✅ {hero.name} is already at full mana")
+                return False
+
+            if hero_id in self.mana_restoring_heroes:
+                print(f"🔄 {hero.name} is already restoring mana")
+                return True
+
+            # Start mana restoration thread for this hero
+            restore_thread = threading.Thread(
+                target=self._restore_mana_loop,
+                args=(hero_id,),
+                daemon=True
+            )
+
+            self.mana_restoring_heroes[hero_id] = {
+                'last_restore': datetime.now(),
+                'thread': restore_thread
+            }
+
+            restore_thread.start()
+            self.save_state()
+
+            print(f"🚀 Started restoring mana for {hero.name} (ID: {hero_id})")
+            print(f"Restoration rate {hero.mana_regeneration_rate} MP/sec")
+            return True
+
+        except Hero.DoesNotExist:
+            print(f"❌ Hero with ID {hero_id} not found")
+            return False
+
     def rest_hero(self, hero_id):
         """Instantly heal hero to full health"""
         try:
             hero = Hero.objects.get(id=hero_id)
 
-            if hero.current_health >= hero.health:
+            if hero.current_health >= hero.max_health:
                 print(f"✅ {hero.name} is already at full health")
                 return False
 
             old_health = hero.current_health
-            hero.current_health = hero.health
+            hero.current_health = hero.max_health
             hero.save()
 
             # Stop ongoing healing since hero is now full
             self.stop_hero_healing(hero_id)
 
-            print(f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(
+                f"💤 {hero.name} rested: {old_health} → {hero.current_health}/{hero.max_health} HP")
             return True
 
         except Hero.DoesNotExist:
@@ -179,10 +265,11 @@ class HealingDaemon:
             hero.current_health = max(0, hero.current_health - damage)
             hero.save()
 
-            print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.health} HP")
+            print(
+                f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
             # Start healing if hero is alive and not at full health
-            if hero.current_health > 0 and hero.current_health < hero.health:
+            if hero.current_health > 0 and hero.current_health < hero.max_health:
                 self.start_hero_healing(hero_id)
 
             return True
@@ -204,7 +291,16 @@ class HealingDaemon:
             try:
                 hero = Hero.objects.get(id=hero_id)
                 last_heal = info.get('last_heal', 'Unknown')
-                print(f"   🏥 {hero.name}: {hero.current_health}/{hero.health} HP (Last heal: {last_heal})")
+                print(
+                    f"   🏥 {hero.name}: {hero.current_health}/{hero.max_health} HP (Last heal: {last_heal})")
+            except Hero.DoesNotExist:
+                print(f"   ❌ Hero {hero_id}: Not found")
+        for hero_id, info in self.mana_restoring_heroes.items():
+            try:
+                hero = Hero.objects.get(id=hero_id)
+                last_restore = info.get('last_restore', 'Unknown')
+                print(
+                    f"   🔮 {hero.name}: {hero.current_mana}/{hero.max_mana} MP (Last restore: {last_restore})")
             except Hero.DoesNotExist:
                 print(f"   ❌ Hero {hero_id}: Not found")
 
@@ -238,7 +334,8 @@ class HealingDaemon:
                     heroes = Hero.objects.all()
                     print(f"\n👥 All Heroes:")
                     for hero in heroes:
-                        print(f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.health} HP")
+                        print(
+                            f"   ID {hero.id}: {hero.name} - {hero.current_health}/{hero.max_health} HP")
                 elif cmd == 'heal' and len(command) > 1:
                     hero_id = int(command[1])
                     self.start_hero_healing(hero_id)
@@ -266,15 +363,32 @@ class HealingDaemon:
         # for every hero not in combat and not at full health, start healing
         print("\n🎮 Passive Healing Daemon Mode")
         while self.running:
-            try:
-                heroes = Hero.objects.filter(
-                    is_in_combat=False, current_health__lt=F('health'))
-                for hero in heroes:
-                    if hero.id not in self.healing_heroes:
-                        self.start_hero_healing(hero.id)
-                time.sleep(30)  # Check every 30 seconds
-            except Exception as e:
-                print(f"Error in passive mode: {e}")
+            self.restore_health()
+            self.restore_mana()
+
+    def restore_health(self):
+        """Restore health for all heroes not in combat"""
+        try:
+            heroes = Hero.objects.filter(
+                is_in_combat=False, current_health__lt=F('max_health'))
+            for hero in heroes:
+                if hero.id not in self.healing_heroes:
+                    self.start_hero_healing(hero.id)
+            time.sleep(self.heal_interval)  # Check every 30 seconds
+        except Exception as e:
+            print(f"Error in passive mode: {e}")
+
+    def restore_mana(self):
+        """Restore mana for all heroes not in combat"""
+        try:
+            heroes = Hero.objects.filter(
+                is_in_combat=False, current_mana__lt=F('max_mana'))
+            for hero in heroes:
+                if hero.id not in self.mana_restoring_heroes:
+                    self.start_restoring_mana(hero.id)
+            time.sleep(self.mana_restore_interval)  # Check every 60 seconds
+        except Exception as e:
+            print(f"⚠️  Error restoring mana: {e}")
 
     def shutdown(self):
         """Gracefully shutdown the daemon"""
@@ -307,7 +421,8 @@ if __name__ == '__main__':
         elif command == 'passive':
             daemon.run_passive_mode()
         else:
-            print("Usage: python healing_daemon.py [status|heal <id>|damage <id> <amount>|rest <id>]")
+            print(
+                "Usage: python healing_daemon.py [status|heal <id>|damage <id> <amount>|rest <id>]")
     else:
         # Run in interactive mode
         daemon.run_interactive()

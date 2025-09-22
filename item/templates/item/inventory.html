@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory - RPG Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container-md py-4">
+      <!-- Inventory Header -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <h1 class="mb-1 fw-bold">Inventory</h1>
+            <p class="text-muted mb-0">Manage your items and equipment</p>
+          </div>
+          <div>
+            <a href="/home" class="btn btn-outline-secondary me-2">🏠 Home</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="inventory-container">
+        <!-- Header -->
+        <div class="inventory-header">
+          <div class="header-info">
+            <h1>🎒 Inventory</h1>
+            <p class="header-subtitle">{{ total_items|default:0 }} items • {{ total_value|default:0 }} gold total</p>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row mt-4">
+          <!-- Weapons Section -->
+          {% if weapons %}
+            <div class="col-12 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h5 class="card-title mb-0"><span class="me-2">⚔️</span>Weapons ({{ weapons|length }})</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    {% for weapon in weapons %}
+                      <div class="col-lg-4 col-md-6">
+                        <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }}" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
+                          <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                              <div class="bg-danger text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <span>⚔️</span>
+                              </div>
+                              <div>
+                                <h6 class="mb-1 fw-semibold">{{ weapon.name }}</h6>
+                                <small class="text-primary">{{ weapon.value|default:0 }} gold</small>
+                              </div>
+                            </div>
+                            <p class="text-muted small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
+                            <div class="bg-light rounded p-2 mb-3">
+                              <small class="text-muted">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:'sword'|title }}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ weapon.id }})">
+                                ⚔️ Equip
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ weapon.id }})">
+                                👁️ View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Armor Section -->
+          {% if armor %}
+            <div class="col-12 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Armor ({{ armor|length }})</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    {% for armor_piece in armor %}
+                      <div class="col-lg-4 col-md-6">
+                        <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }}" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
+                          <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                              <div class="bg-info text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <span>🛡️</span>
+                              </div>
+                              <div>
+                                <h6 class="mb-1 fw-semibold">{{ armor_piece.name }}</h6>
+                                <small class="text-primary">{{ armor_piece.value|default:0 }} gold</small>
+                              </div>
+                            </div>
+                            <p class="text-muted small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
+                            <div class="bg-light rounded p-2 mb-3">
+                              <small class="text-muted">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:'leather'|title }}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }})">
+                                🛡️ Equip
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ armor_piece.id }})">
+                                👁️ View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Off-Hand Items Section -->
+          {% if offhands %}
+            <div class="col-12 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Off-Hand ({{ offhands|length }})</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    {% for offhand in offhands %}
+                      <div class="col-lg-4 col-md-6">
+                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }}" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
+                          <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                              <div class="bg-warning text-dark rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <span>🛡️</span>
+                              </div>
+                              <div>
+                                <h6 class="mb-1 fw-semibold">{{ offhand.name }}</h6>
+                                <small class="text-primary">{{ offhand.value|default:0 }} gold</small>
+                              </div>
+                            </div>
+                            <p class="text-muted small mb-2">{{ offhand.description|default:'A useful off-hand item.' }}</p>
+                            <div class="bg-light rounded p-2 mb-3">
+                              <small class="text-muted">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:'wooden'|title }}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ offhand.id }})">
+                                🛡️ Equip
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ offhand.id }})">
+                                👁️ View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Consumables Section -->
+          {% if consumables %}
+            <div class="col-12 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h5 class="card-title mb-0"><span class="me-2">🧪</span>Consumables ({{ consumables|length }})</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    {% for consumable in consumables %}
+                      <div class="col-lg-4 col-md-6">
+                        <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }}" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
+                          <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                              <div class="bg-success text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <span>🧪</span>
+                              </div>
+                              <div>
+                                <h6 class="mb-1 fw-semibold">{{ consumable.name }}</h6>
+                                <small class="text-primary">{{ consumable.value|default:0 }} gold</small>
+                              </div>
+                            </div>
+                            <p class="text-muted small mb-2">{{ consumable.description|default:'A consumable item with special effects.' }}</p>
+                            <div class="bg-light rounded p-2 mb-3">
+                              <small class="text-muted">
+                                {% if consumable.heal_amount > 0 %}
+                                  +{{ consumable.heal_amount }} HP
+                                {% endif %}
+                                {% if consumable.mana_restore > 0 %}
+                                  {% if consumable.heal_amount > 0 %} • {% endif %}+{{ consumable.mana_restore }} MP
+                                {% endif %}
+                                {% if consumable.duration > 0 %}
+                                  {% if consumable.heal_amount > 0 or consumable.mana_restore > 0 %} • {% endif %}{{ consumable.duration }}s duration
+                                {% endif %}
+                              </small>
+                            </div>
+                            <div class="d-flex gap-2">
+                              <button class="btn btn-success btn-sm flex-fill" onclick="event.stopPropagation(); useItem({{ consumable.id }})">
+                                🧪 Use
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ consumable.id }})">
+                                👁️ View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Other Items Section -->
+          {% if other_items %}
+            <div class="col-12 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h5 class="card-title mb-0"><span class="me-2">📦</span>Other Items ({{ other_items|length }})</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    {% for item in other_items %}
+                      <div class="col-lg-4 col-md-6">
+                        <div class="card item-card h-100" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
+                          <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                              <div class="bg-secondary text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <span>📦</span>
+                              </div>
+                              <div>
+                                <h6 class="mb-1 fw-semibold">{{ item.name }}</h6>
+                                <small class="text-primary">{{ item.value|default:0 }} gold</small>
+                              </div>
+                            </div>
+                            <p class="text-muted small mb-2">{{ item.description|default:'A mysterious item.' }}</p>
+                            <div class="bg-light rounded p-2 mb-3">
+                              <small class="text-muted">General Item</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); equipItem({{ item.id }})">
+                                ⚔️ Equip
+                              </button>
+                              <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); useItem({{ item.id }})">
+                                🧪 Use
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ item.id }})">
+                                👁️ View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Empty Inventory -->
+          {% if total_items == 0 %}
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                  <div style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;">🎒</div>
+                  <h3 class="mb-3">Your inventory is empty</h3>
+                  <p class="text-muted mb-4">Start your adventure to collect items!</p>
+                  <a href="/" class="btn btn-primary">🏠 Start Adventure</a>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function viewItem(itemId) {
+        window.location.href = `/item/${itemId}/`
+      }
+
+      function equipItem(itemId) {
+        // TODO: Implement equip functionality
+        alert(`Equipping item ${itemId}...`);
+        // This would typically make an AJAX call to your Django backend
+        // Example: fetch(`/api/items/${itemId}/equip/`, { method: 'POST', ... })
+      }
+
+      function useItem(itemId) {
+        // TODO: Implement use functionality
+        alert(`Using item ${itemId}...`);
+        // This would typically make an AJAX call to your Django backend
+        // Example: fetch(`/api/items/${itemId}/use/`, { method: 'POST', ... })
+      }
+    </script>
+  </body>
+</html>
