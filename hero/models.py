@@ -1,7 +1,4 @@
 from django.db import models
-from item.models import InventoryItem
-
-# Create your models here.
 
 
 class Hero(models.Model):

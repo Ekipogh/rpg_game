@@ -82,16 +82,94 @@ class CharacterFormView(UnicornView):
         )
         hero.update_health()
         # add some starting items
-        sword = Weapon.objects.get(name="Rusty Sword")
-        shield = OffHand.objects.get(name="Wooden Shield")
-        armor = Armor.objects.get(name="Leather Armor")
-        bow = Weapon.objects.get(name="Simple Bow")
-        quiver = OffHand.objects.get(name="Quiver of Arrows")
-        robe = Armor.objects.get(name="Cloth Robe")
-        staff = Weapon.objects.get(name="Wooden Staff")
-        spellbook = OffHand.objects.get(name="Beginner's Spellbook")
-        healing_potion = Consumable.objects.get(name="Minor Healing Potion")
-        mana_potion = Consumable.objects.get(name="Minor Mana Potion")
+        sword = Weapon.objects.get_or_create(
+            name="Simple Sword",
+            defaults={
+                'value': 100,
+                'damage': 20,
+                'weapon_type': 'sword',
+                'equipment_slot': EquipmentSlots.MAIN_HAND
+            }
+        )[0]
+        shield = OffHand.objects.get_or_create(
+            name="Wooden Shield",
+            defaults={
+                'value': 50,
+                'block': 5,
+                'shield_type': 'wooden',
+                'equipment_slot': EquipmentSlots.OFF_HAND
+            }
+        )[0]
+        armor = Armor.objects.get_or_create(
+            name="Leather Armor",
+            defaults={
+                'value': 75,
+                'defense': 10,
+                'armor_type': 'leather',
+                'equipment_slot': EquipmentSlots.ARMOR
+            }
+        )[0]
+        bow = Weapon.objects.get_or_create(
+            name="Simple Bow",
+            defaults={
+                'value': 100,
+                'damage': 15,
+                'weapon_type': 'bow',
+                'equipment_slot': EquipmentSlots.MAIN_HAND
+            }
+        )[0]
+        quiver = OffHand.objects.get_or_create(
+            name="Quiver of Arrows",
+            defaults={
+                'value': 30,
+                'capacity': 20,
+                'equipment_slot': EquipmentSlots.OFF_HAND
+            }
+        )[0]
+        robe = Armor.objects.get_or_create(
+            name="Cloth Robe",
+            defaults={
+                'value': 25,
+                'defense': 5,
+                'armor_type': 'cloth',
+                'equipment_slot': EquipmentSlots.ARMOR
+            }
+        )[0]
+        staff = Weapon.objects.get_or_create(
+            name="Wooden Staff",
+            defaults={
+                'value': 100,
+                'damage': 15,
+                'weapon_type': 'staff',
+                'equipment_slot': EquipmentSlots.MAIN_HAND
+            }
+        )[0]
+        spellbook = OffHand.objects.get_or_create(
+            name="Beginner's Spellbook",
+            defaults={
+                'value': 25,
+                'capacity': 5,
+                'equipment_slot': EquipmentSlots.OFF_HAND
+            }
+        )[0]
+        healing_potion = Consumable.objects.get_or_create(
+            name="Minor Healing Potion",
+            defaults={
+                'value': 10,
+                'heal_amount': 20,
+                'mana_restore': 0,
+                'duration': 0
+            }
+        )[0]
+        mana_potion = Consumable.objects.get_or_create(
+            name="Minor Mana Potion",
+            defaults={
+                'value': 10,
+                'heal_amount': 0,
+                'mana_restore': 20,
+                'duration': 0
+            }
+        )[0]
 
         if hero_class.name == "Warrior":
             hero.add_to_inventory(sword)
