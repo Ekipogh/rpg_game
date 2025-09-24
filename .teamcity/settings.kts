@@ -1,8 +1,9 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
-version = "2021.2"
+version = "2019.2"
 
 project {
     description = "TeamCity project for rpg_game - example Kotlin DSL"
@@ -13,13 +14,16 @@ project {
 }
 
 object GitHubRepo : GitVcsRoot({
+    id("GitHubRepo")
     name = "rpg_game GitHub"
     url = "https://github.com/Ekipogh/rpg_game.git"
+    branch = "refs/heads/main"
     branchSpec = "+:refs/heads/*"
     // authentication should be configured in TeamCity (ssh key or token)
 })
 
 object Deploy : BuildType({
+    id("Deploy")
     name = "Deploy to same-server agent"
 
     vcs {
