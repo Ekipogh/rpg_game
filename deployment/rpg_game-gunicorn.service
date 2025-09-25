@@ -16,7 +16,7 @@ ExecStart=/var/www/rpg_game/.venv/bin/gunicorn \
     --workers 3 \
     --worker-class sync \
     --timeout 60 \
-    --keepalive 2 \
+    --keep-alive 2 \
     --max-requests 1000 \
     --max-requests-jitter 50 \
     --preload \
