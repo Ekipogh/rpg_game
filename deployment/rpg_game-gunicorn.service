@@ -1,0 +1,49 @@
+[Unit]
+Description=RPG Game Django Application (Gunicorn)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/rpg_game
+Environment=PATH=/var/www/rpg_game/.venv/bin
+Environment=DJANGO_SETTINGS_MODULE=game.settings
+Environment=PYTHONPATH=/var/www/rpg_game
+ExecStart=/var/www/rpg_game/.venv/bin/gunicorn \
+    --bind 0.0.0.0:8000 \
+    --workers 3 \
+    --worker-class sync \
+    --timeout 60 \
+    --keepalive 2 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --preload \
+    --access-logfile /var/log/rpg_game/access.log \
+    --error-logfile /var/log/rpg_game/error.log \
+    --log-level info \
+    --capture-output \
+    game.wsgi:application
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rpg_game
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/rpg_game
+ReadWritePaths=/var/log/rpg_game
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

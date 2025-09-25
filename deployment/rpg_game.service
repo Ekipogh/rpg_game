@@ -1,0 +1,30 @@
+[Unit]
+Description=RPG Game Django Application
+After=network.target
+Wants=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/rpg_game
+Environment=PATH=/var/www/rpg_game/.venv/bin
+Environment=DJANGO_SETTINGS_MODULE=game.settings
+Environment=PYTHONPATH=/var/www/rpg_game
+ExecStart=/var/www/rpg_game/.venv/bin/python manage.py runserver 0.0.0.0:8000
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rpg_game
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/rpg_game
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
