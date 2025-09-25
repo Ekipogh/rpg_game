@@ -118,6 +118,16 @@ staticfiles/
 static/collected/
 static/dist/
 
+# Environment and secrets
+.env
+.env.local
+.env.production
+.env.staging
+/config/production.py
+/deployment/production.env
+/deployment/*.service.local
+
 .vscode/
 healing_state.json
 daemon_commands.json
+.docs
