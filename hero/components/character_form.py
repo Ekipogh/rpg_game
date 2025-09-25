@@ -97,7 +97,7 @@ class CharacterFormView(UnicornView):
                 'value': 50,
                 'block': 5,
                 'shield_type': 'wooden',
-                'equipment_slot': EquipmentSlots.OFF_HAND
+                'equipment_slot': EquipmentSlots.OFFHAND
             }
         )[0]
         armor = Armor.objects.get_or_create(
@@ -123,7 +123,7 @@ class CharacterFormView(UnicornView):
             defaults={
                 'value': 30,
                 'capacity': 20,
-                'equipment_slot': EquipmentSlots.OFF_HAND
+                'equipment_slot': EquipmentSlots.OFFHAND
             }
         )[0]
         robe = Armor.objects.get_or_create(
@@ -149,7 +149,7 @@ class CharacterFormView(UnicornView):
             defaults={
                 'value': 25,
                 'capacity': 5,
-                'equipment_slot': EquipmentSlots.OFF_HAND
+                'equipment_slot': EquipmentSlots.OFFHAND
             }
         )[0]
         healing_potion = Consumable.objects.get_or_create(

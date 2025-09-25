@@ -11,6 +11,9 @@ WorkingDirectory=/var/www/rpg_game
 Environment=PATH=/var/www/rpg_game/.venv/bin
 Environment=DJANGO_SETTINGS_MODULE=game.settings
 Environment=PYTHONPATH=/var/www/rpg_game
+Environment=DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
+Environment=DJANGO_DEBUG=False
+Environment=DJANGO_SECRET_KEY=your-secret-key-here
 ExecStart=/var/www/rpg_game/.venv/bin/gunicorn \
     --bind 0.0.0.0:8000 \
     --workers 3 \
