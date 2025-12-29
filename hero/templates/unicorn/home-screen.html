@@ -39,7 +39,7 @@
               <div class="progress-bar bg-success dark:bg-green-600" role="progressbar" style="width: {{ hero.experience_percentage }}%" aria-valuenow="{{ hero.experience_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
-          <small class="text-muted dark:text-gray-400">{{ hero.experience }} / {{ hero.next_level_xp }} XP</small>
+          <small class="text-muted dark:!text-gray-400">{{ hero.experience }} / {{ hero.next_level_xp }} XP</small>
         </div>
       </div>
     </div>
@@ -57,7 +57,7 @@
               <div class="progress-bar bg-danger dark:bg-red-600" role="progressbar" style="width: {{ hero.health_percentage }}%" id="health-fill" aria-valuenow="{{ hero.health_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
-          <small class="text-muted dark:text-gray-400" id="health-text">{{ hero.current_health }} / {{ hero.max_health }} HP</small>
+          <small class="text-muted dark:!text-gray-400" id="health-text">{{ hero.current_health }} / {{ hero.max_health }} HP</small>
 
           <h6 class="mt-3 fw-semibold text-gray-900 dark:text-white">Mana</h6>
           <div class="mb-2">
@@ -65,7 +65,7 @@
               <div class="progress-bar bg-info dark:bg-blue-500" role="progressbar" style="width: {{ hero.mana_percentage }}%" id="mana-fill" aria-valuenow="{{ hero.mana_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
-          <small class="text-muted dark:text-gray-400" id="mana-text">{{ hero.current_mana }} / {{ hero.max_mana }} MP</small>
+          <small class="text-muted dark:!text-gray-400" id="mana-text">{{ hero.current_mana }} / {{ hero.max_mana }} MP</small>
         </div>
       </div>
     </div>
@@ -82,25 +82,25 @@
           <div class="row g-2">
             <div class="col-6">
               <div class="!bg-light dark:!bg-gray-600 rounded p-2 d-flex justify-content-between">
-                <span class="fw-semibold text-muted dark:text-gray-400">STR</span>
+                <span class="fw-semibold text-muted dark:!text-gray-400">STR</span>
                 <span class="fw-bold text-gray-900 dark:text-white">{{ hero.strength }}</span>
               </div>
             </div>
             <div class="col-6">
               <div class="!bg-light dark:!bg-gray-600 rounded p-2 d-flex justify-content-between">
-                <span class="fw-semibold text-muted dark:text-gray-400">AGI</span>
+                <span class="fw-semibold text-muted dark:!text-gray-400">AGI</span>
                 <span class="fw-bold text-gray-900 dark:text-white">{{ hero.agility }}</span>
               </div>
             </div>
             <div class="col-6">
               <div class="!bg-light dark:!bg-gray-600 rounded p-2 d-flex justify-content-between">
-                <span class="fw-semibold text-muted dark:text-gray-400">INT</span>
+                <span class="fw-semibold text-muted dark:!text-gray-400">INT</span>
                 <span class="fw-bold text-gray-900 dark:text-white">{{ hero.intelligence }}</span>
               </div>
             </div>
             <div class="col-6">
               <div class="!bg-light dark:!bg-gray-600 rounded p-2 d-flex justify-content-between">
-                <span class="fw-semibold text-muted dark:text-gray-400">CON</span>
+                <span class="fw-semibold text-muted dark:!text-gray-400">CON</span>
                 <span class="fw-bold text-gray-900 dark:text-white">{{ hero.constitution }}</span>
               </div>
             </div>
