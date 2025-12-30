@@ -1,23 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory - RPG Game</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+
+    <!-- Dark mode initialization -->
+    <script>
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
-  <body>
+  <body class="!bg-white dark:!bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <!-- Theme Toggle Button -->
+    <div class="fixed top-4 right-4 z-50">
+      <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
+
     <div class="container-md py-4">
       <!-- Inventory Header -->
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm mb-4 !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
           <div>
-            <h1 class="mb-1 fw-bold">Inventory</h1>
-            <p class="text-muted mb-0">Manage your items and equipment</p>
+            <h1 class="mb-1 fw-bold text-gray-900 dark:text-white">Inventory</h1>
+            <p class="text-muted dark:!text-gray-400 mb-0">Manage your items and equipment</p>
           </div>
           <div>
-            <a href="/home" class="btn btn-outline-secondary me-2">🏠 Home</a>
+            <a href="/home" class="btn btn-outline-secondary dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 me-2">🏠 Home</a>
           </div>
         </div>
       </div>
@@ -26,8 +56,8 @@
         <!-- Header -->
         <div class="inventory-header">
           <div class="header-info">
-            <h1>🎒 Inventory</h1>
-            <p class="header-subtitle">{{ total_items|default:0 }} items • {{ total_value|default:0 }} gold total</p>
+            <h1 class="text-gray-900 dark:text-white">🎒 Inventory</h1>
+            <p class="header-subtitle text-muted dark:!text-gray-400">{{ total_items|default:0 }} items • {{ total_value|default:0 }} gold total</p>
           </div>
         </div>
 
@@ -36,34 +66,34 @@
           <!-- Weapons Section -->
           {% if weapons %}
             <div class="col-12 mb-4">
-              <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                  <h5 class="card-title mb-0"><span class="me-2">⚔️</span>Weapons ({{ weapons|length }})</h5>
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+                <div class="card-header bg-light dark:!bg-gray-700">
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapons ({{ weapons|length }})</h5>
                 </div>
                 <div class="card-body">
                   <div class="row g-3">
                     {% for weapon in weapons %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }}" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-danger text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-danger dark:bg-red-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>⚔️</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold">{{ weapon.name }}</h6>
-                                <small class="text-primary">{{ weapon.value|default:0 }} gold</small>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ weapon.name }}</h6>
+                                <small class="text-primary dark:text-blue-400">{{ weapon.value|default:0 }} gold</small>
                               </div>
                             </div>
-                            <p class="text-muted small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
-                            <div class="bg-light rounded p-2 mb-3">
-                              <small class="text-muted">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:'sword'|title }}</small>
+                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
+                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                              <small class="text-muted dark:!text-gray-300">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ weapon.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ weapon.id }})">
                                 ⚔️ Equip
                               </button>
-                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ weapon.id }})">
+                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ weapon.id }})">
                                 👁️ View
                               </button>
                             </div>
@@ -80,34 +110,34 @@
           <!-- Armor Section -->
           {% if armor %}
             <div class="col-12 mb-4">
-              <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                  <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Armor ({{ armor|length }})</h5>
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+                <div class="card-header bg-light dark:!bg-gray-700">
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Armor ({{ armor|length }})</h5>
                 </div>
                 <div class="card-body">
                   <div class="row g-3">
                     {% for armor_piece in armor %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }}" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-info text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-info dark:bg-blue-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>🛡️</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold">{{ armor_piece.name }}</h6>
-                                <small class="text-primary">{{ armor_piece.value|default:0 }} gold</small>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ armor_piece.name }}</h6>
+                                <small class="text-primary dark:text-blue-400">{{ armor_piece.value|default:0 }} gold</small>
                               </div>
                             </div>
-                            <p class="text-muted small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
-                            <div class="bg-light rounded p-2 mb-3">
-                              <small class="text-muted">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:'leather'|title }}</small>
+                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
+                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                              <small class="text-muted dark:!text-gray-300">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:'leather'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }})">
                                 🛡️ Equip
                               </button>
-                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ armor_piece.id }})">
+                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ armor_piece.id }})">
                                 👁️ View
                               </button>
                             </div>
@@ -124,34 +154,34 @@
           <!-- Off-Hand Items Section -->
           {% if offhands %}
             <div class="col-12 mb-4">
-              <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                  <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Off-Hand ({{ offhands|length }})</h5>
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+                <div class="card-header bg-light dark:!bg-gray-700">
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand ({{ offhands|length }})</h5>
                 </div>
                 <div class="card-body">
                   <div class="row g-3">
                     {% for offhand in offhands %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }}" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-warning text-dark rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-warning dark:bg-yellow-600 text-dark dark:text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>🛡️</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold">{{ offhand.name }}</h6>
-                                <small class="text-primary">{{ offhand.value|default:0 }} gold</small>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ offhand.name }}</h6>
+                                <small class="text-primary dark:text-blue-400">{{ offhand.value|default:0 }} gold</small>
                               </div>
                             </div>
-                            <p class="text-muted small mb-2">{{ offhand.description|default:'A useful off-hand item.' }}</p>
-                            <div class="bg-light rounded p-2 mb-3">
-                              <small class="text-muted">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:'wooden'|title }}</small>
+                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ offhand.description|default:'A useful off-hand item.' }}</p>
+                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                              <small class="text-muted dark:!text-gray-300">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:'wooden'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill" onclick="event.stopPropagation(); equipItem({{ offhand.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ offhand.id }})">
                                 🛡️ Equip
                               </button>
-                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ offhand.id }})">
+                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ offhand.id }})">
                                 👁️ View
                               </button>
                             </div>
@@ -168,28 +198,28 @@
           <!-- Consumables Section -->
           {% if consumables %}
             <div class="col-12 mb-4">
-              <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                  <h5 class="card-title mb-0"><span class="me-2">🧪</span>Consumables ({{ consumables|length }})</h5>
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+                <div class="card-header bg-light dark:!bg-gray-700">
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🧪</span>Consumables ({{ consumables|length }})</h5>
                 </div>
                 <div class="card-body">
                   <div class="row g-3">
                     {% for consumable in consumables %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }}" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-success text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-success dark:bg-green-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>🧪</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold">{{ consumable.name }}</h6>
-                                <small class="text-primary">{{ consumable.value|default:0 }} gold</small>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ consumable.name }}</h6>
+                                <small class="text-primary dark:text-blue-400">{{ consumable.value|default:0 }} gold</small>
                               </div>
                             </div>
-                            <p class="text-muted small mb-2">{{ consumable.description|default:'A consumable item with special effects.' }}</p>
-                            <div class="bg-light rounded p-2 mb-3">
-                              <small class="text-muted">
+                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ consumable.description|default:'A consumable item with special effects.' }}</p>
+                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                              <small class="text-muted dark:!text-gray-300">
                                 {% if consumable.heal_amount > 0 %}
                                   +{{ consumable.heal_amount }} HP
                                 {% endif %}
@@ -202,10 +232,10 @@
                               </small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-success btn-sm flex-fill" onclick="event.stopPropagation(); useItem({{ consumable.id }})">
+                              <button class="btn btn-success btn-sm flex-fill dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="event.stopPropagation(); useItem({{ consumable.id }})">
                                 🧪 Use
                               </button>
-                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ consumable.id }})">
+                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ consumable.id }})">
                                 👁️ View
                               </button>
                             </div>
@@ -222,37 +252,37 @@
           <!-- Other Items Section -->
           {% if other_items %}
             <div class="col-12 mb-4">
-              <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                  <h5 class="card-title mb-0"><span class="me-2">📦</span>Other Items ({{ other_items|length }})</h5>
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+                <div class="card-header bg-light dark:!bg-gray-700">
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">📦</span>Other Items ({{ other_items|length }})</h5>
                 </div>
                 <div class="card-body">
                   <div class="row g-3">
                     {% for item in other_items %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-secondary text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-secondary dark:bg-gray-600 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>📦</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold">{{ item.name }}</h6>
-                                <small class="text-primary">{{ item.value|default:0 }} gold</small>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ item.name }}</h6>
+                                <small class="text-primary dark:text-blue-400">{{ item.value|default:0 }} gold</small>
                               </div>
                             </div>
-                            <p class="text-muted small mb-2">{{ item.description|default:'A mysterious item.' }}</p>
-                            <div class="bg-light rounded p-2 mb-3">
-                              <small class="text-muted">General Item</small>
+                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ item.description|default:'A mysterious item.' }}</p>
+                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                              <small class="text-muted dark:!text-gray-300">General Item</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); equipItem({{ item.id }})">
+                              <button class="btn btn-primary btn-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ item.id }})">
                                 ⚔️ Equip
                               </button>
-                              <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); useItem({{ item.id }})">
+                              <button class="btn btn-success btn-sm dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="event.stopPropagation(); useItem({{ item.id }})">
                                 🧪 Use
                               </button>
-                              <button class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); viewItem({{ item.id }})">
+                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ item.id }})">
                                 👁️ View
                               </button>
                             </div>
@@ -269,12 +299,12 @@
           <!-- Empty Inventory -->
           {% if total_items == 0 %}
             <div class="col-12">
-              <div class="card shadow-sm">
+              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-body text-center py-5">
                   <div style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;">🎒</div>
-                  <h3 class="mb-3">Your inventory is empty</h3>
-                  <p class="text-muted mb-4">Start your adventure to collect items!</p>
-                  <a href="/" class="btn btn-primary">🏠 Start Adventure</a>
+                  <h3 class="mb-3 text-gray-900 dark:text-white">Your inventory is empty</h3>
+                  <p class="text-muted dark:!text-gray-400 mb-4">Start your adventure to collect items!</p>
+                  <a href="/" class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white">🏠 Start Adventure</a>
                 </div>
               </div>
             </div>
@@ -302,6 +332,30 @@
         // This would typically make an AJAX call to your Django backend
         // Example: fetch(`/api/items/${itemId}/use/`, { method: 'POST', ... })
       }
+
+      // Theme Toggle Script
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+      } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      themeToggleBtn.addEventListener('click', function() {
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
     </script>
   </body>
 </html>

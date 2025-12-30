@@ -153,7 +153,7 @@ class ButtonBehaviorTests(TestCase):
         if 'Behavior Test Sword' in content:
             # Find the weapon card section
             sword_section_start = content.find('Behavior Test Sword')
-            sword_section_end = content.find('</div>', sword_section_start + 500)  # Find end of card
+            sword_section_end = content.find('</div>', sword_section_start + 1100)  # Find end of card
             sword_section = content[sword_section_start:sword_section_end]
 
             self.assertIn('⚔️ Equip', sword_section)
@@ -167,7 +167,7 @@ class ButtonBehaviorTests(TestCase):
         if 'Behavior Test Armor' in content:
             # Find the armor card section
             armor_section_start = content.find('Behavior Test Armor')
-            armor_section_end = content.find('</div>', armor_section_start + 500)
+            armor_section_end = content.find('</div>', armor_section_start + 1100)
             armor_section = content[armor_section_start:armor_section_end]
 
             self.assertIn('🛡️ Equip', armor_section)
@@ -186,7 +186,7 @@ class ButtonBehaviorTests(TestCase):
             potion_start = content.find('Behavior Test Potion')
             if potion_start != -1:
                 # Look for the button in a reasonable range after the name
-                potion_section = content[potion_start:potion_start + 1000]
+                potion_section = content[potion_start:potion_start + 1100]
                 self.assertIn('useItem(', potion_section)
 
     def test_item_cards_are_clickable(self):

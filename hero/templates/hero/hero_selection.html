@@ -8,31 +8,31 @@
   Select Your Hero
 {% endblock %}
 {% block content %}
-  <div class="container-fluid py-4" style="background: #f8f9fa; min-height: 100vh;">
+  <div class="container-fluid py-4 bg-gray-50 dark:bg-gray-900" style="min-height: 100vh;">
     <div class="text-center mb-5">
-      <h1 class="display-4 fw-bold text-primary">Select Your Hero</h1>
+      <h1 class="display-4 fw-bold text-primary dark:text-blue-400">Select Your Hero</h1>
     </div>
 
     <div class="d-flex flex-wrap justify-content-center gap-4">
       {% for hero in heroes %}
-        <div class="card shadow-sm" style="width: fit-content; min-width: 250px; max-width: 300px;">
+        <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700" style="width: fit-content; min-width: 250px; max-width: 300px;">
           <div class="card-body text-center">
             <div class="mb-3">
-              <div class="rounded-circle bg-primary mx-auto d-flex align-items-center justify-content-center"
+              <div class="rounded-circle bg-primary dark:bg-indigo-700 mx-auto d-flex align-items-center justify-content-center"
                    style="width: 80px; height: 80px;">
                 <div class="{{ hero.hero_class.name|lower }}-icon"
                      style="width: 60px; height: 60px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
               </div>
             </div>
-            <h4 class="card-title fw-bold">{{ hero.name }}</h4>
-            <p class="card-text text-muted">
+            <h4 class="card-title fw-bold text-gray-900 dark:text-white">{{ hero.name }}</h4>
+            <p class="card-text text-muted dark:!text-gray-400">
               <strong>Class:</strong> {{ hero.hero_class.name }}<br>
               <strong>Level:</strong> {{ hero.level }}
             </p>
             <div class="mt-auto">
-              <a href="{% url 'select_hero' hero.id %}" class="btn btn-primary mb-2">Select Hero</a>
+              <a href="{% url 'select_hero' hero.id %}" class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white mb-2">Select Hero</a>
               <a href="{% url 'delete_hero' hero.id %}"
-                 class="btn btn-outline-danger btn-sm"
+                 class="btn btn-outline-danger btn-sm dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900"
                  onclick="return confirm('Are you sure you want to delete this hero?');">
                 <i class="bi bi-trash"></i>
               </a>
@@ -41,10 +41,10 @@
         </div>
       {% empty %}
         <div class="col-12 text-center">
-          <div class="card shadow-sm">
+          <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
             <div class="card-body py-5">
-              <h3 class="text-muted">No Heroes Available</h3>
-              <p class="text-muted">Create your first character to begin your adventure!</p>
+              <h3 class="text-muted dark:!text-gray-400">No Heroes Available</h3>
+              <p class="text-muted dark:!text-gray-400">Create your first character to begin your adventure!</p>
             </div>
           </div>
         </div>
@@ -52,7 +52,7 @@
     </div>
 
     <div class="text-center mt-5">
-      <a href="{% url 'create_character' %}" class="btn btn-success btn-lg">
+      <a href="{% url 'create_character' %}" class="btn btn-success btn-lg dark:bg-green-600 dark:hover:bg-green-700 dark:text-white">
         ➕ Create New Hero
       </a>
     </div>

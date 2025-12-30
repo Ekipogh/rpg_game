@@ -1,15 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ item.name }} - Item Details</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+
+    <!-- Dark mode initialization -->
+    <script>
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       body {
         font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial;
-        background: #f8f9fa;
       }
       .item-icon-large {
         width: 90px;
@@ -33,10 +50,21 @@
       }
     </style>
   </head>
-  <body>
+  <body class="!bg-white dark:!bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <!-- Theme Toggle Button -->
+    <div class="fixed top-4 right-4 z-50">
+      <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
     <div class="container py-4" style="max-width: 900px;">
       <!-- Item Header -->
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm mb-4 !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
         <div class="card-body p-4">
           <div class="d-flex align-items-center">
             <div class="item-icon-large {{ item.item_type|default:'generic' }}-icon text-white rounded d-flex align-items-center justify-content-center me-4 flex-shrink-0">
@@ -53,18 +81,18 @@
               {% endif %}
             </div>
             <div class="flex-grow-1">
-              <h1 class="mb-3 fw-bold">{{ item.name }}</h1>
+              <h1 class="mb-3 fw-bold text-gray-900 dark:text-white">{{ item.name }}</h1>
               <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="badge text-bg-primary fs-6">{{ item.item_type|default:'Item'|title }}</span>
+                <span class="badge text-bg-primary dark:bg-blue-600 dark:text-white fs-6">{{ item.item_type|default:'Item'|title }}</span>
                 {% if item.value %}
-                  <span class="badge text-bg-light border fs-6">{{ item.value }} gold</span>
+                  <span class="badge text-bg-light border dark:!bg-gray-700 dark:text-gray-300 dark:border-gray-600 fs-6">{{ item.value }} gold</span>
                 {% endif %}
                 {% if item.rarity %}
-                  <span class="badge text-bg-success fs-6">{{ item.rarity|title }}</span>
+                  <span class="badge text-bg-success dark:bg-green-600 dark:text-white fs-6">{{ item.rarity|title }}</span>
                 {% endif %}
               </div>
               {% if item.description %}
-                <p class="text-muted mb-0">{{ item.description }}</p>
+                <p class="text-muted dark:!text-gray-400 mb-0">{{ item.description }}</p>
               {% endif %}
             </div>
           </div>
@@ -75,11 +103,11 @@
         <div class="col-12">
           <div class="d-flex flex-wrap gap-2 justify-content-center">
             {% if item.item_type == 'consumable' %}
-              <button class="btn btn-success" onclick="useItem({{ item.id }})">🧪 Use Item</button>
+              <button class="btn btn-success dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="useItem({{ item.id }})">🧪 Use Item</button>
             {% elif item.item_type == 'weapon' or item.item_type == 'armor' or item.item_type == 'offhand' %}
-              <button class="btn btn-primary" onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
+              <button class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
             {% endif %}
-            <a href="/inventory/" class="btn btn-outline-secondary">🎒 Back to Inventory</a>
+            <a href="/inventory/" class="btn btn-outline-secondary dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700">🎒 Back to Inventory</a>
           </div>
         </div>
       </div>
@@ -89,33 +117,33 @@
         {% if item.item_type == 'weapon' %}
           <!-- Weapon Stats -->
           <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light">
-                <h5 class="card-title mb-0"><span class="me-2">⚔️</span>Weapon Statistics</h5>
+            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+              <div class="card-header bg-light dark:!bg-gray-700">
+                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapon Statistics</h5>
               </div>
               <div class="card-body">
                 <div class="row g-3">
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Attack Damage</small>
-                        <h3 class="mb-0 fw-bold">{{ item.damage|default:0 }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Attack Damage</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.damage|default:0 }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Weapon Class</small>
-                        <h3 class="mb-0 fw-bold">{{ item.weapon_type|default:'Unknown'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Weapon Class</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.weapon_type|default:'Unknown'|title }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:'weapon'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'weapon'|title }}</h3>
                       </div>
                     </div>
                   </div>
@@ -126,33 +154,33 @@
         {% elif item.item_type == 'armor' %}
           <!-- Armor Stats -->
           <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light">
-                <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Armor Statistics</h5>
+            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+              <div class="card-header bg-light dark:!bg-gray-700">
+                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Armor Statistics</h5>
               </div>
               <div class="card-body">
                 <div class="row g-3">
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Defense Rating</small>
-                        <h3 class="mb-0 fw-bold">{{ item.defense|default:0 }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Defense Rating</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.defense|default:0 }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Armor Type</small>
-                        <h3 class="mb-0 fw-bold">{{ item.armor_type|default:'Unknown'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Armor Type</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.armor_type|default:'Unknown'|title }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:'chest'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'chest'|title }}</h3>
                       </div>
                     </div>
                   </div>
@@ -163,33 +191,33 @@
         {% elif item.item_type == 'offhand' %}
           <!-- Off-Hand Stats -->
           <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light">
-                <h5 class="card-title mb-0"><span class="me-2">🛡️</span>Off-Hand Statistics</h5>
+            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+              <div class="card-header bg-light dark:!bg-gray-700">
+                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand Statistics</h5>
               </div>
               <div class="card-body">
                 <div class="row g-3">
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Block Rating</small>
-                        <h3 class="mb-0 fw-bold">{{ item.block|default:0 }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Block Rating</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.block|default:0 }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Shield Type</small>
-                        <h3 class="mb-0 fw-bold">{{ item.shield_type|default:'Unknown'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Shield Type</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.shield_type|default:'Unknown'|title }}</h3>
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <div class="card bg-light text-center h-100">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold">{{ item.equipment_slot|default:'shield'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'shield'|title }}</h3>
                       </div>
                     </div>
                   </div>
@@ -200,19 +228,19 @@
         {% elif item.item_type == 'consumable' %}
           <!-- Consumable Effects -->
           <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light">
-                <h5 class="card-title mb-0"><span class="me-2">🧪</span>Magical Effects</h5>
+            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+              <div class="card-header bg-light dark:!bg-gray-700">
+                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🧪</span>Magical Effects</h5>
               </div>
               <div class="card-body">
                 {% if item.heal_amount > 0 or item.mana_restore > 0 or item.duration > 0 %}
                   <div class="row g-3">
                     {% if item.heal_amount > 0 %}
                       <div class="col-12">
-                        <div class="card border-danger">
+                        <div class="card border-danger dark:border-red-600 !bg-white dark:!bg-gray-700">
                           <div class="card-body">
-                            <h6 class="card-title text-danger"><span class="me-2">❤️</span>Health Restoration</h6>
-                            <p class="card-text">Instantly restores {{ item.heal_amount }} health points when consumed, healing wounds and revitalizing the body.</p>
+                            <h6 class="card-title text-danger dark:text-red-400"><span class="me-2">❤️</span>Health Restoration</h6>
+                            <p class="card-text text-gray-900 dark:text-gray-300">Instantly restores {{ item.heal_amount }} health points when consumed, healing wounds and revitalizing the body.</p>
                           </div>
                         </div>
                       </div>
@@ -220,10 +248,10 @@
 
                     {% if item.mana_restore > 0 %}
                       <div class="col-12">
-                        <div class="card border-info">
+                        <div class="card border-info dark:border-blue-600 !bg-white dark:!bg-gray-700">
                           <div class="card-body">
-                            <h6 class="card-title text-info"><span class="me-2">💫</span>Mana Restoration</h6>
-                            <p class="card-text">Replenishes {{ item.mana_restore }} mana points when consumed, restoring magical energy for spellcasting.</p>
+                            <h6 class="card-title text-info dark:text-blue-400"><span class="me-2">💫</span>Mana Restoration</h6>
+                            <p class="card-text text-gray-900 dark:text-gray-300">Replenishes {{ item.mana_restore }} mana points when consumed, restoring magical energy for spellcasting.</p>
                           </div>
                         </div>
                       </div>
@@ -231,10 +259,10 @@
 
                     {% if item.duration > 0 %}
                       <div class="col-12">
-                        <div class="card border-warning">
+                        <div class="card border-warning dark:border-yellow-600 !bg-white dark:!bg-gray-700">
                           <div class="card-body">
-                            <h6 class="card-title text-warning"><span class="me-2">⏰</span>Temporary Enhancement</h6>
-                            <p class="card-text">Provides a powerful temporary effect that lasts for {{ item.duration }} seconds, enhancing your abilities.</p>
+                            <h6 class="card-title text-warning dark:text-yellow-400"><span class="me-2">⏰</span>Temporary Enhancement</h6>
+                            <p class="card-text text-gray-900 dark:text-gray-300">Provides a powerful temporary effect that lasts for {{ item.duration }} seconds, enhancing your abilities.</p>
                           </div>
                         </div>
                       </div>
@@ -243,8 +271,8 @@
                 {% else %}
                   <div class="text-center py-4">
                     <div style="font-size: 3rem; margin-bottom: 1rem;">❓</div>
-                    <h5>Mysterious Properties</h5>
-                    <p class="text-muted">This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
+                    <h5 class="text-gray-900 dark:text-white">Mysterious Properties</h5>
+                    <p class="text-muted dark:!text-gray-400">This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
                   </div>
                 {% endif %}
               </div>
@@ -254,29 +282,29 @@
 
         <!-- Item Properties -->
         <div class="col-12">
-          <div class="card shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="card-title mb-0"><span class="me-2">📋</span>Item Information</h5>
+          <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+            <div class="card-header bg-light dark:!bg-gray-700">
+              <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">📋</span>Item Information</h5>
             </div>
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-borderless">
+                <table class="table table-borderless dark:text-gray-100">
                   <tbody>
                     <tr>
-                      <td class="fw-semibold text-muted">Item Identifier</td>
-                      <td class="fw-semibold">#{{ item.id }}</td>
+                      <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Item Identifier</td>
+                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">#{{ item.id }}</td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold text-muted">Market Value</td>
-                      <td class="fw-semibold">{{ item.value|default:0 }} gold pieces</td>
+                      <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Market Value</td>
+                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">{{ item.value|default:0 }} gold pieces</td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold text-muted">Item Category</td>
-                      <td class="fw-semibold">{{ item.item_type|default:'Generic Item'|title }}</td>
+                      <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Item Category</td>
+                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">{{ item.item_type|default:'Generic Item'|title }}</td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold text-muted">Class Requirement</td>
-                      <td class="fw-semibold">
+                      <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Class Requirement</td>
+                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">
                         {% if item.hero_class_restriction %}
                           {{ item.hero_class_restriction.name }} Only
                         {% else %}
@@ -286,8 +314,8 @@
                     </tr>
                     {% if item.item_type != 'consumable' %}
                       <tr>
-                        <td class="fw-semibold text-muted">Equipment Slot</td>
-                        <td class="fw-semibold">{{ item.equipment_slot|default:'None'|title }}</td>
+                        <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Equipment Slot</td>
+                        <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">{{ item.equipment_slot|default:'None'|title }}</td>
                       </tr>
                     {% endif %}
                   </tbody>
@@ -301,6 +329,30 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      // Theme Toggle Script
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+      } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      themeToggleBtn.addEventListener('click', function() {
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+
       function useItem(itemId) {
         if (confirm('🧪 Are you sure you want to use this consumable item? This action cannot be undone.')) {
           const button = event.target
