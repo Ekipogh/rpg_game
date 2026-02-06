@@ -20,7 +20,8 @@ class ItemViewTests(TestCase):
             name="Test Hero",
             hero_class=self.hero_class,
             level=1,
-            constitution=12,
+            attack=12,
+            defense=10,
             current_health=80,
             max_health=100,
             current_mana=60,
@@ -198,7 +199,7 @@ class InventoryTemplateTests(TestCase):
             name="Template Sword",
             description="A sword for template testing",
             value=150,
-            damage=20,
+            attack_bonus=20,
             weapon_type="sword"
         )
 
@@ -206,7 +207,7 @@ class InventoryTemplateTests(TestCase):
             name="Template Armor",
             description="Armor for template testing",
             value=120,
-            defense=15,
+            defense_bonus=15,
             armor_type="leather"
         )
 

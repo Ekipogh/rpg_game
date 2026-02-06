@@ -19,7 +19,7 @@ class InventoryJavaScriptTests(TestCase):
 
         self.weapon = Weapon.objects.create(
             name="JS Test Sword",
-            damage=10,
+            attack_bonus=10,
             weapon_type="sword",
             value=100
         )
@@ -119,14 +119,14 @@ class ButtonBehaviorTests(TestCase):
         # Create different item types
         self.weapon = Weapon.objects.create(
             name="Behavior Test Sword",
-            damage=15,
+            attack_bonus=15,
             weapon_type="sword",
             value=200
         )
 
         self.armor = Armor.objects.create(
             name="Behavior Test Armor",
-            defense=12,
+            defense_bonus=12,
             armor_type="chain",
             value=150
         )
