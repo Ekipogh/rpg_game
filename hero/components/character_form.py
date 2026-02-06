@@ -10,34 +10,39 @@ class CharacterFormView(UnicornView):
     hero_class = HeroClass.objects.first()
     selected_class: str = hero_class.name if hero_class else ""
     if hero_class:
-        strength: int = hero_class.base_strength
-        constitution: int = hero_class.base_constitution
-        agility: int = hero_class.base_agility
-        intelligence: int = hero_class.base_intelligence
+        attack: int = hero_class.base_attack
+        defense: int = hero_class.base_defense
+        magic: int = hero_class.base_magic
+        magic_defense: int = hero_class.base_magic_defense
+        speed: int = hero_class.base_speed
     else:
-        strength: int = 10
-        constitution: int = 10
-        agility: int = 10
-        intelligence: int = 10
-    strength_mod: int = 0
-    constitution_mod: int = 0
-    agility_mod: int = 0
-    intelligence_mod: int = 0
+        attack: int = 10
+        defense: int = 10
+        magic: int = 10
+        magic_defense: int = 10
+        speed: int = 10
+    attack_mod: int = 0
+    defense_mod: int = 0
+    magic_mod: int = 0
+    magic_defense_mod: int = 0
+    speed_mod: int = 0
 
-    strength_total: int = strength + strength_mod
-    constitution_total: int = constitution + constitution_mod
-    agility_total: int = agility + agility_mod
-    intelligence_total: int = intelligence + intelligence_mod
+    attack_total: int = attack + attack_mod
+    defense_total: int = defense + defense_mod
+    magic_total: int = magic + magic_mod
+    magic_defense_total: int = magic_defense + magic_defense_mod
+    speed_total: int = speed + speed_mod
 
     points_available: int = 10
 
     def select_class(self, cls: str):
         hero_class = HeroClass.objects.filter(name=cls).first()
         if hero_class:
-            self.strength = hero_class.base_strength
-            self.constitution = hero_class.base_constitution
-            self.agility = hero_class.base_agility
-            self.intelligence = hero_class.base_intelligence
+            self.attack = hero_class.base_attack
+            self.defense = hero_class.base_defense
+            self.magic = hero_class.base_magic
+            self.magic_defense = hero_class.base_magic_defense
+            self.speed = hero_class.base_speed
         self.update_totals()
         self.selected_class = cls
 
@@ -58,10 +63,11 @@ class CharacterFormView(UnicornView):
         self.update_totals()
 
     def update_totals(self):
-        self.strength_total = self.strength + self.strength_mod
-        self.constitution_total = self.constitution + self.constitution_mod
-        self.agility_total = self.agility + self.agility_mod
-        self.intelligence_total = self.intelligence + self.intelligence_mod
+        self.attack_total = self.attack + self.attack_mod
+        self.defense_total = self.defense + self.defense_mod
+        self.magic_total = self.magic + self.magic_mod
+        self.magic_defense_total = self.magic_defense + self.magic_defense_mod
+        self.speed_total = self.speed + self.speed_mod
 
     def submit(self):
         # For now just print, later you can save to DB
@@ -74,13 +80,17 @@ class CharacterFormView(UnicornView):
         hero = Hero.objects.create(
             name=self.name,
             hero_class=hero_class,
-            strength=self.strength,
-            constitution=self.constitution,
-            agility=self.agility,
-            intelligence=self.intelligence,
+            attack=self.attack_total,
+            defense=self.defense_total,
+            magic=self.magic_total,
+            magic_defense=self.magic_defense_total,
+            speed=self.speed_total,
+            max_health=hero_class.base_health,
+            current_health=hero_class.base_health,
+            max_mana=hero_class.base_mana,
+            current_mana=hero_class.base_mana,
             inventory=inventory
         )
-        hero.update_health()
         # add some starting items
         sword = Weapon.objects.get_or_create(
             name="Simple Sword",

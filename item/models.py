@@ -49,7 +49,9 @@ class Item(PolymorphicModel):
 
 
 class Weapon(Item):
-    damage = models.IntegerField(default=10)
+    attack_bonus = models.IntegerField(default=0)
+    accuracy_bonus = models.IntegerField(default=0)
+    # TODO: add elemental damage types
     weapon_type = models.CharField(max_length=50, default='sword')
     equipment_slot = models.CharField(
         max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.MAIN_HAND.value)
@@ -59,7 +61,7 @@ class Weapon(Item):
         return ItemTypes.WEAPON.value
 
     def get_stats(self):
-        return f"Damage: {self.damage}, Type: {self.weapon_type}"
+        return f"Attack Bonus: {self.attack_bonus}, Accuracy Bonus: {self.accuracy_bonus}, Type: {self.weapon_type}"
 
 
 class OffHand(Item):

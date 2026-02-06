@@ -320,10 +320,24 @@
       }
 
       function equipItem(itemId) {
-        // TODO: Implement equip functionality
-        alert(`Equipping item ${itemId}...`);
-        // This would typically make an AJAX call to your Django backend
-        // Example: fetch(`/api/items/${itemId}/equip/`, { method: 'POST', ... })
+        fetch(`/item/${itemId}/use/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+        }).then(response => {
+          if (response.ok) {
+            alert(`Item ${itemId} equipped successfully!`);
+            // Optionally, refresh the page or update the UI
+            location.reload();
+          } else {
+            alert(`Failed to equip item ${itemId}.`);
+          }
+        }).catch(error => {
+          console.error('Error:', error);
+          alert(`An error occurred while equipping item ${itemId}.`);
+        });
       }
 
       function useItem(itemId) {

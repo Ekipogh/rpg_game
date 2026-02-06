@@ -14,8 +14,7 @@ def home_view(request):
 
 
 def character_creation_view(request):
-    classes = HeroClass.objects.all()
-    return render(request, 'hero/character_creation.html', {'hero_classes': classes})
+    return render(request, 'hero/character_creation.html', {'hero_classes': HeroClass.objects.all()})
 
 
 def hero_selection_view(request):
@@ -30,7 +29,6 @@ def index(request):
     if hero:
         return redirect('hero_selection')
     else:
-        classes = HeroClass.objects.all()
         return redirect('create_character')
 
 
