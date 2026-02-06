@@ -24,21 +24,23 @@ def item_detail(request, item_id):
     # Add type-specific attributes and methods
     if isinstance(item, Weapon):
         item_info.update({
-            'damage': item.damage,
+            'attack_bonus': item.attack_bonus,
+            'accuracy_bonus': item.accuracy_bonus,
             'weapon_type': item.weapon_type,
             'equipment_slot': item.equipment_slot,
-            'attack_description': f"Deals {item.damage} damage",
+            'attack_description': f"ATK +{item.attack_bonus}, ACC +{item.accuracy_bonus}",
             'can_attack': True,
             'icon_class': 'fas fa-sword',
-            'stat_color': 'text-danger',  # Red for damage
+            'stat_color': 'text-danger',  # Red for attack
         })
 
     elif isinstance(item, Armor):
         item_info.update({
-            'defense': item.defense,
+            'defense_bonus': item.defense_bonus,
+            'health_bonus': item.health_bonus,
             'armor_type': item.armor_type,
             'equipment_slot': item.equipment_slot,
-            'defense_description': f"Provides {item.defense} defense",
+            'defense_description': f"DEF +{item.defense_bonus}, HP +{item.health_bonus}",
             'can_equip': True,
             'icon_class': 'fas fa-shield-alt',
             'stat_color': 'text-primary',  # Blue for defense
@@ -136,7 +138,7 @@ def equip_weapon(hero, weapon):
         return f"Only {weapon.hero_class_restriction.name}s can use this weapon!"
 
     # TODO: Check if weapon slot is available, unequip current weapon, etc.
-    return f"Equipped {weapon.name}! Attack power increased by {weapon.damage}!"
+    return f"Equipped {weapon.name}! Attack power increased by {weapon.attack_bonus}!"
 
 
 def equip_armor(hero, armor):
@@ -146,7 +148,7 @@ def equip_armor(hero, armor):
         return f"Only {armor.hero_class_restriction.name}s can wear this armor!"
 
     # TODO: Check if armor slot is available, unequip current armor, etc.
-    return f"Equipped {armor.name}! Defense increased by {armor.defense}!"
+    return f"Equipped {armor.name}! Defense increased by {armor.defense_bonus}!"
 
 
 def inventory_view(request):

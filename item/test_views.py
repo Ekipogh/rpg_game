@@ -32,7 +32,8 @@ class ItemViewTests(TestCase):
             name="Test Sword",
             description="A sharp sword",
             value=100,
-            damage=15,
+            attack_bonus=15,
+            accuracy_bonus=5,
             weapon_type="sword"
         )
 
@@ -40,7 +41,8 @@ class ItemViewTests(TestCase):
             name="Test Shield",
             description="A sturdy shield",
             value=80,
-            defense=10,
+            defense_bonus=10,
+            health_bonus=20,
             armor_type="plate"
         )
 
@@ -81,16 +83,16 @@ class ItemViewTests(TestCase):
         response = self.client.get(f'/item/{self.weapon.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.weapon.name)
-        self.assertContains(response, "Attack Damage")  # From the template
-        self.assertContains(response, str(self.weapon.damage))
+        self.assertContains(response, "Attack Bonus")  # From the template
+        self.assertContains(response, str(self.weapon.attack_bonus))
 
     def test_item_detail_armor(self):
         """Test item detail view for armor"""
         response = self.client.get(f'/item/{self.armor.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.armor.name)
-        self.assertContains(response, "Defense Rating")  # From the template
-        self.assertContains(response, str(self.armor.defense))
+        self.assertContains(response, "Defense Bonus")  # From the template
+        self.assertContains(response, str(self.armor.defense_bonus))
 
     def test_item_detail_consumable(self):
         """Test item detail view for consumable"""

@@ -87,7 +87,7 @@
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
                             <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
-                              <small class="text-muted dark:!text-gray-300">{{ weapon.damage|default:0 }} DMG • {{ weapon.weapon_type|default:'sword'|title }}</small>
+                              <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
                               <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ weapon.id }})">
@@ -131,7 +131,7 @@
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
                             <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
-                              <small class="text-muted dark:!text-gray-300">{{ armor_piece.defense|default:0 }} DEF • {{ armor_piece.armor_type|default:'leather'|title }}</small>
+                              <small class="text-muted dark:!text-gray-300">DEF +{{ armor_piece.defense_bonus|default:0 }}, HP +{{ armor_piece.health_bonus|default:0 }} • {{ armor_piece.armor_type|default:'leather'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
                               <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }})">

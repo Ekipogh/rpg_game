@@ -96,9 +96,10 @@ class CharacterFormView(UnicornView):
             name="Simple Sword",
             defaults={
                 'value': 100,
-                'damage': 20,
+                'attack_bonus': 20,
+                'accuracy_bonus': 5,
                 'weapon_type': 'sword',
-                'equipment_slot': EquipmentSlots.MAIN_HAND
+                'equipment_slot': EquipmentSlots.WEAPON
             }
         )[0]
         shield = OffHand.objects.get_or_create(
@@ -107,14 +108,15 @@ class CharacterFormView(UnicornView):
                 'value': 50,
                 'block': 5,
                 'shield_type': 'wooden',
-                'equipment_slot': EquipmentSlots.OFFHAND
+                'equipment_slot': EquipmentSlots.ACCESSORY
             }
         )[0]
         armor = Armor.objects.get_or_create(
             name="Leather Armor",
             defaults={
                 'value': 75,
-                'defense': 10,
+                'defense_bonus': 10,
+                'health_bonus': 25,
                 'armor_type': 'leather',
                 'equipment_slot': EquipmentSlots.ARMOR
             }
@@ -123,24 +125,27 @@ class CharacterFormView(UnicornView):
             name="Simple Bow",
             defaults={
                 'value': 100,
-                'damage': 15,
+                'attack_bonus': 15,
+                'accuracy_bonus': 10,
                 'weapon_type': 'bow',
-                'equipment_slot': EquipmentSlots.MAIN_HAND
+                'equipment_slot': EquipmentSlots.WEAPON
             }
         )[0]
         quiver = OffHand.objects.get_or_create(
             name="Quiver of Arrows",
             defaults={
                 'value': 30,
-                'capacity': 20,
-                'equipment_slot': EquipmentSlots.OFFHAND
+                'block': 2,
+                'shield_type': 'quiver',
+                'equipment_slot': EquipmentSlots.ACCESSORY
             }
         )[0]
         robe = Armor.objects.get_or_create(
             name="Cloth Robe",
             defaults={
                 'value': 25,
-                'defense': 5,
+                'defense_bonus': 5,
+                'health_bonus': 10,
                 'armor_type': 'cloth',
                 'equipment_slot': EquipmentSlots.ARMOR
             }
@@ -149,17 +154,19 @@ class CharacterFormView(UnicornView):
             name="Wooden Staff",
             defaults={
                 'value': 100,
-                'damage': 15,
+                'attack_bonus': 8,
+                'accuracy_bonus': 15,
                 'weapon_type': 'staff',
-                'equipment_slot': EquipmentSlots.MAIN_HAND
+                'equipment_slot': EquipmentSlots.WEAPON
             }
         )[0]
         spellbook = OffHand.objects.get_or_create(
             name="Beginner's Spellbook",
             defaults={
                 'value': 25,
-                'capacity': 5,
-                'equipment_slot': EquipmentSlots.OFFHAND
+                'block': 0,
+                'shield_type': 'tome',
+                'equipment_slot': EquipmentSlots.ACCESSORY
             }
         )[0]
         healing_potion = Consumable.objects.get_or_create(

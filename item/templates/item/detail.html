@@ -123,15 +123,23 @@
               </div>
               <div class="card-body">
                 <div class="row g-3">
-                  <div class="col-lg-4">
+                  <div class="col-lg-3">
                     <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Attack Damage</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.damage|default:0 }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Attack Bonus</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.attack_bonus|default:0 }}</h3>
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-4">
+                  <div class="col-lg-3">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
+                      <div class="card-body">
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Accuracy Bonus</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.accuracy_bonus|default:0 }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
                     <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Weapon Class</small>
@@ -139,11 +147,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-4">
+                  <div class="col-lg-3">
                     <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'weapon'|title }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Element</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.element|default:'None'|title }}</h3>
                       </div>
                     </div>
                   </div>
@@ -163,8 +171,16 @@
                   <div class="col-lg-4">
                     <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Defense Rating</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.defense|default:0 }}</h3>
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Defense Bonus</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.defense_bonus|default:0 }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-4">
+                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
+                      <div class="card-body">
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Health Bonus</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.health_bonus|default:0 }}</h3>
                       </div>
                     </div>
                   </div>
@@ -173,14 +189,6 @@
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Armor Type</small>
                         <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.armor_type|default:'Unknown'|title }}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
-                      <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'chest'|title }}</h3>
                       </div>
                     </div>
                   </div>
