@@ -62,11 +62,6 @@
 
       <!-- Stats Section -->
       <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-semibold mb-0 text-gray-900 dark:text-white">Attribute Points</h5>
-          <span class="badge bg-primary dark:bg-blue-600 dark:text-white fs-6">Points Available: {{ points_available }}</span>
-        </div>
-
         <div class="row g-3">
           <div class="col-md-6">
             <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
@@ -80,9 +75,7 @@
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-sm me-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="decrease_stat('attack')">−</button>
                     <span class="fw-bold fs-5 mx-2 text-gray-900 dark:text-white">{{ attack_total }}</span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="increase_stat('attack')">+</button>
                   </div>
                 </div>
               </div>
@@ -101,9 +94,7 @@
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-sm me-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="decrease_stat('defense')">−</button>
                     <span class="fw-bold fs-5 mx-2 text-gray-900 dark:text-white">{{ defense_total }}</span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="increase_stat('defense')">+</button>
                   </div>
                 </div>
               </div>
@@ -122,9 +113,7 @@
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-sm me-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="decrease_stat('magic')">−</button>
                     <span class="fw-bold fs-5 mx-2 text-gray-900 dark:text-white">{{ magic_total }}</span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="increase_stat('magic')">+</button>
                   </div>
                 </div>
               </div>
@@ -143,9 +132,7 @@
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-sm me-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="decrease_stat('magic_defense')">−</button>
                     <span class="fw-bold fs-5 mx-2 text-gray-900 dark:text-white">{{ magic_defense_total }}</span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="increase_stat('magic_defense')">+</button>
                   </div>
                 </div>
               </div>
@@ -164,9 +151,7 @@
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary btn-sm me-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="decrease_stat('speed')">−</button>
                     <span class="fw-bold fs-5 mx-2 text-gray-900 dark:text-white">{{ speed_total }}</span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" unicorn:click="increase_stat('speed')">+</button>
                   </div>
                 </div>
               </div>
@@ -175,11 +160,6 @@
         </div>
       </div>
 
-      {% for error_list in unicorn.errors.points_available %}
-        {% for message in error_list.message %}
-          <div class="text-danger small mb-3">{{ message }}</div>
-        {% endfor %}
-      {% endfor %}
 
       {% csrf_token %}
 

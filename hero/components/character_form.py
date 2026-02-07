@@ -33,8 +33,6 @@ class CharacterFormView(UnicornView):
     magic_defense_total: int = magic_defense + magic_defense_mod
     speed_total: int = speed + speed_mod
 
-    points_available: int = 10
-
     def select_class(self, cls: str):
         hero_class = HeroClass.objects.filter(name=cls).first()
         if hero_class:
@@ -45,22 +43,6 @@ class CharacterFormView(UnicornView):
             self.speed = hero_class.base_speed
         self.update_totals()
         self.selected_class = cls
-
-    def increase_stat(self, stat: str):
-        stat_name = stat + "_mod"
-        if self.points_available > 0:
-            self.points_available -= 1
-            setattr(self, stat_name, getattr(self, stat_name) + 1)
-            self.update_totals()
-
-    def decrease_stat(self, stat: str):
-        stat_name = stat + "_mod"
-        if self.points_available < 10:
-            self.points_available += 1
-        current = getattr(self, stat_name)
-        if current > 1:  # prevent going below 1
-            setattr(self, stat_name, current - 1)
-        self.update_totals()
 
     def update_totals(self):
         self.attack_total = self.attack + self.attack_mod
@@ -217,9 +199,6 @@ class CharacterFormView(UnicornView):
 
         if not self.selected_class:
             errors["selected_class"] = "You must select a class."
-
-        if self.points_available != 0:
-            errors["points_available"] = "You must allocate all available points."
 
         if errors:
             raise ValidationError(errors, code="invalid")
