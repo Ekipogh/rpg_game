@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from hero.models import Hero, HeroClass
-from item.models import Item, Weapon, Armor, Consumable, OffHand, Inventory
+from item.models import Item, Weapon, Armor, Consumable, Inventory
 
 
 class ItemViewTests(TestCase):

@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test import Client
 from hero.models import Hero, HeroClass
-from item.models import Weapon, Armor, Consumable, OffHand
+from item.models import Weapon, Armor, Consumable
 
 
 class InventoryJavaScriptTests(TestCase):
@@ -129,13 +129,6 @@ class ButtonBehaviorTests(TestCase):
             defense_bonus=12,
             armor_type="chain",
             value=150
-        )
-
-        self.offhand = OffHand.objects.create(
-            name="Behavior Test Shield",
-            block=8,
-            shield_type="metal",
-            value=100
         )
 
         self.consumable = Consumable.objects.create(

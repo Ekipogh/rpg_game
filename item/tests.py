@@ -1,6 +1,6 @@
 from django.test import TestCase
 from hero.models import HeroClass
-from item.models import Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable, Accessory
+from item.models import Item, EquipmentSlots, Weapon, Armor, Consumable, Accessory
 
 # Create your tests here.
 class ItemTests(TestCase):
@@ -19,13 +19,6 @@ class ItemTests(TestCase):
         self.assertEqual(armor.health_bonus, 50)
         self.assertEqual(armor.armor_type, "plate")
         self.assertEqual(armor.equipment_slot, EquipmentSlots.ARMOR.value)
-
-    def test_create_offhand(self):
-        offhand = OffHand.objects.create(name="Buckler of Testing", block=8, shield_type="wooden")
-        self.assertEqual(offhand.name, "Buckler of Testing")
-        self.assertEqual(offhand.block, 8)
-        self.assertEqual(offhand.shield_type, "wooden")
-        self.assertEqual(offhand.equipment_slot, EquipmentSlots.ACCESSORY.value)
 
     def test_create_consumable_health(self):
         consumable = Consumable.objects.create(name="Health Potion", heal_amount=50, mana_restore=0, duration=0)

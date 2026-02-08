@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 
 from hero.models import Hero
 from item.models import (
-    Inventory, InventoryItem, Item, OffHand, Weapon, Armor,
+    Inventory, InventoryItem, Item, Weapon, Armor,
     Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory
 )
 
@@ -130,7 +130,6 @@ def serialize_inventory_item(item: Item) -> dict:
         Armor: 'armor',
         Accessory: 'accessory',
         Consumable: 'consumable',
-        OffHand: 'offhand',
     }
     category = next((cat for item_type, cat in category_map.items() if isinstance(item, item_type)), 'other')
 
@@ -163,11 +162,6 @@ def serialize_inventory_item(item: Item) -> dict:
             'critical_bonus': item.critical_bonus,
             'accessory_type': item.accessory_type,
         })
-    elif isinstance(item, OffHand):
-        payload.update({
-            'block': item.block,
-            'shield_type': item.shield_type,
-        })
     elif isinstance(item, Consumable):
         payload.update({
             'heal_amount': item.heal_amount,
@@ -199,7 +193,7 @@ def use_item_api(request, item_id):
     # Polymorphic usage - different behavior for each type!
     try:
         # Check if item is in inventory for equipment items
-        if isinstance(item, (Weapon, Armor, OffHand)) or (
+        if isinstance(item, (Weapon, Armor)) or (
             getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value
         ):
             inventory = get_or_create_inventory(hero)
@@ -227,7 +221,7 @@ def use_item_api(request, item_id):
             handler, slot_type = handler_info
             result, unequipped_item, did_change = handler(hero, item)
             action_type = 'equipped'
-        elif isinstance(item, OffHand) or (getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value):
+        elif getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value:
             result, unequipped_item, did_change = equip_accessory(hero, item)
             action_type = 'equipped'
             slot_type = EquipmentSlots.ACCESSORY.value
@@ -420,7 +414,6 @@ def inventory_view(request):
         'armor': [],
         'accessories': [],
         'consumables': [],
-        'offhands': [],
         'other_items': []
     }
     item_count = 0
@@ -443,8 +436,6 @@ def inventory_view(request):
             categories['accessories'].append(item)
         elif isinstance(item, Consumable):
             categories['consumables'].append(item)
-        elif isinstance(item, OffHand):
-            categories['offhands'].append(item)
         else:
             categories['other_items'].append(item)
 

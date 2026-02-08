@@ -73,24 +73,10 @@ class Weapon(Item):
         return stats
 
 
-class OffHand(Item):
-    """Deprecated: Use Armor or Accessory instead. Kept for backward compatibility."""
-    block = models.IntegerField(default=5)
-    shield_type = models.CharField(max_length=50, default='wooden')
-    equipment_slot = models.CharField(
-        max_length=50, choices=EquipmentSlots.choices(), default=EquipmentSlots.ACCESSORY.value)
-
-    @property
-    def item_type(self):
-        return ItemTypes.ACCESSORY.value
-
-    def get_stats(self):
-        return f"DEF +{self.block}, Type: {self.shield_type}"
-
-
 class Armor(Item):
     """Armor equipment (BATTLE_SYSTEM.md: +DEF, +HP, Elemental resistances)"""
     defense_bonus = models.IntegerField(default=5)  # +DEF
+    magic_defense_bonus = models.IntegerField(default=0)  # +MDEF
     health_bonus = models.IntegerField(default=0)  # +HP
     armor_type = models.CharField(max_length=50, default='leather')
     # Elemental resistances stored as JSON: {"fire": 0.75, "ice": 0.5}
@@ -114,6 +100,10 @@ class Armor(Item):
 
 class Accessory(Item):
     """Accessory equipment (BATTLE_SYSTEM.md: +CRIT, Status immunities, Passive effects)"""
+    defense_bonus = models.IntegerField(default=0)  # +DEF
+    speed_bonus = models.IntegerField(default=0)  # +SPD
+    magic_bonus = models.IntegerField(default=0)  # +MAG
+    magic_defense_bonus = models.IntegerField(default=0)  # +MDEF
     critical_bonus = models.IntegerField(default=0)  # +CRIT (percentage)
     # Status immunities stored as JSON list: ["poison", "burn"]
     status_immunities = models.JSONField(default=list, blank=True)

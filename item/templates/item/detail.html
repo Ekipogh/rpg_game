@@ -42,9 +42,6 @@
       .consumable-icon {
         background: linear-gradient(135deg, #28a745, #1e7e34);
       }
-      .offhand-icon {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-      }
       .generic-icon {
         background: linear-gradient(135deg, #6c757d, #545b62);
       }
@@ -74,8 +71,6 @@
                 🛡️
               {% elif item.item_type == 'consumable' %}
                 🧪
-              {% elif item.item_type == 'offhand' %}
-                🛡️
               {% else %}
                 📦
               {% endif %}
@@ -104,7 +99,7 @@
           <div class="d-flex flex-wrap gap-2 justify-content-center">
             {% if item.item_type == 'consumable' %}
               <button class="btn btn-success dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="useItem({{ item.id }})">🧪 Use Item</button>
-            {% elif item.item_type == 'weapon' or item.item_type == 'armor' or item.item_type == 'offhand' %}
+            {% elif item.item_type == 'weapon' or item.item_type == 'armor' %}
               <button class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
             {% endif %}
             <a href="/inventory/" class="btn btn-outline-secondary dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700">🎒 Back to Inventory</a>
@@ -189,43 +184,6 @@
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Armor Type</small>
                         <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.armor_type|default:'Unknown'|title }}</h3>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% elif item.item_type == 'offhand' %}
-          <!-- Off-Hand Stats -->
-          <div class="col-12 mb-4">
-            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
-              <div class="card-header bg-light dark:!bg-gray-700">
-                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand Statistics</h5>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-lg-4">
-                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
-                      <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Block Rating</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.block|default:0 }}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
-                      <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Shield Type</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.shield_type|default:'Unknown'|title }}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div class="card bg-light dark:!bg-gray-600 text-center h-100 border-0 dark:border-gray-600">
-                      <div class="card-body">
-                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Equipment Slot</small>
-                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.equipment_slot|default:'shield'|title }}</h3>
                       </div>
                     </div>
                   </div>

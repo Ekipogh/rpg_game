@@ -1,6 +1,6 @@
 from django.db import models
 
-from item.models import InventoryItem
+from item.models import EquipmentSlots, InventoryItem
 
 
 class Hero(models.Model):
@@ -104,9 +104,84 @@ class Hero(models.Model):
     def attack_mod(self):
         """Calculate attack modifier from equipment and buffs"""
         mod = 0
-        # For equipment slots: weapon, armor, accessory
-
+        if self.weapon:
+            mod += self.weapon.attack_bonus
         return mod
+
+    @property
+    def defense_mod(self):
+        """Calculate defense modifier from equipment and buffs"""
+        mod = 0
+        if self.armor:
+            mod += self.armor.defense_bonus
+        if self.accessory:
+            mod += self.accessory.defense_bonus
+        return mod
+
+    @property
+    def magic_mod(self):
+        """Calculate magic modifier from equipment and buffs"""
+        mod = 0
+        if self.accessory:
+            mod += self.accessory.magic_bonus
+        return mod
+
+    @property
+    def speed_mod(self):
+        """Calculate speed modifier from equipment and buffs"""
+        mod = 0
+        if self.accessory:
+            mod += self.accessory.speed_bonus
+        return mod
+
+    @property
+    def magic_defense_mod(self):
+        """Calculate magic defense modifier from equipment and buffs"""
+        mod = 0
+        if self.armor:
+            mod += self.armor.magic_defense_bonus
+        if self.accessory:
+            mod += self.accessory.magic_defense_bonus
+        return mod
+
+    @property
+    def weapon(self):
+        """Get equipped weapon item"""
+        try:
+            from item.models import Equipment, EquipmentSlot
+            equipment_slot = EquipmentSlot.objects.filter(
+                equipment__hero=self,
+                slot=EquipmentSlots.WEAPON.value
+            ).first()
+            return equipment_slot.item if equipment_slot else None
+        except Exception:
+            return None
+
+    @property
+    def armor(self):
+        """Get equipped armor item"""
+        try:
+            from item.models import Equipment, EquipmentSlot
+            equipment_slot = EquipmentSlot.objects.filter(
+                equipment__hero=self,
+                slot=EquipmentSlots.ARMOR.value
+            ).first()
+            return equipment_slot.item if equipment_slot else None
+        except Exception:
+            return None
+
+    @property
+    def accessory(self):
+        """Get equipped accessory item"""
+        try:
+            from item.models import Equipment, EquipmentSlot
+            equipment_slot = EquipmentSlot.objects.filter(
+                equipment__hero=self,
+                slot=EquipmentSlots.ACCESSORY.value
+            ).first()
+            return equipment_slot.item if equipment_slot else None
+        except Exception:
+            return None
 
     def take_damage(self, damage):
         """

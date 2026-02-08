@@ -292,50 +292,6 @@
             </div>
           {% endif %}
 
-          <!-- Off-Hand Items Section -->
-          {% if offhands %}
-            <div class="col-12 mb-4" id="section-offhand">
-              <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
-                <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand (<span id="count-offhand">{{ offhands|length }}</span>)</h5>
-                </div>
-                <div class="card-body">
-                  <div class="row g-3" id="inventory-section-offhand">
-                    {% for offhand in offhands %}
-                      <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ offhand.id }}" data-category="offhand" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
-                          <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                              <div class="bg-warning dark:bg-yellow-600 text-dark dark:text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <span>🛡️</span>
-                              </div>
-                              <div>
-                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ offhand.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ offhand.value|default:0 }} gold</small>
-                              </div>
-                            </div>
-                            <p class="text-muted dark:!text-gray-400 small mb-2">{{ offhand.description|default:'A useful off-hand item.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
-                              <small class="text-muted dark:!text-gray-300">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:'wooden'|title }}</small>
-                            </div>
-                            <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="offhand" data-slot="{{ offhand.equipment_slot|default:'accessory' }}" data-item-name="{{ offhand.name|escape }}" data-item-description="{{ offhand.description|default:'A useful off-hand item.'|escape }}" data-item-icon="🛡️" data-badge-class="bg-warning" onclick="event.stopPropagation(); equipItem({{ offhand.id }}, this)">
-                                🛡️ Equip
-                              </button>
-                              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ offhand.id }})">
-                                👁️ View
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-
           <!-- Consumables Section -->
           {% if consumables %}
             <div class="col-12 mb-4" id="section-consumable">
