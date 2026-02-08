@@ -34,6 +34,7 @@ class Item(PolymorphicModel):
     value = models.IntegerField(default=0)
     hero_class_restriction = models.ForeignKey(
         'hero.HeroClass', on_delete=models.CASCADE, null=True, blank=True)
+    level_requirement = models.IntegerField(default=1)
 
     @property
     def item_type(self):

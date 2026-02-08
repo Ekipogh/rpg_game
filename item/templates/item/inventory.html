@@ -25,27 +25,27 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    
+
     <style>
       .equipment-slot {
         transition: all 0.3s ease;
         min-height: 200px;
       }
-      
+
       .equipment-slot:hover {
         border-color: #6366f1 !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
-      
+
       .empty-slot {
         opacity: 0.7;
       }
-      
+
       .equipped-item {
         padding: 0.5rem 0;
       }
-      
+
       .equipment-slot .badge {
         font-size: 1.2rem;
         padding: 0.5rem 0.8rem;
@@ -104,7 +104,7 @@
                 <div class="row g-3">
                   {% for slot in equipment_slots %}
                     <div class="col-lg-4 col-md-6">
-                      <div class="equipment-slot card h-100 !bg-gray-50 dark:!bg-gray-600 border-2 border-dashed border-gray-300 dark:border-gray-500">
+                      <div class="equipment-slot card h-100 !bg-gray-50 dark:!bg-gray-600 border-2 border-dashed border-gray-300 dark:border-gray-500" data-slot="{{ slot.value }}" data-slot-label="{{ slot.name|title }}">
                         <div class="card-body text-center">
                           {% if equipped_items|lookup:slot.value %}
                             {% with equipped_items|lookup:slot.value as equipped_item %}
@@ -157,19 +157,19 @@
         </div>
 
         <!-- Main Content -->
-        <div class="row mt-4">
+        <div class="row mt-4" id="inventory-sections">
           <!-- Weapons Section -->
           {% if weapons %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-weapon">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapons ({{ weapons|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapons (<span id="count-weapon">{{ weapons|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-weapon">
                     {% for weapon in weapons %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ weapon.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ weapon.id }}" data-category="weapon" onclick="viewItem({{ weapon.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-danger dark:bg-red-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -185,7 +185,7 @@
                               <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ weapon.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="weapon" data-slot="{{ weapon.equipment_slot|default:'weapon' }}" data-item-name="{{ weapon.name|escape }}" data-item-description="{{ weapon.description|default:'A reliable weapon for combat.'|escape }}" data-item-icon="⚔️" data-badge-class="bg-danger" onclick="event.stopPropagation(); equipItem({{ weapon.id }}, this)">
                                 ⚔️ Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ weapon.id }})">
@@ -204,16 +204,16 @@
 
           <!-- Armor Section -->
           {% if armor %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-armor">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Armor ({{ armor|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Armor (<span id="count-armor">{{ armor|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-armor">
                     {% for armor_piece in armor %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ armor_piece.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ armor_piece.id }}" data-category="armor" onclick="viewItem({{ armor_piece.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-info dark:bg-blue-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -229,7 +229,7 @@
                               <small class="text-muted dark:!text-gray-300">DEF +{{ armor_piece.defense_bonus|default:0 }}, HP +{{ armor_piece.health_bonus|default:0 }} • {{ armor_piece.armor_type|default:'leather'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="armor" data-slot="{{ armor_piece.equipment_slot|default:'armor' }}" data-item-name="{{ armor_piece.name|escape }}" data-item-description="{{ armor_piece.description|default:'Protective gear for adventurers.'|escape }}" data-item-icon="🛡️" data-badge-class="bg-info" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }}, this)">
                                 🛡️ Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ armor_piece.id }})">
@@ -248,16 +248,16 @@
 
           <!-- Accessories Section -->
           {% if accessories %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-accessory">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">💍</span>Accessories ({{ accessories|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">💍</span>Accessories (<span id="count-accessory">{{ accessories|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-accessory">
                     {% for accessory in accessories %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ accessory.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ accessory.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ accessory.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ accessory.id }}" data-category="accessory" onclick="viewItem({{ accessory.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-warning dark:bg-yellow-600 text-dark dark:text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -275,7 +275,7 @@
                               </small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ accessory.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="accessory" data-slot="{{ accessory.equipment_slot|default:'accessory' }}" data-item-name="{{ accessory.name|escape }}" data-item-description="{{ accessory.description|default:'A valuable accessory.'|escape }}" data-item-icon="💍" data-badge-class="bg-warning" onclick="event.stopPropagation(); equipItem({{ accessory.id }}, this)">
                                 💍 Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ accessory.id }})">
@@ -294,16 +294,16 @@
 
           <!-- Off-Hand Items Section -->
           {% if offhands %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-offhand">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand ({{ offhands|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🛡️</span>Off-Hand (<span id="count-offhand">{{ offhands|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-offhand">
                     {% for offhand in offhands %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ offhand.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ offhand.id }}" data-category="offhand" onclick="viewItem({{ offhand.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-warning dark:bg-yellow-600 text-dark dark:text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -319,7 +319,7 @@
                               <small class="text-muted dark:!text-gray-300">{{ offhand.block|default:0 }} BLOCK • {{ offhand.shield_type|default:'wooden'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ offhand.id }})">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="offhand" data-slot="{{ offhand.equipment_slot|default:'accessory' }}" data-item-name="{{ offhand.name|escape }}" data-item-description="{{ offhand.description|default:'A useful off-hand item.'|escape }}" data-item-icon="🛡️" data-badge-class="bg-warning" onclick="event.stopPropagation(); equipItem({{ offhand.id }}, this)">
                                 🛡️ Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ offhand.id }})">
@@ -338,16 +338,16 @@
 
           <!-- Consumables Section -->
           {% if consumables %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-consumable">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🧪</span>Consumables ({{ consumables|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🧪</span>Consumables (<span id="count-consumable">{{ consumables|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-consumable">
                     {% for consumable in consumables %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 rarity-{{ consumable.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ consumable.id }}" data-category="consumable" onclick="viewItem({{ consumable.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-success dark:bg-green-700 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -373,7 +373,7 @@
                               </small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-success btn-sm flex-fill dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="event.stopPropagation(); useItem({{ consumable.id }})">
+                              <button class="btn btn-success btn-sm flex-fill dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" data-category="consumable" onclick="event.stopPropagation(); useItem({{ consumable.id }}, this)">
                                 🧪 Use
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ consumable.id }})">
@@ -392,16 +392,16 @@
 
           <!-- Other Items Section -->
           {% if other_items %}
-            <div class="col-12 mb-4">
+            <div class="col-12 mb-4" id="section-other">
               <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
                 <div class="card-header bg-light dark:!bg-gray-700">
-                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">📦</span>Other Items ({{ other_items|length }})</h5>
+                  <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">📦</span>Other Items (<span id="count-other">{{ other_items|length }}</span>)</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row g-3">
+                  <div class="row g-3" id="inventory-section-other">
                     {% for item in other_items %}
                       <div class="col-lg-4 col-md-6">
-                        <div class="card item-card h-100 !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
+                        <div class="card item-card h-100 !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ item.id }}" data-category="other" onclick="viewItem({{ item.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                               <div class="bg-secondary dark:bg-gray-600 text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -417,10 +417,10 @@
                               <small class="text-muted dark:!text-gray-300">General Item</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="event.stopPropagation(); equipItem({{ item.id }})">
+                              <button class="btn btn-primary btn-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="other" data-slot="{{ item.equipment_slot|default:'' }}" data-item-name="{{ item.name|escape }}" data-item-description="{{ item.description|default:'A mysterious item.'|escape }}" data-item-icon="📦" data-badge-class="bg-secondary" onclick="event.stopPropagation(); equipItem({{ item.id }}, this)">
                                 ⚔️ Equip
                               </button>
-                              <button class="btn btn-success btn-sm dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="event.stopPropagation(); useItem({{ item.id }})">
+                              <button class="btn btn-success btn-sm dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" data-category="other" onclick="event.stopPropagation(); useItem({{ item.id }}, this)">
                                 🧪 Use
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ item.id }})">
@@ -454,31 +454,354 @@
       </div>
     </div>
 
+    <div id="toast-container" class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      // Helper function to get CSRF token
+      function getCsrfToken() {
+        return '{{ csrf_token }}'
+      }
+
       function viewItem(itemId) {
         window.location.href = `/item/${itemId}/`
       }
 
-      function equipItem(itemId) {
+      function showToast(message, variant = 'info') {
+        const container = document.getElementById('toast-container')
+        if (!container) return
+
+        const toast = document.createElement('div')
+        const variantClass = variant === 'success' ? 'bg-success' : variant === 'error' ? 'bg-danger' : 'bg-secondary'
+
+        toast.className = `toast align-items-center text-white ${variantClass} border-0 show mb-2`
+        toast.setAttribute('role', 'alert')
+        toast.setAttribute('aria-live', 'assertive')
+        toast.setAttribute('aria-atomic', 'true')
+        toast.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"></button>
+          </div>
+        `
+
+        const closeButton = toast.querySelector('button')
+        closeButton.addEventListener('click', () => {
+          toast.remove()
+        })
+
+        container.appendChild(toast)
+
+        setTimeout(() => {
+          toast.remove()
+        }, 3500)
+      }
+
+      function getSlotElement(slotValue) {
+        return document.querySelector(`.equipment-slot[data-slot="${slotValue}"]`)
+      }
+
+      function renderEmptySlot(slotValue) {
+        const slotEl = getSlotElement(slotValue)
+        if (!slotEl) return
+
+        const slotLabel = slotEl.dataset.slotLabel || slotValue
+        const iconMap = {
+          weapon: '⚔️',
+          armor: '🛡️',
+          accessory: '💍'
+        }
+        const icon = iconMap[slotValue] || '📦'
+        const cardBody = slotEl.querySelector('.card-body')
+
+        if (!cardBody) return
+
+        cardBody.innerHTML = `
+          <div class="empty-slot text-center py-3">
+            <div class="mb-3" style="font-size: 2.5rem; opacity: 0.3;">${icon}</div>
+            <h6 class="text-muted dark:!text-gray-400">${slotLabel} Slot</h6>
+            <small class="text-muted dark:!text-gray-500">No item equipped</small>
+          </div>
+        `
+      }
+
+      function renderEquippedSlot(slotValue, itemData) {
+        const slotEl = getSlotElement(slotValue)
+        if (!slotEl) return
+
+        const slotLabel = slotEl.dataset.slotLabel || slotValue
+        const badgeClass = itemData.badgeClass || (slotValue === 'weapon' ? 'bg-danger' : slotValue === 'armor' ? 'bg-info' : 'bg-warning')
+        const icon = itemData.icon || (slotValue === 'weapon' ? '⚔️' : slotValue === 'armor' ? '🛡️' : '💍')
+        const description = itemData.description || 'An equipped item.'
+        const cardBody = slotEl.querySelector('.card-body')
+
+        if (!cardBody) return
+
+        cardBody.innerHTML = `
+          <div class="equipped-item">
+            <div class="mb-2">
+              <span class="badge ${badgeClass} fs-6">${icon}</span>
+            </div>
+            <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">${itemData.name}</h6>
+            <small class="text-primary dark:text-blue-400">${slotLabel} Slot</small>
+            <p class="text-muted dark:!text-gray-400 small mt-2 mb-3">${description}</p>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-danger btn-sm flex-fill dark:border-red-500 dark:text-red-400 dark:hover:bg-red-700" onclick="unequipItem('${slotValue}')">
+                🗑️ Unequip
+              </button>
+              <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="viewItem(${itemData.id})">
+                👁️ View
+              </button>
+            </div>
+          </div>
+        `
+      }
+
+      const sectionConfig = {
+        weapon: { title: 'Weapons', icon: '⚔️', countId: 'count-weapon' },
+        armor: { title: 'Armor', icon: '🛡️', countId: 'count-armor' },
+        accessory: { title: 'Accessories', icon: '💍', countId: 'count-accessory' },
+        offhand: { title: 'Off-Hand', icon: '🛡️', countId: 'count-offhand' },
+        consumable: { title: 'Consumables', icon: '🧪', countId: 'count-consumable' },
+        other: { title: 'Other Items', icon: '📦', countId: 'count-other' }
+      }
+
+      function getSectionElements(category) {
+        return {
+          section: document.getElementById(`section-${category}`),
+          list: document.getElementById(`inventory-section-${category}`),
+          count: document.getElementById(sectionConfig[category]?.countId || '')
+        }
+      }
+
+      function ensureSection(category) {
+        const config = sectionConfig[category]
+        if (!config) return getSectionElements(category)
+
+        const elements = getSectionElements(category)
+        if (elements.section && elements.list && elements.count) {
+          elements.section.classList.remove('d-none')
+          return elements
+        }
+
+        const container = document.getElementById('inventory-sections')
+        if (!container) return elements
+
+        const section = document.createElement('div')
+        section.className = 'col-12 mb-4'
+        section.id = `section-${category}`
+        section.innerHTML = `
+          <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+            <div class="card-header bg-light dark:!bg-gray-700">
+              <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">${config.icon}</span>${config.title} (<span id="${config.countId}">0</span>)</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3" id="inventory-section-${category}"></div>
+            </div>
+          </div>
+        `
+
+        container.appendChild(section)
+        return getSectionElements(category)
+      }
+
+      function updateSectionCount(category, delta) {
+        const elements = ensureSection(category)
+        if (!elements.count) return
+
+        const current = Number(elements.count.textContent || '0')
+        const next = Math.max(0, current + delta)
+        elements.count.textContent = String(next)
+
+        if (elements.section) {
+          elements.section.classList.toggle('d-none', next === 0)
+        }
+      }
+
+      function removeInventoryCard(buttonEl) {
+        if (!buttonEl) return
+        const columnEl = buttonEl.closest('.col-lg-4, .col-md-6')
+        if (columnEl) {
+          columnEl.remove()
+          return
+        }
+
+        const cardEl = buttonEl.closest('.item-card')
+        if (cardEl) {
+          cardEl.remove()
+        }
+      }
+
+      function buildInventoryCard(item) {
+        const escapeHtml = (value) => {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+        }
+
+        const category = item.category || 'other'
+        const iconMap = {
+          weapon: { icon: '⚔️', badgeClass: 'bg-danger' },
+          armor: { icon: '🛡️', badgeClass: 'bg-info' },
+          accessory: { icon: '💍', badgeClass: 'bg-warning' },
+          offhand: { icon: '🛡️', badgeClass: 'bg-warning' },
+          consumable: { icon: '🧪', badgeClass: 'bg-success' },
+          other: { icon: '📦', badgeClass: 'bg-secondary' }
+        }
+
+        const meta = iconMap[category] || iconMap.other
+        const description = escapeHtml(item.description || '')
+        const value = Number.isFinite(item.value) ? item.value : 0
+
+        let statsLine = ''
+        if (category === 'weapon') {
+          const weaponType = escapeHtml(item.weapon_type || 'sword')
+          statsLine = `ATK +${item.attack_bonus || 0}, ACC +${item.accuracy_bonus || 0} • ${weaponType.replace(/\b\w/g, c => c.toUpperCase())}`
+        } else if (category === 'armor') {
+          const armorType = escapeHtml(item.armor_type || 'leather')
+          statsLine = `DEF +${item.defense_bonus || 0}, HP +${item.health_bonus || 0} • ${armorType.replace(/\b\w/g, c => c.toUpperCase())}`
+        } else if (category === 'accessory') {
+          const critText = item.critical_bonus && item.critical_bonus > 0 ? `CRIT +${item.critical_bonus}% • ` : ''
+          const accessoryType = escapeHtml(item.accessory_type || 'ring')
+          statsLine = `${critText}${accessoryType.replace(/\b\w/g, c => c.toUpperCase())}`
+        } else if (category === 'offhand') {
+          const shieldType = escapeHtml(item.shield_type || 'wooden')
+          statsLine = `${item.block || 0} BLOCK • ${shieldType.replace(/\b\w/g, c => c.toUpperCase())}`
+        } else if (category === 'consumable') {
+          const parts = []
+          if (item.heal_amount > 0) parts.push(`+${item.heal_amount} HP`)
+          if (item.mana_restore > 0) parts.push(`+${item.mana_restore} MP`)
+          if (item.duration > 0) parts.push(`${item.duration}s duration`)
+          statsLine = parts.join(' • ')
+        } else {
+          statsLine = 'General Item'
+        }
+
+        const equipButton = category === 'consumable'
+          ? ''
+          : `<button class="btn btn-primary btn-sm ${category === 'other' ? '' : 'flex-fill'} dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="${category}" data-slot="${escapeHtml(item.equipment_slot || '')}" data-item-name="${escapeHtml(item.name)}" data-item-description="${description || ''}" data-item-icon="${meta.icon}" data-badge-class="${meta.badgeClass}" onclick="event.stopPropagation(); equipItem(${item.id}, this)">
+              ${meta.icon} Equip
+            </button>`
+
+        const useButton = category === 'consumable' || category === 'other'
+          ? `<button class="btn btn-${category === 'consumable' ? 'success' : 'success'} btn-sm ${category === 'consumable' ? 'flex-fill' : ''} dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" data-category="${category}" onclick="event.stopPropagation(); useItem(${item.id}, this)">
+              🧪 Use
+            </button>`
+          : ''
+
+        return `
+          <div class="col-lg-4 col-md-6">
+            <div class="card item-card h-100 !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="${item.id}" data-category="${category}" onclick="viewItem(${item.id})" style="cursor: pointer;">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="${meta.badgeClass} ${category === 'consumable' ? 'dark:bg-green-700' : category === 'weapon' ? 'dark:bg-red-700' : category === 'armor' ? 'dark:bg-blue-700' : category === 'accessory' || category === 'offhand' ? 'dark:bg-yellow-600' : 'dark:bg-gray-600'} ${category === 'accessory' || category === 'offhand' ? 'text-dark dark:text-white' : 'text-white'} rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <span>${meta.icon}</span>
+                  </div>
+                  <div>
+                    <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">${escapeHtml(item.name)}</h6>
+                    <small class="text-primary dark:text-blue-400">${value} gold</small>
+                  </div>
+                </div>
+                <p class="text-muted dark:!text-gray-400 small mb-2">${description || 'A mysterious item.'}</p>
+                <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                  <small class="text-muted dark:!text-gray-300">${statsLine || 'General Item'}</small>
+                </div>
+                <div class="d-flex gap-2">
+                  ${equipButton}
+                  ${useButton}
+                  <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem(${item.id})">
+                    👁️ View
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+
+      function addInventoryCard(item) {
+        if (!item || !item.id) return false
+        const existing = document.querySelector(`.item-card[data-item-id="${item.id}"]`)
+        if (existing) return false
+
+        const category = item.category || 'other'
+        const elements = ensureSection(category)
+        if (!elements.list) return false
+
+        elements.list.insertAdjacentHTML('beforeend', buildInventoryCard(item))
+        return true
+      }
+
+      function equipItem(itemId, buttonEl) {
+        if (!buttonEl) return
+        const slotValue = buttonEl.dataset.slot || ''
+
+        buttonEl.disabled = true
+        const originalText = buttonEl.innerHTML
+        buttonEl.innerHTML = '⏳ Equipping...'
+
         fetch(`/item/${itemId}/use/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
+            'X-CSRFToken': getCsrfToken()
           },
-        }).then(response => {
-          if (response.ok) {
-            alert(`Item ${itemId} equipped successfully!`);
-            // Optionally, refresh the page or update the UI
-            location.reload();
-          } else {
-            alert(`Failed to equip item ${itemId}.`);
+        }).then(async (response) => {
+          const data = await response.json().catch(() => ({}))
+          if (!response.ok || data.error) {
+            showToast(data.error || `Failed to equip item ${itemId}.`, 'error')
+            buttonEl.innerHTML = originalText
+            buttonEl.disabled = false
+            return
           }
+
+          const resolvedSlot = data.slot_type || slotValue
+          if (!resolvedSlot) {
+            showToast('Equipped item, but no slot was provided.', 'info')
+            buttonEl.innerHTML = originalText
+            buttonEl.disabled = false
+            return
+          }
+
+          // Only update UI if the equipment actually changed
+          if (data.did_change) {
+            // Render the item in the equipment slot
+            renderEquippedSlot(resolvedSlot, {
+              id: itemId,
+              name: buttonEl.dataset.itemName || 'Equipped Item',
+              description: buttonEl.dataset.itemDescription || 'An equipped item.',
+              icon: buttonEl.dataset.itemIcon,
+              badgeClass: buttonEl.dataset.badgeClass
+            })
+
+            // Remove the equipped item from inventory list
+            const category = buttonEl.dataset.category
+            removeInventoryCard(buttonEl)
+            if (category) {
+              updateSectionCount(category, -1)
+            }
+
+            // Add previously equipped item back to inventory if there was one
+            if (data.unequipped_item && data.unequipped_item.id !== itemId) {
+              const added = addInventoryCard(data.unequipped_item)
+              if (added) {
+                updateSectionCount(data.unequipped_item.category || 'other', 1)
+              }
+            }
+          }
+
+          showToast(data.message || `Item ${itemId} equipped successfully!`, 'success')
         }).catch(error => {
-          console.error('Error:', error);
-          alert(`An error occurred while equipping item ${itemId}.`);
-        });
+          console.error('Error:', error)
+          showToast(`An error occurred while equipping item ${itemId}.`, 'error')
+          if (buttonEl && document.body.contains(buttonEl)) {
+            buttonEl.innerHTML = originalText
+            buttonEl.disabled = false
+          }
+        })
       }
 
       function unequipItem(slotType) {
@@ -486,26 +809,62 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
+            'X-CSRFToken': getCsrfToken()
           },
-        }).then(response => {
-          if (response.ok) {
-            alert(`${slotType} unequipped successfully!`);
-            location.reload();
-          } else {
-            alert(`Failed to unequip ${slotType}.`);
+        }).then(async (response) => {
+          const data = await response.json().catch(() => ({}))
+          if (!response.ok || data.error) {
+            showToast(data.error || `Failed to unequip ${slotType}.`, 'error')
+            return
           }
+
+          renderEmptySlot(slotType)
+
+          // Add the unequipped item back to inventory list
+          if (data.unequipped_item) {
+            const added = addInventoryCard(data.unequipped_item)
+            if (added) {
+              updateSectionCount(data.unequipped_item.category || 'other', 1)
+            }
+          }
+
+          showToast(data.message || `${slotType} unequipped successfully!`, 'success')
         }).catch(error => {
-          console.error('Error:', error);
-          alert(`An error occurred while unequipping ${slotType}.`);
-        });
+          console.error('Error:', error)
+          showToast(`An error occurred while unequipping ${slotType}.`, 'error')
+        })
       }
 
-      function useItem(itemId) {
-        // TODO: Implement use functionality
-        alert(`Using item ${itemId}...`);
-        // This would typically make an AJAX call to your Django backend
-        // Example: fetch(`/api/items/${itemId}/use/`, { method: 'POST', ... })
+      function useItem(itemId, buttonEl) {
+        if (buttonEl) {
+          buttonEl.disabled = true
+          var originalText = buttonEl.innerHTML
+          buttonEl.innerHTML = '⏳ Using...'
+        }
+
+        fetch(`/item/${itemId}/use/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+        }).then(async (response) => {
+          const data = await response.json().catch(() => ({}))
+          if (!response.ok || data.error) {
+            showToast(data.error || `Failed to use item ${itemId}.`, 'error')
+            return
+          }
+
+          showToast(data.message || `Used item ${itemId}.`, 'success')
+        }).catch(error => {
+          console.error('Error:', error)
+          showToast(`An error occurred while using item ${itemId}.`, 'error')
+        }).finally(() => {
+          if (buttonEl) {
+            buttonEl.innerHTML = originalText
+            buttonEl.disabled = false
+          }
+        })
       }
 
       // Theme Toggle Script

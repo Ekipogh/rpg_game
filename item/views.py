@@ -1,8 +1,12 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
+from typing import Optional, Tuple
 
 from hero.models import Hero
-from item.models import Inventory, Item, OffHand, Weapon, Armor, Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory
+from item.models import (
+    Inventory, InventoryItem, Item, OffHand, Weapon, Armor,
+    Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory
+)
 
 # Create your views here.
 
@@ -19,6 +23,7 @@ def item_detail(request, item_id):
         'item': item,
         'item_type': item.__class__.__name__,
         'item_type_lower': item.__class__.__name__.lower(),
+        'level_requirement': getattr(item, 'level_requirement', 1),
     }
 
     # Add type-specific attributes and methods
@@ -81,6 +86,98 @@ def format_currency(value):
     return f"{value:,} 🪙"
 
 
+def get_or_create_inventory(hero: Hero) -> Inventory:
+    """Get or create an inventory for the given hero"""
+    if hasattr(hero, 'inventory') and hero.inventory:
+        return hero.inventory
+
+    inventory = Inventory.objects.create()
+    hero.inventory = inventory  # type: ignore
+    hero.save(update_fields=['inventory'])
+    return inventory
+
+
+def remove_inventory_item(inventory: Inventory, item: Item) -> Optional[int]:
+    """Remove an item from inventory, decrementing quantity or deleting if last one"""
+    inventory_item = InventoryItem.objects.filter(inventory=inventory, item=item).first()
+    if not inventory_item:
+        return None
+
+    if inventory_item.quantity > 1:
+        inventory_item.quantity -= 1
+        inventory_item.save(update_fields=['quantity'])
+        return inventory_item.quantity
+
+    inventory_item.delete()
+    return 0
+
+
+def add_inventory_item(inventory: Inventory, item: Item) -> None:
+    """Add an item to inventory, incrementing quantity if it already exists"""
+    inventory_item, created = InventoryItem.objects.get_or_create(
+        inventory=inventory, item=item, defaults={'quantity': 1}
+    )
+    if not created:
+        inventory_item.quantity += 1
+        inventory_item.save(update_fields=['quantity'])
+
+
+def serialize_inventory_item(item: Item) -> dict:
+    """Serialize item to JSON format for API responses"""
+    # Determine category based on item type
+    category_map = {
+        Weapon: 'weapon',
+        Armor: 'armor',
+        Accessory: 'accessory',
+        Consumable: 'consumable',
+        OffHand: 'offhand',
+    }
+    category = next((cat for item_type, cat in category_map.items() if isinstance(item, item_type)), 'other')
+
+    # Base payload common to all items
+    payload = {
+        'id': item.id,
+        'name': item.name,
+        'description': item.description or '',
+        'value': item.value,
+        'category': category,
+        'item_type': item.item_type,
+        'equipment_slot': getattr(item, 'equipment_slot', ''),
+    }
+
+    # Add type-specific attributes
+    if isinstance(item, Weapon):
+        payload.update({
+            'attack_bonus': item.attack_bonus,
+            'accuracy_bonus': item.accuracy_bonus,
+            'weapon_type': item.weapon_type,
+        })
+    elif isinstance(item, Armor):
+        payload.update({
+            'defense_bonus': item.defense_bonus,
+            'health_bonus': item.health_bonus,
+            'armor_type': item.armor_type,
+        })
+    elif isinstance(item, Accessory):
+        payload.update({
+            'critical_bonus': item.critical_bonus,
+            'accessory_type': item.accessory_type,
+        })
+    elif isinstance(item, OffHand):
+        payload.update({
+            'block': item.block,
+            'shield_type': item.shield_type,
+        })
+    elif isinstance(item, Consumable):
+        payload.update({
+            'heal_amount': item.heal_amount,
+            'mana_restore': item.mana_restore,
+            'duration': item.duration,
+        })
+
+    return payload
+
+
 def use_item_api(request, item_id):
     """
     API endpoint that handles polymorphic item usage
@@ -92,46 +189,74 @@ def use_item_api(request, item_id):
     # Get the polymorphic item
     item = get_object_or_404(Item, id=item_id)
 
-    # Get hero from session (assuming you have hero management)
+    # Get hero from session
     hero_id = request.session.get('hero_id')
     if not hero_id:
         return JsonResponse({'error': 'No hero selected'}, status=400)
 
-    from hero.models import Hero
     hero = get_object_or_404(Hero, id=hero_id)
 
     # Polymorphic usage - different behavior for each type!
     try:
-        if isinstance(item, Weapon):
-            result = equip_weapon(hero, item)
-            action_type = 'equipped'
+        # Check if item is in inventory for equipment items
+        if isinstance(item, (Weapon, Armor, OffHand)) or (
+            getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value
+        ):
+            inventory = get_or_create_inventory(hero)
+            if not InventoryItem.objects.filter(inventory=inventory, item=item).exists():
+                return JsonResponse({'error': 'Item not found in inventory'}, status=400)
 
-        elif isinstance(item, Armor):
-            result = equip_armor(hero, item)
-            action_type = 'equipped'
+        slot_type = None
+        did_change = False
+        unequipped_item = None
+        action_type = 'used'
 
-        elif isinstance(item, OffHand):
-            # Treat OffHand as an accessory for backward compatibility
-            result = equip_accessory(hero, item)
-            action_type = 'equipped'
+        # Equipment handling with type mapping
+        equipment_handlers = {
+            Weapon: (equip_weapon, EquipmentSlots.WEAPON.value),
+            Armor: (equip_armor, EquipmentSlots.ARMOR.value),
+        }
 
-        elif hasattr(item, 'equipment_slot') and item.equipment_slot == EquipmentSlots.ACCESSORY.value:
-            result = equip_accessory(hero, item)
-            action_type = 'equipped'
+        # Check if item is equipment type
+        handler_info = next(
+            ((handler, slot) for item_type, (handler, slot) in equipment_handlers.items() if isinstance(item, item_type)),
+            None
+        )
 
+        if handler_info:
+            handler, slot_type = handler_info
+            result, unequipped_item, did_change = handler(hero, item)
+            action_type = 'equipped'
+        elif isinstance(item, OffHand) or (getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value):
+            result, unequipped_item, did_change = equip_accessory(hero, item)
+            action_type = 'equipped'
+            slot_type = EquipmentSlots.ACCESSORY.value
         elif isinstance(item, Consumable):
             result = item.use(hero)  # Uses the polymorphic method
             action_type = 'consumed'
-
         else:
             result = f"Used {item.name}"
-            action_type = 'used'
+
+        # Remove from inventory if equipped successfully
+        remaining_quantity = None
+        if action_type == 'equipped' and did_change:
+            inventory = get_or_create_inventory(hero)
+            remaining_quantity = remove_inventory_item(inventory, item)
+            if remaining_quantity is None:
+                return JsonResponse({'error': 'Item not found in inventory'}, status=400)
+
+            if unequipped_item and unequipped_item.id != item.id:
+                add_inventory_item(inventory, unequipped_item)
 
         return JsonResponse({
             'success': True,
             'message': result,
             'action_type': action_type,
+            'slot_type': slot_type,
             'item_type': item.__class__.__name__,
+            'did_change': did_change,
+            'remaining_quantity': remaining_quantity,
+            'unequipped_item': serialize_inventory_item(unequipped_item) if unequipped_item else None,
             'hero_health': hero.current_health,
             'hero_max_health': hero.max_health,
         })
@@ -140,117 +265,127 @@ def use_item_api(request, item_id):
         return JsonResponse({'error': str(e)}, status=400)
 
 
-def equip_weapon(hero, weapon):
+def _get_or_create_equipment_with_slots(hero: Hero) -> Equipment:
+    """Helper function to get or create equipment and ensure all slots exist"""
+    equipment, created = Equipment.objects.get_or_create(hero=hero)
+    if created:
+        # Create equipment slots if equipment was just created
+        for slot_choice in EquipmentSlots:
+            EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
+    return equipment
+
+
+def equip_weapon(hero: Hero, weapon: Weapon) -> Tuple[str, Optional[Item], bool]:
     """Handle weapon-specific equipping logic"""
     # Check if hero can use this weapon type
     if weapon.hero_class_restriction and weapon.hero_class_restriction != hero.hero_class:
-        return f"Only {weapon.hero_class_restriction.name}s can use this weapon!"
+        return f"Only {weapon.hero_class_restriction.name}s can use this weapon!", None, False
+
+    if weapon.level_requirement > hero.level:
+        return f"Level {weapon.level_requirement} required to equip this weapon!", None, False
 
     # Get or create equipment for hero
-    equipment, created = Equipment.objects.get_or_create(hero=hero)
-    if created:
-        # Create equipment slots if equipment was just created
-        for slot_choice in EquipmentSlots:
-            EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
+    equipment = _get_or_create_equipment_with_slots(hero)
 
     # Get the weapon slot
-    weapon_slot, created = EquipmentSlot.objects.get_or_create(
-        equipment=equipment, 
+    weapon_slot, _ = EquipmentSlot.objects.get_or_create(
+        equipment=equipment,
         slot=EquipmentSlots.WEAPON.value,
         defaults={'item': None}
     )
-    
-    # Unequip current weapon if any
-    old_weapon = None
-    if weapon_slot.item:
-        old_weapon = weapon_slot.item
-    
+
+    # Check if weapon is already equipped
+    old_weapon = weapon_slot.item
+    if old_weapon and old_weapon.id == weapon.id:
+        return f"{weapon.name} is already equipped.", None, False
+
     # Equip new weapon
     weapon_slot.item = weapon
     weapon_slot.save()
-    
+
     result = f"Equipped {weapon.name}! Attack power increased by {weapon.attack_bonus}!"
     if old_weapon:
         result += f" (Unequipped {old_weapon.name})"
-    
-    return result
+
+    return result, old_weapon, True
 
 
-def equip_armor(hero, armor):
+def equip_armor(hero: Hero, armor: Armor) -> Tuple[str, Optional[Item], bool]:
     """Handle armor-specific equipping logic"""
     # Check class restrictions
     if armor.hero_class_restriction and armor.hero_class_restriction != hero.hero_class:
-        return f"Only {armor.hero_class_restriction.name}s can wear this armor!"
+        return f"Only {armor.hero_class_restriction.name}s can wear this armor!", None, False
+
+    if armor.level_requirement > hero.level:
+        return f"Level {armor.level_requirement} required to equip this armor!", None, False
 
     # Get or create equipment for hero
-    equipment, created = Equipment.objects.get_or_create(hero=hero)
-    if created:
-        # Create equipment slots if equipment was just created
-        for slot_choice in EquipmentSlots:
-            EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
+    equipment = _get_or_create_equipment_with_slots(hero)
 
     # Get the armor slot
-    armor_slot, created = EquipmentSlot.objects.get_or_create(
-        equipment=equipment, 
+    armor_slot, _ = EquipmentSlot.objects.get_or_create(
+        equipment=equipment,
         slot=EquipmentSlots.ARMOR.value,
         defaults={'item': None}
     )
-    
-    # Unequip current armor if any
-    old_armor = None
-    if armor_slot.item:
-        old_armor = armor_slot.item
-    
+
+    # Check if armor is already equipped
+    old_armor = armor_slot.item
+    if old_armor and old_armor.id == armor.id:
+        return f"{armor.name} is already equipped.", None, False
+
     # Equip new armor
     armor_slot.item = armor
     armor_slot.save()
-    
+
     result = f"Equipped {armor.name}! Defense increased by {armor.defense_bonus}!"
     if old_armor:
         result += f" (Unequipped {old_armor.name})"
-    
-    return result
+
+    return result, old_armor, True
 
 
-def equip_accessory(hero, accessory):
+def equip_accessory(hero: Hero, accessory: Item) -> Tuple[str, Optional[Item], bool]:
     """Handle accessory-specific equipping logic"""
     # Check class restrictions if any
     if hasattr(accessory, 'hero_class_restriction') and accessory.hero_class_restriction and accessory.hero_class_restriction != hero.hero_class:
-        return f"Only {accessory.hero_class_restriction.name}s can use this accessory!"
+        return f"Only {accessory.hero_class_restriction.name}s can use this accessory!", None, False
+
+    if hasattr(accessory, 'level_requirement') and accessory.level_requirement > hero.level:
+        return f"Level {accessory.level_requirement} required to equip this accessory!", None, False
 
     # Get or create equipment for hero
-    equipment, created = Equipment.objects.get_or_create(hero=hero)
-    if created:
-        # Create equipment slots if equipment was just created
-        for slot_choice in EquipmentSlots:
-            EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
+    equipment = _get_or_create_equipment_with_slots(hero)
 
     # Get the accessory slot
-    accessory_slot, created = EquipmentSlot.objects.get_or_create(
-        equipment=equipment, 
+    accessory_slot, _ = EquipmentSlot.objects.get_or_create(
+        equipment=equipment,
         slot=EquipmentSlots.ACCESSORY.value,
         defaults={'item': None}
     )
-    
-    # Unequip current accessory if any
-    old_accessory = None
-    if accessory_slot.item:
-        old_accessory = accessory_slot.item
-    
+
+    # Check if accessory is already equipped
+    old_accessory = accessory_slot.item
+    if old_accessory and old_accessory.id == accessory.id:
+        return f"{accessory.name} is already equipped.", None, False
+
     # Equip new accessory
     accessory_slot.item = accessory
     accessory_slot.save()
-    
+
     result = f"Equipped {accessory.name}!"
-    if hasattr(accessory, 'critical_bonus') and accessory.critical_bonus > 0:
-        result += f" Critical chance increased by {accessory.critical_bonus}%!"
-    elif hasattr(accessory, 'block') and accessory.block > 0:
-        result += f" Defense increased by {accessory.block}!"
-    
+    critical_bonus = getattr(accessory, 'critical_bonus', 0)
+    block = getattr(accessory, 'block', 0)
+
+    if critical_bonus > 0:
+        result += f" Critical chance increased by {critical_bonus}%!"
+    elif block > 0:
+        result += f" Defense increased by {block}!"
+
     if old_accessory:
         result += f" (Unequipped {old_accessory.name})"
-    
-    return result
+
+    return result, old_accessory, True
 
 
 def inventory_view(request):
@@ -260,7 +395,7 @@ def inventory_view(request):
     # Get hero from session
     hero_id = request.session.get('hero_id')
     equipped_items = {}
-    
+
     if not hero_id:
         inventory_items = []
         # For demo purposes, create mock inventory items
@@ -269,65 +404,59 @@ def inventory_view(request):
     else:
         hero = get_object_or_404(Hero, id=hero_id)
         inventory = hero.inventory
-        if inventory is None:
-            inventory_items = []
-        else:
-            inventory_items = inventory.all()  # Assuming Inventory has a method to get all items
-        
+        inventory_items = [] if inventory is None else inventory.all()
+
         # Get equipped items
-        try:
-            equipment = hero.equipment
-            equipped_slots = equipment.slots.all()
-            for slot in equipped_slots:
-                if slot.item:
-                    equipped_items[slot.slot] = slot.item
-        except Equipment.DoesNotExist:
-            # Create equipment for hero if it doesn't exist
-            equipment = Equipment.objects.create(hero=hero)
-            # Create equipment slots
-            for slot_choice in EquipmentSlots:
-                EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
+        equipment = _get_or_create_equipment_with_slots(hero)
+        equipped_slots = EquipmentSlot.objects.filter(equipment=equipment)
+        equipped_items = {slot.slot: slot.item for slot in equipped_slots if slot.item}
+
+    # Get IDs of equipped items to filter them out of inventory display
+    equipped_item_ids = {item.id for item in equipped_items.values()}
 
     # Categorize items automatically using polymorphic types
-    weapons = []
-    offhands = []
-    armor = []
-    accessories = []
-    consumables = []
-    other_items = []
-
+    categories = {
+        'weapons': [],
+        'armor': [],
+        'accessories': [],
+        'consumables': [],
+        'offhands': [],
+        'other_items': []
+    }
     item_count = 0
     items_value = 0
 
     for inventory_item in inventory_items:
         item = inventory_item.item
         quantity = inventory_item.quantity
+
+        # Skip items that are currently equipped
+        if item.id in equipped_item_ids:
+            continue
+
+        # Categorize item by type
         if isinstance(item, Weapon):
-            weapons.append(item)
+            categories['weapons'].append(item)
         elif isinstance(item, Armor):
-            armor.append(item)
+            categories['armor'].append(item)
         elif isinstance(item, Accessory):
-            accessories.append(item)
+            categories['accessories'].append(item)
         elif isinstance(item, Consumable):
-            consumables.append(item)
+            categories['consumables'].append(item)
         elif isinstance(item, OffHand):
-            offhands.append(item)
+            categories['offhands'].append(item)
         else:
-            other_items.append(item)
+            categories['other_items'].append(item)
+
         item_count += quantity
         items_value += item.value * quantity
 
     context = {
-        'weapons': weapons,
-        'armor': armor,
-        'accessories': accessories,
-        'consumables': consumables,
-        'offhands': offhands,
-        'other_items': other_items,
+        **categories,
         'total_items': item_count,
         'total_value': items_value,
         'equipped_items': equipped_items,
-        'equipment_slots': [slot for slot in EquipmentSlots],
+        'equipment_slots': list(EquipmentSlots),
     }
 
     return render(request, 'item/inventory.html', context)
@@ -348,22 +477,26 @@ def unequip_item_api(request, slot_type):
     hero = get_object_or_404(Hero, id=hero_id)
 
     try:
-        equipment = hero.equipment
-        equipment_slot = equipment.slots.get(slot=slot_type)
-        
+        equipment = _get_or_create_equipment_with_slots(hero)
+        equipment_slot = EquipmentSlot.objects.get(equipment=equipment, slot=slot_type)
+
         if equipment_slot.item:
-            item_name = equipment_slot.item.name
+            unequipped_item = equipment_slot.item
             equipment_slot.item = None
             equipment_slot.save()
-            
+
+            inventory = get_or_create_inventory(hero)
+            add_inventory_item(inventory, unequipped_item)
+
             return JsonResponse({
                 'success': True,
-                'message': f'Unequipped {item_name} from {slot_type} slot',
+                'message': f'Unequipped {unequipped_item.name} from {slot_type} slot',
                 'slot_type': slot_type,
+                'unequipped_item': serialize_inventory_item(unequipped_item),
             })
         else:
             return JsonResponse({'error': f'No item equipped in {slot_type} slot'}, status=400)
-            
+
     except Equipment.DoesNotExist:
         return JsonResponse({'error': 'No equipment found for hero'}, status=400)
     except EquipmentSlot.DoesNotExist:

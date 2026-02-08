@@ -100,6 +100,14 @@ class Hero(models.Model):
         # Base regen rate: 1% of max MP per second
         return max(1, self.max_mana // 100)
 
+    @property
+    def attack_mod(self):
+        """Calculate attack modifier from equipment and buffs"""
+        mod = 0
+        # For equipment slots: weapon, armor, accessory
+
+        return mod
+
     def take_damage(self, damage):
         """
         Deal damage to hero and start healing if not at full health
