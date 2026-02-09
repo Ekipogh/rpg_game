@@ -36,8 +36,7 @@ class InventoryJavaScriptTests(TestCase):
         content = response.content.decode()
 
         # Check function definition
-        self.assertIn('function equipItem(itemId)', content)
-        self.assertIn('alert(`Equipping item ${itemId}...`)', content)
+        self.assertIn('function equipItem(itemId, buttonEl)', content)
 
     def test_use_item_javascript_present(self):
         """Test that useItem JavaScript function is properly defined"""
@@ -45,8 +44,7 @@ class InventoryJavaScriptTests(TestCase):
         content = response.content.decode()
 
         # Check function definition
-        self.assertIn('function useItem(itemId)', content)
-        self.assertIn('alert(`Using item ${itemId}...`)', content)
+        self.assertIn('function useItem(itemId, buttonEl)', content)
 
     def test_view_item_javascript_present(self):
         """Test that viewItem JavaScript function is properly defined"""
