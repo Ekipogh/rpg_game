@@ -1,6 +1,6 @@
 from django.db import models
 
-from item.models import EquipmentSlots, InventoryItem
+from item.models import EquipmentSlots, Inventory, InventoryItem
 
 
 class Hero(models.Model):
@@ -105,7 +105,7 @@ class Hero(models.Model):
         """Calculate attack modifier from equipment and buffs"""
         mod = 0
         if self.weapon:
-            mod += self.weapon.attack_bonus
+            mod += getattr(self.weapon, 'attack_bonus', 0)
         return mod
 
     @property
@@ -113,9 +113,9 @@ class Hero(models.Model):
         """Calculate defense modifier from equipment and buffs"""
         mod = 0
         if self.armor:
-            mod += self.armor.defense_bonus
+            mod += getattr(self.armor, 'defense_bonus', 0)
         if self.accessory:
-            mod += self.accessory.defense_bonus
+            mod += getattr(self.accessory, 'defense_bonus', 0)
         return mod
 
     @property
@@ -123,7 +123,7 @@ class Hero(models.Model):
         """Calculate magic modifier from equipment and buffs"""
         mod = 0
         if self.accessory:
-            mod += self.accessory.magic_bonus
+            mod += getattr(self.accessory, 'magic_bonus', 0)
         return mod
 
     @property
@@ -131,7 +131,7 @@ class Hero(models.Model):
         """Calculate speed modifier from equipment and buffs"""
         mod = 0
         if self.accessory:
-            mod += self.accessory.speed_bonus
+            mod += getattr(self.accessory, 'speed_bonus', 0)
         return mod
 
     @property
@@ -139,9 +139,9 @@ class Hero(models.Model):
         """Calculate magic defense modifier from equipment and buffs"""
         mod = 0
         if self.armor:
-            mod += self.armor.magic_defense_bonus
+            mod += getattr(self.armor, 'magic_defense_bonus', 0)
         if self.accessory:
-            mod += self.accessory.magic_defense_bonus
+            mod += getattr(self.accessory, 'magic_defense_bonus', 0)
         return mod
 
     @property
@@ -206,14 +206,15 @@ class Hero(models.Model):
 
     def add_to_inventory(self, item, quantity=1):
         """Add item to hero's inventory"""
+        if not self.inventory:
+            self.inventory = Inventory.objects.create()
+            self.save(update_fields=['inventory'])
+
         inventory_item, created = InventoryItem.objects.get_or_create(
-            inventory=self.inventory, item=item, quantity=quantity
+            inventory=self.inventory, item=item, defaults={'quantity': 0}
         )
-        if not created:
-            inventory_item.quantity += quantity
-        else:
-            inventory_item.quantity = quantity
-        inventory_item.save()
+        inventory_item.quantity = inventory_item.quantity + quantity
+        inventory_item.save(update_fields=['quantity'])
 
     def __str__(self):
         return self.name

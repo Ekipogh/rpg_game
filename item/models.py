@@ -152,22 +152,28 @@ class Consumable(Item):
 
     def use(self, hero):
         """Apply the consumable effect to the hero"""
+        starting_health = hero.current_health
+        starting_mana = hero.current_mana
+
         if self.heal_amount > 0:
             hero.current_health = min(
                 hero.current_health + self.heal_amount, hero.max_health)
-            hero.save()
         if self.mana_restore > 0:
             # Assuming hero has a mana attribute
             hero.current_mana = min(
                 hero.current_mana + self.mana_restore, hero.max_mana)
-            hero.save()
+        hero.save(update_fields=['current_health', 'current_mana'])
+
+        healed = hero.current_health - starting_health
+        restored = hero.current_mana - starting_mana
+        return f"Restored {healed} HP and {restored} MP."
 
 class Inventory(models.Model):
     id = models.AutoField(primary_key=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def all(self):
-        return InventoryItem.objects.filter(inventory=self)
+        return InventoryItem.objects.filter(inventory=self).select_related('item')
 
 class InventoryItem(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)

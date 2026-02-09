@@ -51,6 +51,19 @@ def item_detail(request, item_id):
             'stat_color': 'text-primary',  # Blue for defense
         })
 
+    elif isinstance(item, Accessory):
+        item_info.update({
+            'critical_bonus': item.critical_bonus,
+            'defense_bonus': item.defense_bonus,
+            'speed_bonus': item.speed_bonus,
+            'magic_bonus': item.magic_bonus,
+            'accessory_type': item.accessory_type,
+            'equipment_slot': item.equipment_slot,
+            'can_equip': True,
+            'icon_class': 'fas fa-gem',
+            'stat_color': 'text-warning',
+        })
+
     elif isinstance(item, Consumable):
         item_info.update({
             'heal_amount': item.heal_amount,
@@ -193,9 +206,7 @@ def use_item_api(request, item_id):
     # Polymorphic usage - different behavior for each type!
     try:
         # Check if item is in inventory for equipment items
-        if isinstance(item, (Weapon, Armor)) or (
-            getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value
-        ):
+        if isinstance(item, (Weapon, Armor, Accessory)):
             inventory = get_or_create_inventory(hero)
             if not InventoryItem.objects.filter(inventory=inventory, item=item).exists():
                 return JsonResponse({'error': 'Item not found in inventory'}, status=400)
@@ -209,6 +220,7 @@ def use_item_api(request, item_id):
         equipment_handlers = {
             Weapon: (equip_weapon, EquipmentSlots.WEAPON.value),
             Armor: (equip_armor, EquipmentSlots.ARMOR.value),
+            Accessory: (equip_accessory, EquipmentSlots.ACCESSORY.value),
         }
 
         # Check if item is equipment type
@@ -221,10 +233,6 @@ def use_item_api(request, item_id):
             handler, slot_type = handler_info
             result, unequipped_item, did_change = handler(hero, item)
             action_type = 'equipped'
-        elif getattr(item, 'equipment_slot', None) == EquipmentSlots.ACCESSORY.value:
-            result, unequipped_item, did_change = equip_accessory(hero, item)
-            action_type = 'equipped'
-            slot_type = EquipmentSlots.ACCESSORY.value
         elif isinstance(item, Consumable):
             result = item.use(hero)  # Uses the polymorphic method
             action_type = 'consumed'
@@ -262,9 +270,11 @@ def use_item_api(request, item_id):
 def _get_or_create_equipment_with_slots(hero: Hero) -> Equipment:
     """Helper function to get or create equipment and ensure all slots exist"""
     equipment, created = Equipment.objects.get_or_create(hero=hero)
-    if created:
-        # Create equipment slots if equipment was just created
-        for slot_choice in EquipmentSlots:
+    existing_slots = set(
+        EquipmentSlot.objects.filter(equipment=equipment).values_list('slot', flat=True)
+    )
+    for slot_choice in EquipmentSlots:
+        if slot_choice.value not in existing_slots:
             EquipmentSlot.objects.create(equipment=equipment, slot=slot_choice.value, item=None)
     return equipment
 
@@ -339,7 +349,7 @@ def equip_armor(hero: Hero, armor: Armor) -> Tuple[str, Optional[Item], bool]:
     return result, old_armor, True
 
 
-def equip_accessory(hero: Hero, accessory: Item) -> Tuple[str, Optional[Item], bool]:
+def equip_accessory(hero: Hero, accessory: Accessory) -> Tuple[str, Optional[Item], bool]:
     """Handle accessory-specific equipping logic"""
     # Check class restrictions if any
     if hasattr(accessory, 'hero_class_restriction') and accessory.hero_class_restriction and accessory.hero_class_restriction != hero.hero_class:
@@ -369,12 +379,18 @@ def equip_accessory(hero: Hero, accessory: Item) -> Tuple[str, Optional[Item], b
 
     result = f"Equipped {accessory.name}!"
     critical_bonus = getattr(accessory, 'critical_bonus', 0)
-    block = getattr(accessory, 'block', 0)
+    defense_bonus = getattr(accessory, 'defense_bonus', 0)
+    magic_bonus = getattr(accessory, 'magic_bonus', 0)
+    speed_bonus = getattr(accessory, 'speed_bonus', 0)
 
     if critical_bonus > 0:
         result += f" Critical chance increased by {critical_bonus}%!"
-    elif block > 0:
-        result += f" Defense increased by {block}!"
+    elif defense_bonus > 0:
+        result += f" Defense increased by {defense_bonus}!"
+    elif magic_bonus > 0:
+        result += f" Magic increased by {magic_bonus}!"
+    elif speed_bonus > 0:
+        result += f" Speed increased by {speed_bonus}!"
 
     if old_accessory:
         result += f" (Unequipped {old_accessory.name})"

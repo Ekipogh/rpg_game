@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from hero.models import Hero, HeroClass
-from item.models import Item, Weapon, Armor, Consumable, Inventory
+from item.models import Item, Weapon, Armor, Consumable, Inventory, InventoryItem
 
 
 class ItemViewTests(TestCase):
@@ -27,6 +27,10 @@ class ItemViewTests(TestCase):
             current_mana=60,
             max_mana=80
         )
+
+        self.inventory = Inventory.objects.create()
+        self.hero.inventory = self.inventory
+        self.hero.save(update_fields=['inventory'])
 
         # Create test items
         self.weapon = Weapon.objects.create(
@@ -61,6 +65,9 @@ class ItemViewTests(TestCase):
             description="An ancient key",
             value=50
         )
+
+        InventoryItem.objects.create(inventory=self.inventory, item=self.weapon, quantity=1)
+        InventoryItem.objects.create(inventory=self.inventory, item=self.armor, quantity=1)
 
     def test_inventory_view_without_hero(self):
         """Test inventory view when no hero is selected"""
