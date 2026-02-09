@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from hero.models import Hero, HeroClass
-from item.models import Item, Weapon, Armor, Consumable, OffHand, Inventory
+from item.models import Item, Weapon, Armor, Consumable, Inventory, InventoryItem
 
 
 class ItemViewTests(TestCase):
@@ -20,19 +20,25 @@ class ItemViewTests(TestCase):
             name="Test Hero",
             hero_class=self.hero_class,
             level=1,
-            constitution=12,
+            attack=12,
+            defense=10,
             current_health=80,
             max_health=100,
             current_mana=60,
             max_mana=80
         )
 
+        self.inventory = Inventory.objects.create()
+        self.hero.inventory = self.inventory
+        self.hero.save(update_fields=['inventory'])
+
         # Create test items
         self.weapon = Weapon.objects.create(
             name="Test Sword",
             description="A sharp sword",
             value=100,
-            damage=15,
+            attack_bonus=15,
+            accuracy_bonus=5,
             weapon_type="sword"
         )
 
@@ -40,7 +46,8 @@ class ItemViewTests(TestCase):
             name="Test Shield",
             description="A sturdy shield",
             value=80,
-            defense=10,
+            defense_bonus=10,
+            health_bonus=20,
             armor_type="plate"
         )
 
@@ -58,6 +65,9 @@ class ItemViewTests(TestCase):
             description="An ancient key",
             value=50
         )
+
+        InventoryItem.objects.create(inventory=self.inventory, item=self.weapon, quantity=1)
+        InventoryItem.objects.create(inventory=self.inventory, item=self.armor, quantity=1)
 
     def test_inventory_view_without_hero(self):
         """Test inventory view when no hero is selected"""
@@ -81,16 +91,16 @@ class ItemViewTests(TestCase):
         response = self.client.get(f'/item/{self.weapon.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.weapon.name)
-        self.assertContains(response, "Attack Damage")  # From the template
-        self.assertContains(response, str(self.weapon.damage))
+        self.assertContains(response, "Attack Bonus")  # From the template
+        self.assertContains(response, str(self.weapon.attack_bonus))
 
     def test_item_detail_armor(self):
         """Test item detail view for armor"""
         response = self.client.get(f'/item/{self.armor.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.armor.name)
-        self.assertContains(response, "Defense Rating")  # From the template
-        self.assertContains(response, str(self.armor.defense))
+        self.assertContains(response, "Defense Bonus")  # From the template
+        self.assertContains(response, str(self.armor.defense_bonus))
 
     def test_item_detail_consumable(self):
         """Test item detail view for consumable"""
@@ -196,7 +206,7 @@ class InventoryTemplateTests(TestCase):
             name="Template Sword",
             description="A sword for template testing",
             value=150,
-            damage=20,
+            attack_bonus=20,
             weapon_type="sword"
         )
 
@@ -204,7 +214,7 @@ class InventoryTemplateTests(TestCase):
             name="Template Armor",
             description="Armor for template testing",
             value=120,
-            defense=15,
+            defense_bonus=15,
             armor_type="leather"
         )
 

@@ -1,29 +1,24 @@
 from django.test import TestCase
 from hero.models import HeroClass
-from item.models import Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable
+from item.models import Item, EquipmentSlots, Weapon, Armor, Consumable, Accessory
 
 # Create your tests here.
 class ItemTests(TestCase):
     def test_create_weapon(self):
-        weapon = Weapon.objects.create(name="Sword of Testing", damage=15, weapon_type="sword")
+        weapon = Weapon.objects.create(name="Sword of Testing", attack_bonus=15, accuracy_bonus=5, weapon_type="sword")
         self.assertEqual(weapon.name, "Sword of Testing")
-        self.assertEqual(weapon.damage, 15)
+        self.assertEqual(weapon.attack_bonus, 15)
+        self.assertEqual(weapon.accuracy_bonus, 5)
         self.assertEqual(weapon.weapon_type, "sword")
-        self.assertEqual(weapon.equipment_slot, EquipmentSlots.MAIN_HAND.value)
+        self.assertEqual(weapon.equipment_slot, EquipmentSlots.WEAPON.value)
 
     def test_create_armor(self):
-        armor = Armor.objects.create(name="Shield of Testing", defense=10, armor_type="plate")
-        self.assertEqual(armor.name, "Shield of Testing")
-        self.assertEqual(armor.defense, 10)
+        armor = Armor.objects.create(name="Plate Armor of Testing", defense_bonus=10, health_bonus=50, armor_type="plate")
+        self.assertEqual(armor.name, "Plate Armor of Testing")
+        self.assertEqual(armor.defense_bonus, 10)
+        self.assertEqual(armor.health_bonus, 50)
         self.assertEqual(armor.armor_type, "plate")
-        self.assertEqual(armor.equipment_slot, EquipmentSlots.HEAD.value)
-
-    def test_create_offhand(self):
-        offhand = OffHand.objects.create(name="Buckler of Testing", block=8, shield_type="wooden")
-        self.assertEqual(offhand.name, "Buckler of Testing")
-        self.assertEqual(offhand.block, 8)
-        self.assertEqual(offhand.shield_type, "wooden")
-        self.assertEqual(offhand.equipment_slot, EquipmentSlots.OFFHAND.value)
+        self.assertEqual(armor.equipment_slot, EquipmentSlots.ARMOR.value)
 
     def test_create_consumable_health(self):
         consumable = Consumable.objects.create(name="Health Potion", heal_amount=50, mana_restore=0, duration=0)
@@ -45,27 +40,33 @@ class ItemTests(TestCase):
         self.assertEqual(item.description, "Just a test item")
         self.assertEqual(item.value, 5)
         self.assertIsNone(item.hero_class_restriction)
-        self.assertFalse(hasattr(item, 'damage'))
-        self.assertFalse(hasattr(item, 'defense'))
+        self.assertFalse(hasattr(item, 'attack_bonus'))
+        self.assertFalse(hasattr(item, 'defense_bonus'))
+
+    def test_create_accessory(self):
+        accessory = Accessory.objects.create(
+            name="Lucky Ring",
+            critical_bonus=5,
+            status_immunities=["poison"],
+            accessory_type="ring"
+        )
+        self.assertEqual(accessory.name, "Lucky Ring")
+        self.assertEqual(accessory.critical_bonus, 5)
+        self.assertEqual(accessory.status_immunities, ["poison"])
+        self.assertEqual(accessory.equipment_slot, EquipmentSlots.ACCESSORY.value)
 
     def test_equipment_slot_choices(self):
         expected_choices = [
-            (EquipmentSlots.HEAD.value, 'Head'),
+            (EquipmentSlots.WEAPON.value, 'Weapon'),
             (EquipmentSlots.ARMOR.value, 'Armor'),
-            (EquipmentSlots.MAIN_HAND.value, 'Main_hand'),
-            (EquipmentSlots.OFFHAND.value, 'Offhand'),
-            (EquipmentSlots.CONSUMABLE_1.value, 'Consumable_1'),
-            (EquipmentSlots.CONSUMABLE_2.value, 'Consumable_2'),
-            (EquipmentSlots.CONSUMABLE_3.value, 'Consumable_3'),
-            (EquipmentSlots.LEGS.value, 'Legs'),
-            (EquipmentSlots.HANDS.value, 'Hands'),
+            (EquipmentSlots.ACCESSORY.value, 'Accessory'),
         ]
         self.assertEqual(EquipmentSlots.choices(), expected_choices)
 
     def test_consumable_use_heal(self):
         from hero.models import Hero, HeroClass  # Import here to avoid circular imports
         hero_class = HeroClass.objects.create(name="Warrior", description="A brave warrior.")
-        hero = Hero.objects.create(name="Test Hero", constitution=10, level=1, hero_class=hero_class)
+        hero = Hero.objects.create(name="Test Hero", level=1, hero_class=hero_class)
         hero.max_health = 100
         hero.current_health = 50
         hero.save()
@@ -79,7 +80,7 @@ class ItemTests(TestCase):
     def test_consumable_use_mana(self):
         from hero.models import Hero, HeroClass  # Import here to avoid circular imports
         hero_class = HeroClass.objects.create(name="Warrior", description="A brave warrior.")
-        hero = Hero.objects.create(name="Test Hero", constitution=10, level=1, hero_class=hero_class)
+        hero = Hero.objects.create(name="Test Hero", level=1, hero_class=hero_class)
         hero.max_mana = 100
         hero.current_mana = 40
         hero.save()
@@ -88,4 +89,4 @@ class ItemTests(TestCase):
         consumable.use(hero)
 
         hero.refresh_from_db()
-        self.assertEqual(hero.current_mana, 90)  # Restored by 50 but capped at max_mana
+        self.assertEqual(hero.current_mana, 90)  # Restored by 50

@@ -10,18 +10,21 @@ class HeroModelTest(TestCase):
         self.hero = Hero.objects.create(
             name="Test Hero", hero_class=self.hero_class, level=1)
 
-    def test_calculate_max_health(self):
-        expected_health = self.hero_class.base_health + \
-            (self.hero.constitution - 10) * 2 + (self.hero.level - 1) * 5
-        self.assertEqual(self.hero.calculate_max_health(), expected_health)
+    def test_level_up(self):
+        """Test that level up increases stats according to class bonuses"""
+        initial_level = self.hero.level
+        initial_attack = self.hero.attack
+        initial_health = self.hero.max_health
+        initial_mana = self.hero.max_mana
 
-    def test_update_health(self):
-        self.hero.constitution = 15
-        self.hero.level = 3
-        self.hero.update_health()
-        expected_health = self.hero.calculate_max_health()
-        self.assertEqual(self.hero.max_health, expected_health)
-        self.assertEqual(self.hero.current_health, expected_health)
+        self.hero.level_up()
+
+        self.assertEqual(self.hero.level, initial_level + 1)
+        self.assertGreater(self.hero.attack, initial_attack)
+        self.assertGreater(self.hero.max_health, initial_health)
+        self.assertGreaterEqual(self.hero.max_mana, initial_mana)
+        self.assertEqual(self.hero.current_health, self.hero.max_health)
+        self.assertEqual(self.hero.current_mana, self.hero.max_mana)
 
     def test_experience_percentage(self):
         self.hero.experience = 50
@@ -76,43 +79,27 @@ class HeroModelTest(TestCase):
         self.hero.heal(10)
         self.assertEqual(self.hero.current_health, self.hero.max_health)
 
-    def test_health_regeneration_rate_base(self):
-        """Test base health regeneration rate for constitution <= 10"""
-        self.hero.constitution = 10
+    def test_health_regeneration_rate(self):
+        """Test health regeneration rate is 1% of max HP"""
+        self.hero.max_health = 100
+        self.assertEqual(self.hero.health_regeneration_rate, 1)
+
+        self.hero.max_health = 500
         self.assertEqual(self.hero.health_regeneration_rate, 5)
 
-        self.hero.constitution = 8
-        self.assertEqual(self.hero.health_regeneration_rate, 5)
+        self.hero.max_health = 1000
+        self.assertEqual(self.hero.health_regeneration_rate, 10)
 
-    def test_health_regeneration_rate_bonus(self):
-        """Test health regeneration rate with constitution bonus"""
-        self.hero.constitution = 12  # +1 bonus (12-10)//2 = 1
-        self.assertEqual(self.hero.health_regeneration_rate, 6)
+    def test_mana_regeneration_rate(self):
+        """Test mana regeneration rate is 1% of max MP"""
+        self.hero.max_mana = 100
+        self.assertEqual(self.hero.mana_regeneration_rate, 1)
 
-        self.hero.constitution = 14  # +2 bonus (14-10)//2 = 2
-        self.assertEqual(self.hero.health_regeneration_rate, 7)
-
-        self.hero.constitution = 16  # +3 bonus (16-10)//2 = 3
-        self.assertEqual(self.hero.health_regeneration_rate, 8)
-
-    def test_mana_regeneration_rate_base(self):
-        """Test base mana regeneration rate for intelligence <= 10"""
-        self.hero.intelligence = 10
+        self.hero.max_mana = 500
         self.assertEqual(self.hero.mana_regeneration_rate, 5)
 
-        self.hero.intelligence = 8
-        self.assertEqual(self.hero.mana_regeneration_rate, 5)
-
-    def test_mana_regeneration_rate_bonus(self):
-        """Test mana regeneration rate with intelligence bonus"""
-        self.hero.intelligence = 12  # +1 bonus (12-10)//2 = 1
-        self.assertEqual(self.hero.mana_regeneration_rate, 6)
-
-        self.hero.intelligence = 14  # +2 bonus (14-10)//2 = 2
-        self.assertEqual(self.hero.mana_regeneration_rate, 7)
-
-        self.hero.intelligence = 18  # +4 bonus (18-10)//2 = 4
-        self.assertEqual(self.hero.mana_regeneration_rate, 9)
+        self.hero.max_mana = 1000
+        self.assertEqual(self.hero.mana_regeneration_rate, 10)
 
     def test_mana_percentage(self):
         """Test mana percentage calculation"""
@@ -153,7 +140,12 @@ class HeroCreationTest(TestCase):
         self.assertEqual(hero.level, 1)
         self.assertEqual(hero.current_health, hero.max_health)
         self.assertEqual(hero.experience, 0)
-        self.assertEqual(hero.strength, 10)
-        self.assertEqual(hero.constitution, 10)
-        self.assertEqual(hero.agility, 10)
-        self.assertEqual(hero.intelligence, 10)
+        self.assertEqual(hero.attack, 10)
+        self.assertEqual(hero.defense, 10)
+        self.assertEqual(hero.magic, 10)
+        self.assertEqual(hero.magic_defense, 10)
+        self.assertEqual(hero.speed, 10)
+        self.assertEqual(hero.accuracy, 100)
+        self.assertEqual(hero.evasion, 0)
+        self.assertEqual(hero.critical_chance, 5)
+        self.assertEqual(hero.critical_damage, 1.5)
