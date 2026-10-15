@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test import Client
 from hero.models import Hero, HeroClass
-from item.models import Weapon, Armor, Consumable, OffHand
+from item.models import Weapon, Armor, Consumable
 
 
 class InventoryJavaScriptTests(TestCase):
@@ -19,7 +19,7 @@ class InventoryJavaScriptTests(TestCase):
 
         self.weapon = Weapon.objects.create(
             name="JS Test Sword",
-            damage=10,
+            attack_bonus=10,
             weapon_type="sword",
             value=100
         )
@@ -36,8 +36,7 @@ class InventoryJavaScriptTests(TestCase):
         content = response.content.decode()
 
         # Check function definition
-        self.assertIn('function equipItem(itemId)', content)
-        self.assertIn('alert(`Equipping item ${itemId}...`)', content)
+        self.assertIn('function equipItem(itemId, buttonEl)', content)
 
     def test_use_item_javascript_present(self):
         """Test that useItem JavaScript function is properly defined"""
@@ -45,8 +44,7 @@ class InventoryJavaScriptTests(TestCase):
         content = response.content.decode()
 
         # Check function definition
-        self.assertIn('function useItem(itemId)', content)
-        self.assertIn('alert(`Using item ${itemId}...`)', content)
+        self.assertIn('function useItem(itemId, buttonEl)', content)
 
     def test_view_item_javascript_present(self):
         """Test that viewItem JavaScript function is properly defined"""
@@ -119,23 +117,16 @@ class ButtonBehaviorTests(TestCase):
         # Create different item types
         self.weapon = Weapon.objects.create(
             name="Behavior Test Sword",
-            damage=15,
+            attack_bonus=15,
             weapon_type="sword",
             value=200
         )
 
         self.armor = Armor.objects.create(
             name="Behavior Test Armor",
-            defense=12,
+            defense_bonus=12,
             armor_type="chain",
             value=150
-        )
-
-        self.offhand = OffHand.objects.create(
-            name="Behavior Test Shield",
-            block=8,
-            shield_type="metal",
-            value=100
         )
 
         self.consumable = Consumable.objects.create(
