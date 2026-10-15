@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from hero.models import Hero, HeroClass
-from item.models import Item, Weapon, Armor, Consumable, Inventory, InventoryItem
+from item.models import Item, Weapon, Armor, Accessory, Consumable, Inventory, InventoryItem
 
 
 class ItemViewTests(TestCase):
@@ -85,6 +85,30 @@ class ItemViewTests(TestCase):
         response = self.client.get('/inventory/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Inventory")
+
+    def test_hero_inventory_preserves_item_categories_and_stats(self):
+        accessory = Accessory.objects.create(name="Lucky Ring", critical_bonus=7, value=40)
+        for item, quantity in ((accessory, 1), (self.consumable, 3), (self.other_item, 1)):
+            InventoryItem.objects.create(inventory=self.inventory, item=item, quantity=quantity)
+
+        session = self.client.session
+        session['hero_id'] = self.hero.id
+        session.save()
+
+        response = self.client.get('/inventory/')
+        self.assertEqual(response.status_code, 200)
+        for category, expected in (
+            ('weapons', self.weapon), ('armor', self.armor),
+            ('accessories', accessory), ('consumables', self.consumable),
+            ('other_items', self.other_item),
+        ):
+            with self.subTest(category=category):
+                self.assertEqual(response.context[category], [expected])
+                self.assertIsInstance(response.context[category][0], type(expected))
+        self.assertEqual(response.context['weapons'][0].attack_bonus, 15)
+        self.assertEqual(response.context['consumables'][0].heal_amount, 30)
+        self.assertEqual(response.context['total_items'], 7)
+        self.assertEqual(response.context['total_value'], 345)
 
     def test_item_detail_weapon(self):
         """Test item detail view for weapon"""

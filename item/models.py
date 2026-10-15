@@ -173,7 +173,9 @@ class Inventory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def all(self):
-        return InventoryItem.objects.filter(inventory=self).select_related('item')
+        # Prefetch through Item's polymorphic manager so subclasses and their
+        # stats survive loading; select_related only constructs base Item rows.
+        return InventoryItem.objects.filter(inventory=self).prefetch_related('item')
 
 class InventoryItem(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
