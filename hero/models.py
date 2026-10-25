@@ -8,7 +8,8 @@ class Hero(models.Model):
     name = models.CharField(max_length=100, unique=True, null=False)
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
-    hero_class = models.ForeignKey("HeroClass", on_delete=models.CASCADE, null=False)
+    hero_class = models.ForeignKey(
+        "HeroClass", on_delete=models.CASCADE, null=False)
 
     # Primary Stats (BATTLE_SYSTEM.md)
     max_health = models.IntegerField(default=100)  # HP
@@ -29,6 +30,9 @@ class Hero(models.Model):
 
     is_in_combat = models.BooleanField(default=False)
 
+    dungeon_run = models.JSONField(default=dict, blank=True)
+    dungeon_revision = models.IntegerField(default=0)
+
     inventory = models.ForeignKey(
         "item.Inventory", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -43,15 +47,22 @@ class Hero(models.Model):
         self.level += 1
 
         # Increase stats based on class bonuses (min-max ranges)
-        self.attack += random.randint(self.hero_class.atk_gain_min, self.hero_class.atk_gain_max)
-        self.defense += random.randint(self.hero_class.def_gain_min, self.hero_class.def_gain_max)
-        self.magic += random.randint(self.hero_class.mag_gain_min, self.hero_class.mag_gain_max)
-        self.magic_defense += random.randint(self.hero_class.mdef_gain_min, self.hero_class.mdef_gain_max)
-        self.speed += random.randint(self.hero_class.spd_gain_min, self.hero_class.spd_gain_max)
+        self.attack += random.randint(self.hero_class.atk_gain_min,
+                                      self.hero_class.atk_gain_max)
+        self.defense += random.randint(self.hero_class.def_gain_min,
+                                       self.hero_class.def_gain_max)
+        self.magic += random.randint(self.hero_class.mag_gain_min,
+                                     self.hero_class.mag_gain_max)
+        self.magic_defense += random.randint(
+            self.hero_class.mdef_gain_min, self.hero_class.mdef_gain_max)
+        self.speed += random.randint(self.hero_class.spd_gain_min,
+                                     self.hero_class.spd_gain_max)
 
         # Increase HP and MP
-        hp_gain = random.randint(self.hero_class.hp_gain_min, self.hero_class.hp_gain_max)
-        mp_gain = random.randint(self.hero_class.mp_gain_min, self.hero_class.mp_gain_max)
+        hp_gain = random.randint(
+            self.hero_class.hp_gain_min, self.hero_class.hp_gain_max)
+        mp_gain = random.randint(
+            self.hero_class.mp_gain_min, self.hero_class.mp_gain_max)
 
         self.max_health += hp_gain
         self.max_mana += mp_gain
@@ -201,7 +212,8 @@ class Hero(models.Model):
         """
         Heal hero by specified amount
         """
-        self.current_health = min(self.max_health, self.current_health + amount)
+        self.current_health = min(
+            self.max_health, self.current_health + amount)
         self.save()
 
     def add_to_inventory(self, item, quantity=1):
@@ -215,6 +227,24 @@ class Hero(models.Model):
         )
         inventory_item.quantity = inventory_item.quantity + quantity
         inventory_item.save(update_fields=['quantity'])
+
+    def store_dungeon_run(self, dungeon_data):
+        """Store the current dungeon run data in the hero's record"""
+        if not self.validate_dungeon_data(dungeon_data):
+            raise ValueError("Invalid dungeon data format.")
+        self.dungeon_run = dungeon_data
+        self.dungeon_revision += 1
+        self.save(update_fields=['dungeon_run', 'dungeon_revision'])
+
+    def validate_dungeon_data(self, dungeon_data):
+        """Validate the structure of the dungeon data"""
+        required_keys = {'current_floor', 'current_encounter',
+                         'phase', 'last_result', 'path_left', 'path_right'}
+        if not isinstance(dungeon_data, dict):
+            return False
+        if not required_keys.issubset(dungeon_data.keys()):
+            return False
+        return True
 
     def __str__(self):
         return self.name
