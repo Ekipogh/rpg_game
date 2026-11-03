@@ -161,8 +161,8 @@ class DungeonTests(TestCase):
         self.assertRedirects(self.client.get(reverse('dungeon')), reverse('home'))
         self.client.get(reverse('select_hero', args=[self.hero.pk]))
         self.start()
-        self.assertContains(self.client.get(reverse('home')), 'Resume expedition')
-        self.assertNotContains(self.client.get(reverse('home')), 'setInterval(heal, 1000)')
+        self.assertRedirects(self.client.get(reverse('home')), reverse('dungeon'),
+                             fetch_redirect_response=False)
 
     def test_missing_hero_invalid_forms_and_stale_post(self):
         self.assertRedirects(Client().get(reverse('dungeon')), reverse('index'), fetch_redirect_response=False)
