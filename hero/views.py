@@ -73,7 +73,8 @@ def dungeon_view(request, encounter_kind=None):
             return redirect('dungeon')
         template = 'hero/dungeon.html'
     return render(request, template, {
-        'hero_name': hero.name, 'health': hero.current_health, 'max_health': hero.max_health,
+        'hero_id': hero.pk, 'hero_name': hero.name, 'health': hero.current_health,
+        'max_health': hero.max_health,
         'floor': run['current_floor'], 'phase': run['phase'],
         'result': run['last_result'], 'revision': hero.dungeon_revision,
         'title': encounter.definition.title, 'description': encounter.definition.description,
@@ -83,10 +84,12 @@ def dungeon_view(request, encounter_kind=None):
 
 @require_POST
 def dungeon_action_view(request):
-    hero_id = request.session.get('hero_id')
-    if not hero_id or not Hero.objects.filter(pk=hero_id).exists():
+    selected_hero_id = request.session.get('hero_id')
+    hero = Hero.objects.filter(pk=selected_hero_id).first() if selected_hero_id else None
+    if not hero:
         return redirect('index')
     try:
+        originating_hero_id = int(request.POST['hero_id'])
         revision = int(request.POST['revision'])
         raw_choice = request.POST.get('choice')
         if raw_choice is not None and raw_choice not in ('0', '1'):
@@ -94,7 +97,9 @@ def dungeon_action_view(request):
         choice = int(raw_choice) if raw_choice is not None else None
     except (KeyError, ValueError):
         return HttpResponseBadRequest('Invalid dungeon action.')
-    outcome = apply_action(hero_id, request.POST.get('action'), revision, choice)
+    if originating_hero_id != hero.pk:
+        return HttpResponseBadRequest('Invalid dungeon action.')
+    outcome = apply_action(hero.pk, request.POST.get('action'), revision, choice)
     if outcome == 'invalid':
         return HttpResponseBadRequest('Invalid dungeon action.')
     if outcome in ('retreat', 'defeat'):

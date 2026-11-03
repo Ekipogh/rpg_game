@@ -140,6 +140,7 @@ class DungeonTests(TestCase):
         response = self.client.get(reverse('dungeon'))
         for label in ('Left path', 'Right path', 'Retreat'):
             self.assertContains(response, label, count=1)
+        self.assertContains(response, f'name="hero_id" value="{self.hero.pk}"', count=2)
         for side in ('path_left', 'path_right'):
             encounter = self.hero.dungeon_run[side]
             self.assertNotContains(response, encounter['id'])
@@ -150,9 +151,12 @@ class DungeonTests(TestCase):
         session = secure.session
         session['hero_id'] = self.hero.pk
         session.save()
-        self.assertEqual(secure.post(reverse('dungeon_action'), {'action': 'retreat', 'revision': self.hero.dungeon_revision}).status_code, 403)
+        self.assertEqual(secure.post(reverse('dungeon_action'), {
+            'action': 'retreat', 'hero_id': self.hero.pk,
+            'revision': self.hero.dungeon_revision}).status_code, 403)
         secure.get(reverse('dungeon'))
         response = secure.post(reverse('dungeon_action'), {'action': 'retreat', 'revision': self.hero.dungeon_revision,
+                               'hero_id': self.hero.pk,
                                'csrfmiddlewaretoken': secure.cookies['csrftoken'].value})
         self.assertRedirects(response, reverse('home'), fetch_redirect_response=False)
         self.assertContains(secure.get(reverse('home')), 'You retreated')
@@ -168,9 +172,47 @@ class DungeonTests(TestCase):
         self.assertRedirects(Client().get(reverse('dungeon')), reverse('index'), fetch_redirect_response=False)
         self.assertRedirects(self.client.get(reverse('dungeon')), reverse('home'))
         self.start()
-        for data in ({}, {'revision': 'x'}, {'revision': 1, 'action': 'choose', 'choice': '5'}):
+        for data in ({}, {'revision': 'x'}, {'revision': 1, 'action': 'choose', 'choice': '5'},
+                     {'hero_id': 'invalid', 'revision': 1, 'action': 'resolve'}):
             self.assertEqual(self.client.post(reverse('dungeon_action'), data).status_code, 400)
-        self.assertRedirects(self.client.post(reverse('dungeon_action'), {'action': 'resolve', 'revision': 0}), reverse('dungeon'), fetch_redirect_response=False)
+        self.assertRedirects(self.client.post(reverse('dungeon_action'), {
+            'action': 'resolve', 'hero_id': self.hero.pk, 'revision': 0}),
+            reverse('dungeon'), fetch_redirect_response=False)
+
+    def test_action_rejects_form_from_another_hero_with_matching_revision(self):
+        self.start()
+        other = Hero.objects.create(name='Other', hero_class=self.hero.hero_class)
+        self.assertEqual(enter_or_resume(other.pk), 'success')
+        other.refresh_from_db()
+        self.assertEqual(self.hero.dungeon_revision, other.dungeon_revision)
+
+        response = self.client.get(reverse('dungeon_fight'))
+        self.assertEqual(response.context['hero_id'], self.hero.pk)
+        self.assertContains(response, f'name="hero_id" value="{self.hero.pk}"')
+        form_data = {
+            'action': 'resolve',
+            'hero_id': response.context['hero_id'],
+            'revision': response.context['revision'],
+        }
+        original_hero_state = (self.hero.dungeon_run, self.hero.current_health,
+                               self.hero.experience, self.hero.dungeon_revision)
+        original_other_state = (other.dungeon_run, other.current_health,
+                                other.experience, other.dungeon_revision)
+
+        self.client.get(reverse('select_hero', args=[other.pk]))
+        response = self.client.post(reverse('dungeon_action'), form_data)
+
+        self.assertEqual(response.status_code, 400)
+        self.hero.refresh_from_db()
+        other.refresh_from_db()
+        self.assertEqual(
+            (self.hero.dungeon_run, self.hero.current_health,
+             self.hero.experience, self.hero.dungeon_revision),
+            original_hero_state)
+        self.assertEqual(
+            (other.dungeon_run, other.current_health,
+             other.experience, other.dungeon_revision),
+            original_other_state)
 
 
     def test_earned_xp_survives_retreat_and_hero_switch(self):
@@ -209,7 +251,8 @@ class DungeonTests(TestCase):
         self.start()
         Hero.objects.filter(pk=self.hero.pk).update(current_health=1)
         response = self.client.post(reverse('dungeon_action'), {
-            'action': 'resolve', 'revision': self.hero.dungeon_revision}, follow=True)
+            'action': 'resolve', 'hero_id': self.hero.pk,
+            'revision': self.hero.dungeon_revision}, follow=True)
         self.assertContains(response, 'returned home with 1 HP')
 
     def test_encounter_pages_and_canonical_navigation(self):
@@ -235,7 +278,8 @@ class DungeonTests(TestCase):
                 self.assertEqual(self.hero.dungeon_run, run)
                 self.assertEqual(self.hero.dungeon_revision, revision)
                 response = self.client.post(reverse('dungeon_action'), {
-                    'action': 'resolve', 'revision': revision}, follow=True)
+                    'action': 'resolve', 'hero_id': self.hero.pk,
+                    'revision': revision}, follow=True)
                 self.assertTemplateUsed(response, 'hero/dungeon.html')
                 self.assertContains(response, 'Choose your next path')
                 self.assertNotContains(response, 'encounter placeholder')
@@ -243,6 +287,7 @@ class DungeonTests(TestCase):
                 self.hero.refresh_from_db()
                 response = self.client.post(reverse('dungeon_action'), {
                     'action': 'choose', 'choice': 0,
+                    'hero_id': self.hero.pk,
                     'revision': self.hero.dungeon_revision}, follow=True)
                 self.hero.refresh_from_db()
                 kind = Encounter.from_dict(self.hero.dungeon_run['current_encounter']).kind

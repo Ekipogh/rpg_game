@@ -19,6 +19,7 @@
         <h2 class="card-title">Choose your next path</h2>
         <form method="post" action="{% url 'dungeon_action' %}" class="d-grid gap-2">
           {% csrf_token %}
+          <input type="hidden" name="hero_id" value="{{ hero_id }}" />
           <input type="hidden" name="revision" value="{{ revision }}" />
           <input type="hidden" name="action" value="choose" />
           <button class="btn btn-primary" name="choice" value="0">Left path</button>
@@ -28,6 +29,7 @@
         {% if phase == 'choices' %}
           <form method="post" action="{% url 'dungeon_action' %}" class="d-grid mt-2">
             {% csrf_token %}
+            <input type="hidden" name="hero_id" value="{{ hero_id }}" />
             <input type="hidden" name="revision" value="{{ revision }}" />
             <button class="btn btn-outline-warning" name="action" value="retreat">Retreat</button>
           </form>

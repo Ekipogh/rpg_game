@@ -23,6 +23,7 @@
         {% endblock %}
         <form method="post" action="{% url 'dungeon_action' %}" class="d-grid gap-2">
           {% csrf_token %}
+          <input type="hidden" name="hero_id" value="{{ hero_id }}" />
           <input type="hidden" name="revision" value="{{ revision }}" />
           <button class="btn btn-primary" name="action" value="resolve">Continue</button>
         </form>
