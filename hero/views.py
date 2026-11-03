@@ -15,6 +15,8 @@ def home_view(request):
     hero = Hero.objects.filter(id=hero_id).first() if hero_id else None
     if not hero:
         return redirect('index')
+    if hero.dungeon_run:
+        return redirect('dungeon')
     return render(request, 'hero/home.html', {'hero': hero})
 
 

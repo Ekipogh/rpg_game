@@ -123,11 +123,10 @@
             <span style="font-size: 2rem;">⚔️</span>
           </div>
           <h5 class="card-title fw-semibold text-gray-900 dark:text-white">Actions</h5>
-          <p class="text-muted dark:!text-gray-400">Explore mystery paths, survive encounters, and retreat with earned XP.</p>
           <div class="d-grid gap-2">
-            <button class="btn btn-outline-danger hover:bg-red-50 dark:hover:bg-red-900 dark:border-red-600 dark:text-red-400 d-flex align-items-center justify-content-center" unicorn:click="navigate_to_battle">
+            <button id="dungeon-button" class="btn btn-outline-danger hover:bg-red-50 dark:hover:bg-red-900 dark:border-red-600 dark:text-red-400 d-flex align-items-center justify-content-center" unicorn:click="navigate_to_battle"{% if hero.not_healed %} disabled{% endif %}>
               <span class="me-2">⚔️</span>
-              {% if hero.dungeon_run %}Resume expedition{% else %}Battle{% endif %}
+              {% if hero.dungeon_run %}Resume expedition{% else %}Explore the dungeon{% endif %}
             </button>
             <button class="btn btn-outline-info hover:bg-blue-50 dark:hover:bg-blue-900 dark:border-blue-600 dark:text-blue-400 d-flex align-items-center justify-content-center" unicorn:click="navigate_to_shop">
               <span class="me-2">🛒</span>

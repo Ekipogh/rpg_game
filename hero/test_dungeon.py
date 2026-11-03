@@ -68,6 +68,27 @@ class DungeonTests(TestCase):
         self.assertEqual(self.hero.dungeon_revision, revision)
         self.assertTrue(self.hero.is_in_combat)
 
+    def test_dungeon_entry_requires_80_percent_health(self):
+        self.hero.current_health = 79
+        self.hero.save(update_fields=['current_health'])
+        self.assertEqual(enter_or_resume(self.hero.pk), 'not_healed')
+        self.hero.refresh_from_db()
+        self.assertFalse(self.hero.dungeon_run)
+
+        self.hero.current_health = 80
+        self.hero.save(update_fields=['current_health'])
+        self.assertEqual(enter_or_resume(self.hero.pk), 'success')
+
+    def test_dungeon_button_enabled_at_80_percent_and_disabled_below(self):
+        for health, is_enabled in ((79, False), (80, True)):
+            with self.subTest(health=health):
+                Hero.objects.filter(pk=self.hero.pk).update(current_health=health)
+                response = self.client.get(reverse('home'))
+                button = 'id="dungeon-button"'
+                self.assertContains(response, button)
+                button_markup = response.content.decode().split(button, 1)[1].split('>', 1)[0]
+                self.assertEqual(' disabled' in button_markup, not is_enabled)
+
     def test_duplicates_invalid_phases_and_choices(self):
         self.start()
         revision = self.hero.dungeon_revision

@@ -76,10 +76,10 @@ def enter_or_resume(hero_id):
     hero = Hero.objects.filter(pk=hero_id).first()
     if hero is None:
         return 'invalid'
+    if hero.not_healed:
+        return 'not_healed'
     if hero.dungeon_run:
         return 'success'
-    if hero.current_health <= 0:
-        return 'invalid'
     updated = _snapshot(hero).update(dungeon_run=create_run(), is_in_combat=True,
                                      dungeon_revision=F('dungeon_revision') + 1)
     return 'success' if updated else 'stale'

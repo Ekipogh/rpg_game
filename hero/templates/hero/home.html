@@ -17,6 +17,7 @@
         var max_health = {{ hero.max_health }};
         var healthFill = document.getElementById("health-fill");
         var healthText = document.getElementById("health-text");
+        var dungeonButton = document.getElementById("dungeon-button");
         var healthRegenRate = {{ hero.health_regeneration_rate }};
 
         var current_mana = {{ hero.current_mana }};
@@ -34,6 +35,7 @@
                 var healthPercentage = (current_health / max_health) * 100;
                 healthFill.style.width = healthPercentage + "%";
                 healthText.textContent = current_health + " / " + max_health + " HP";
+                dungeonButton.disabled = max_health <= 0 || current_health * 5 < max_health * 4;
             }
         }
 
