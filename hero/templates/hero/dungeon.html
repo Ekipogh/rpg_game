@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}
+  Dungeon - Floor {{ floor }}
+{% endblock %}
+{% block content %}
+  <div class="container py-4 text-gray-900 dark:text-gray-100" style="max-width: 720px;">
+    {% for message in messages %}
+      <div class="alert alert-info" role="status">{{ message }}</div>
+    {% endfor %}
+    <h1>Floor {{ floor }}</h1>
+    <p>{{ hero_name }} &middot; {{ health }} / {{ max_health }} HP</p>
+    <div class="card shadow-sm !bg-white dark:!bg-gray-800 mb-3">
+      <div class="card-body">
+        {% if result %}
+        <div class="alert alert-info" role="status">
+          <p role="status">{{ result.title }}: HP {{ result.health_change }}, XP +{{ result.experience_change }}.</p>
+        </div>
+        {% endif %}
+        <h2 class="card-title">Choose your next path</h2>
+        <form method="post" action="{% url 'dungeon_action' %}" class="d-grid gap-2">
+          {% csrf_token %}
+          <input type="hidden" name="hero_id" value="{{ hero_id }}" />
+          <input type="hidden" name="revision" value="{{ revision }}" />
+          <input type="hidden" name="action" value="choose" />
+          <button class="btn btn-primary" name="choice" value="0">Left path</button>
+          <button class="btn btn-primary" name="choice" value="1">Right path</button>
+          <a href="{% url 'inventory' %}" class="btn btn-outline-secondary dark:text-gray-100">View inventory</a>
+        </form>
+        {% if phase == 'choices' %}
+          <form method="post" action="{% url 'dungeon_action' %}" class="d-grid mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="hero_id" value="{{ hero_id }}" />
+            <input type="hidden" name="revision" value="{{ revision }}" />
+            <button class="btn btn-outline-warning" name="action" value="retreat">Retreat</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

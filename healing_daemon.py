@@ -20,6 +20,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
 
 from hero.models import Hero
+from hero.recovery import restore_resources
 from django.db.models import F
 
 
@@ -129,9 +130,10 @@ class HealingDaemon:
 
                 # Heal the hero
                 old_health = hero.current_health
-                hero.current_health = min(
-                    hero.current_health + hero.health_regeneration_rate, hero.max_health)
-                hero.save()
+                if not restore_resources(hero_id, health_amount=hero.health_regeneration_rate):
+                    time.sleep(self.heal_interval)
+                    continue
+                hero.refresh_from_db(fields=['current_health'])
 
                 # Update last heal time
                 self.healing_heroes[hero_id]['last_heal'] = datetime.now()
@@ -165,9 +167,10 @@ class HealingDaemon:
 
                 # Restore mana
                 old_mana = hero.current_mana
-                hero.current_mana = min(
-                    hero.current_mana + hero.mana_regeneration_rate, hero.max_mana)
-                hero.save()
+                if not restore_resources(hero_id, mana_amount=hero.mana_regeneration_rate):
+                    time.sleep(self.mana_restore_interval)
+                    continue
+                hero.refresh_from_db(fields=['current_mana'])
 
                 # Update last restore time
                 self.mana_restoring_heroes[hero_id]['last_restore'] = datetime.now(
@@ -243,8 +246,8 @@ class HealingDaemon:
                 return False
 
             old_health = hero.current_health
-            hero.current_health = hero.max_health
-            hero.save()
+            if not restore_resources(hero_id, health_amount=hero.max_health):
+                return False
 
             # Stop ongoing healing since hero is now full
             self.stop_hero_healing(hero_id)
@@ -263,7 +266,7 @@ class HealingDaemon:
             hero = Hero.objects.get(id=hero_id)
             old_health = hero.current_health
             hero.current_health = max(0, hero.current_health - damage)
-            hero.save()
+            hero.save(update_fields=['current_health'])
 
             print(
                 f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")

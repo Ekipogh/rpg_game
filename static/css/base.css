@@ -21,3 +21,29 @@
 body {
     font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
 }
+/* Bootstrap components share Tailwind's page palette in dark mode. */
+[data-bs-theme="dark"] {
+    --bs-body-color: #f3f4f6;
+    --bs-body-bg: #111827;
+    --bs-secondary-color: #d1d5db;
+    --bs-secondary-bg: #374151;
+    --bs-tertiary-bg: #1f2937;
+    --bs-border-color: #4b5563;
+}
+
+[data-bs-theme="dark"] .card {
+    --bs-card-color: var(--bs-body-color);
+    --bs-card-bg: #1f2937;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: #374151;
+    color: #f3f4f6;
+    border-color: #6b7280;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: #d1d5db;
+    opacity: 1;
+}

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 {% load item_extras %}
 <html lang="en" class="">
@@ -14,18 +15,12 @@
       }
     </script>
 
-    <!-- Dark mode initialization -->
-    <script>
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    </script>
+    <script src="{% static 'js/theme.js' %}"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <style>
       .equipment-slot {
         transition: all 0.3s ease;
@@ -60,7 +55,7 @@
   <body class="!bg-white dark:!bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
     <!-- Theme Toggle Button -->
     <div class="fixed top-4 right-4 z-50">
-      <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+      <button id="theme-toggle" type="button" aria-label="Switch color theme" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
         <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
         </svg>
@@ -104,7 +99,7 @@
                 <div class="row g-3">
                   {% for slot in equipment_slots %}
                     <div class="col-lg-4 col-md-6">
-                      <div class="equipment-slot card h-100 !bg-gray-50 dark:!bg-gray-600 border-2 border-dashed border-gray-300 dark:border-gray-500" data-slot="{{ slot.value }}" data-slot-label="{{ slot.name|title }}">
+                      <div class="equipment-slot card h-100 !bg-gray-50 dark:!bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-500" data-slot="{{ slot.value }}" data-slot-label="{{ slot.name|title }}">
                         <div class="card-body text-center">
                           {% if equipped_items|lookup:slot.value %}
                             {% with equipped_items|lookup:slot.value as equipped_item %}
@@ -119,7 +114,7 @@
                                   {% endif %}
                                 </div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ equipped_item.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ slot.name|title }} Slot</small>
+                                <small class="text-primary dark:!text-blue-400">{{ slot.name|title }} Slot</small>
                                 <p class="text-muted dark:!text-gray-400 small mt-2 mb-3">{{ equipped_item.description|default:'An equipped item.' }}</p>
                                 <div class="d-flex gap-2">
                                   <button class="btn btn-outline-danger btn-sm flex-fill dark:border-red-500 dark:text-red-400 dark:hover:bg-red-700" onclick="unequipItem('{{ slot.value }}')">
@@ -143,7 +138,7 @@
                                 {% endif %}
                               </div>
                               <h6 class="text-muted dark:!text-gray-400">{{ slot.name|title }} Slot</h6>
-                              <small class="text-muted dark:!text-gray-500">No item equipped</small>
+                              <small class="text-muted dark:!text-gray-300">No item equipped</small>
                             </div>
                           {% endif %}
                         </div>
@@ -177,11 +172,11 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ weapon.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ weapon.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ weapon.value|default:0 }} gold</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                            <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
@@ -221,11 +216,11 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ armor_piece.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ armor_piece.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ armor_piece.value|default:0 }} gold</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                            <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">DEF +{{ armor_piece.defense_bonus|default:0 }}, HP +{{ armor_piece.health_bonus|default:0 }} • {{ armor_piece.armor_type|default:'leather'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
@@ -260,16 +255,16 @@
                         <div class="card item-card h-100 rarity-{{ accessory.rarity|default:'common' }} !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="{{ accessory.id }}" data-category="accessory" onclick="viewItem({{ accessory.id }})" style="cursor: pointer;">
                           <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                              <div class="bg-warning dark:bg-yellow-600 text-dark dark:text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <div class="bg-warning dark:bg-yellow-600 text-dark dark:!text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                 <span>💍</span>
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ accessory.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ accessory.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ accessory.value|default:0 }} gold</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ accessory.description|default:'A valuable accessory.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                            <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">
                                 {% if accessory.critical_bonus > 0 %}CRIT +{{ accessory.critical_bonus }}% • {% endif %}{{ accessory.accessory_type|default:'ring'|title }}
                               </small>
@@ -311,11 +306,11 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ consumable.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ consumable.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ consumable.value|default:0 }} gold</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ consumable.description|default:'A consumable item with special effects.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                            <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">
                                 {% if consumable.heal_amount > 0 %}
                                   +{{ consumable.heal_amount }} HP
@@ -365,11 +360,11 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ item.name }}</h6>
-                                <small class="text-primary dark:text-blue-400">{{ item.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ item.value|default:0 }} gold</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ item.description|default:'A mysterious item.' }}</p>
-                            <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                            <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">General Item</small>
                             </div>
                             <div class="d-flex gap-2">
@@ -476,7 +471,7 @@
           <div class="empty-slot text-center py-3">
             <div class="mb-3" style="font-size: 2.5rem; opacity: 0.3;">${icon}</div>
             <h6 class="text-muted dark:!text-gray-400">${slotLabel} Slot</h6>
-            <small class="text-muted dark:!text-gray-500">No item equipped</small>
+            <small class="text-muted dark:!text-gray-300">No item equipped</small>
           </div>
         `
       }
@@ -499,7 +494,7 @@
               <span class="badge ${badgeClass} fs-6">${icon}</span>
             </div>
             <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">${itemData.name}</h6>
-            <small class="text-primary dark:text-blue-400">${slotLabel} Slot</small>
+            <small class="text-primary dark:!text-blue-400">${slotLabel} Slot</small>
             <p class="text-muted dark:!text-gray-400 small mt-2 mb-3">${description}</p>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-danger btn-sm flex-fill dark:border-red-500 dark:text-red-400 dark:hover:bg-red-700" onclick="unequipItem('${slotValue}')">
@@ -653,16 +648,16 @@
             <div class="card item-card h-100 !bg-white dark:!bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-0 dark:border-gray-600" data-item-id="${item.id}" data-category="${category}" onclick="viewItem(${item.id})" style="cursor: pointer;">
               <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
-                  <div class="${meta.badgeClass} ${category === 'consumable' ? 'dark:bg-green-700' : category === 'weapon' ? 'dark:bg-red-700' : category === 'armor' ? 'dark:bg-blue-700' : category === 'accessory' || category === 'offhand' ? 'dark:bg-yellow-600' : 'dark:bg-gray-600'} ${category === 'accessory' || category === 'offhand' ? 'text-dark dark:text-white' : 'text-white'} rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <div class="${meta.badgeClass} ${category === 'consumable' ? 'dark:bg-green-700' : category === 'weapon' ? 'dark:bg-red-700' : category === 'armor' ? 'dark:bg-blue-700' : category === 'accessory' || category === 'offhand' ? 'dark:bg-yellow-600' : 'dark:bg-gray-600'} ${category === 'accessory' || category === 'offhand' ? 'text-dark dark:!text-white' : 'text-white'} rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                     <span>${meta.icon}</span>
                   </div>
                   <div>
                     <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">${escapeHtml(item.name)}</h6>
-                    <small class="text-primary dark:text-blue-400">${value} gold</small>
+                    <small class="text-primary dark:!text-blue-400">${value} gold</small>
                   </div>
                 </div>
                 <p class="text-muted dark:!text-gray-400 small mb-2">${description || 'A mysterious item.'}</p>
-                <div class="bg-light dark:!bg-gray-600 rounded p-2 mb-3">
+                <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                   <small class="text-muted dark:!text-gray-300">${statsLine || 'General Item'}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -823,29 +818,6 @@
         })
       }
 
-      // Theme Toggle Script
-      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-      const themeToggleBtn = document.getElementById('theme-toggle');
-
-      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        themeToggleLightIcon.classList.remove('hidden');
-      } else {
-        themeToggleDarkIcon.classList.remove('hidden');
-      }
-
-      themeToggleBtn.addEventListener('click', function() {
-        themeToggleDarkIcon.classList.toggle('hidden');
-        themeToggleLightIcon.classList.toggle('hidden');
-
-        if (document.documentElement.classList.contains('dark')) {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        } else {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-        }
-      });
     </script>
   </body>
 </html>

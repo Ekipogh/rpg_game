@@ -2,7 +2,7 @@
 {% load static %}
 <div class="container py-4" style="max-width: 800px; min-height: 100vh;">
   <div class="text-center mb-4">
-    <h2 class="display-5 fw-bold text-primary dark:text-blue-400">Create a Character</h2>
+    <h2 class="display-5 fw-bold text-primary dark:!text-blue-400">Create a Character</h2>
     <p class="lead text-muted dark:!text-gray-400">Choose a class and distribute your stat points.</p>
   </div>
 
@@ -24,31 +24,31 @@
         <h5 class="fw-semibold mb-3 text-gray-900 dark:text-white">Select a Class</h5>
         <div class="row g-3">
           <div class="col-4">
-            <div class="card h-100 {% if selected_class == 'Warrior' %}border-primary bg-primary bg-opacity-10 dark:bg-blue-900 dark:bg-opacity-30{% else %}border-light dark:border-gray-600{% endif %} dark:!bg-gray-700"
+            <div class="card h-100 {% if selected_class == 'Warrior' %}border-primary bg-primary bg-opacity-10 dark:!bg-blue-900{% else %}border-light dark:border-gray-600 dark:!bg-gray-700{% endif %}"
                  style="cursor: pointer;" unicorn:click="select_class('Warrior')">
               <div class="card-body text-center p-3">
                 <img src="{% static 'images/warrior.png' %}" alt="Warrior" class="img-fluid mb-2" style="max-height: 60px;" />
-                <h6 class="card-title mb-0 {% if selected_class == 'Warrior' %}text-primary dark:text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Warrior</h6>
+                <h6 class="card-title mb-0 {% if selected_class == 'Warrior' %}text-primary dark:!text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Warrior</h6>
               </div>
             </div>
           </div>
 
           <div class="col-4">
-            <div class="card h-100 {% if selected_class == 'Wizard' %}border-primary bg-primary bg-opacity-10 dark:bg-blue-900 dark:bg-opacity-30{% else %}border-light dark:border-gray-600{% endif %} dark:!bg-gray-700"
+            <div class="card h-100 {% if selected_class == 'Wizard' %}border-primary bg-primary bg-opacity-10 dark:!bg-blue-900{% else %}border-light dark:border-gray-600 dark:!bg-gray-700{% endif %}"
                  style="cursor: pointer;" unicorn:click="select_class('Wizard')">
               <div class="card-body text-center p-3">
                 <img src="{% static 'images/wizard.png' %}" alt="Wizard" class="img-fluid mb-2" style="max-height: 60px;" />
-                <h6 class="card-title mb-0 {% if selected_class == 'Wizard' %}text-primary dark:text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Wizard</h6>
+                <h6 class="card-title mb-0 {% if selected_class == 'Wizard' %}text-primary dark:!text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Wizard</h6>
               </div>
             </div>
           </div>
 
           <div class="col-4">
-            <div class="card h-100 {% if selected_class == 'Ranger' %}border-primary bg-primary bg-opacity-10 dark:bg-blue-900 dark:bg-opacity-30{% else %}border-light dark:border-gray-600{% endif %} dark:!bg-gray-700"
+            <div class="card h-100 {% if selected_class == 'Ranger' %}border-primary bg-primary bg-opacity-10 dark:!bg-blue-900{% else %}border-light dark:border-gray-600 dark:!bg-gray-700{% endif %}"
                  style="cursor: pointer;" unicorn:click="select_class('Ranger')">
               <div class="card-body text-center p-3">
                 <img src="{% static 'images/ranger.png' %}" alt="Ranger" class="img-fluid mb-2" style="max-height: 60px;" />
-                <h6 class="card-title mb-0 {% if selected_class == 'Ranger' %}text-primary dark:text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Ranger</h6>
+                <h6 class="card-title mb-0 {% if selected_class == 'Ranger' %}text-primary dark:!text-blue-400 fw-bold{% else %}text-gray-900 dark:text-white{% endif %}">Ranger</h6>
               </div>
             </div>
           </div>
@@ -64,7 +64,7 @@
       <div class="mb-4">
         <div class="row g-3">
           <div class="col-md-6">
-            <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
+            <div class="card bg-light dark:!bg-gray-700 border-0 dark:border-gray-600">
               <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center">
@@ -83,7 +83,7 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
+            <div class="card bg-light dark:!bg-gray-700 border-0 dark:border-gray-600">
               <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center">
@@ -102,7 +102,7 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
+            <div class="card bg-light dark:!bg-gray-700 border-0 dark:border-gray-600">
               <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center">
@@ -121,7 +121,7 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
+            <div class="card bg-light dark:!bg-gray-700 border-0 dark:border-gray-600">
               <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center">
@@ -140,7 +140,7 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card bg-light dark:!bg-gray-600 border-0 dark:border-gray-600">
+            <div class="card bg-light dark:!bg-gray-700 border-0 dark:border-gray-600">
               <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center">

@@ -29,6 +29,9 @@ class Hero(models.Model):
 
     is_in_combat = models.BooleanField(default=False)
 
+    dungeon_run = models.JSONField(default=dict, blank=True)
+    dungeon_revision = models.IntegerField(default=0)
+
     inventory = models.ForeignKey(
         "item.Inventory", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -43,15 +46,29 @@ class Hero(models.Model):
         self.level += 1
 
         # Increase stats based on class bonuses (min-max ranges)
-        self.attack += random.randint(self.hero_class.atk_gain_min, self.hero_class.atk_gain_max)
-        self.defense += random.randint(self.hero_class.def_gain_min, self.hero_class.def_gain_max)
-        self.magic += random.randint(self.hero_class.mag_gain_min, self.hero_class.mag_gain_max)
-        self.magic_defense += random.randint(self.hero_class.mdef_gain_min, self.hero_class.mdef_gain_max)
-        self.speed += random.randint(self.hero_class.spd_gain_min, self.hero_class.spd_gain_max)
+        self.attack += random.randint(
+            self.hero_class.atk_gain_min, self.hero_class.atk_gain_max
+        )
+        self.defense += random.randint(
+            self.hero_class.def_gain_min, self.hero_class.def_gain_max
+        )
+        self.magic += random.randint(
+            self.hero_class.mag_gain_min, self.hero_class.mag_gain_max
+        )
+        self.magic_defense += random.randint(
+            self.hero_class.mdef_gain_min, self.hero_class.mdef_gain_max
+        )
+        self.speed += random.randint(
+            self.hero_class.spd_gain_min, self.hero_class.spd_gain_max
+        )
 
         # Increase HP and MP
-        hp_gain = random.randint(self.hero_class.hp_gain_min, self.hero_class.hp_gain_max)
-        mp_gain = random.randint(self.hero_class.mp_gain_min, self.hero_class.mp_gain_max)
+        hp_gain = random.randint(
+            self.hero_class.hp_gain_min, self.hero_class.hp_gain_max
+        )
+        mp_gain = random.randint(
+            self.hero_class.mp_gain_min, self.hero_class.mp_gain_max
+        )
 
         self.max_health += hp_gain
         self.max_mana += mp_gain
@@ -105,7 +122,7 @@ class Hero(models.Model):
         """Calculate attack modifier from equipment and buffs"""
         mod = 0
         if self.weapon:
-            mod += getattr(self.weapon, 'attack_bonus', 0)
+            mod += getattr(self.weapon, "attack_bonus", 0)
         return mod
 
     @property
@@ -113,9 +130,9 @@ class Hero(models.Model):
         """Calculate defense modifier from equipment and buffs"""
         mod = 0
         if self.armor:
-            mod += getattr(self.armor, 'defense_bonus', 0)
+            mod += getattr(self.armor, "defense_bonus", 0)
         if self.accessory:
-            mod += getattr(self.accessory, 'defense_bonus', 0)
+            mod += getattr(self.accessory, "defense_bonus", 0)
         return mod
 
     @property
@@ -123,7 +140,7 @@ class Hero(models.Model):
         """Calculate magic modifier from equipment and buffs"""
         mod = 0
         if self.accessory:
-            mod += getattr(self.accessory, 'magic_bonus', 0)
+            mod += getattr(self.accessory, "magic_bonus", 0)
         return mod
 
     @property
@@ -131,7 +148,7 @@ class Hero(models.Model):
         """Calculate speed modifier from equipment and buffs"""
         mod = 0
         if self.accessory:
-            mod += getattr(self.accessory, 'speed_bonus', 0)
+            mod += getattr(self.accessory, "speed_bonus", 0)
         return mod
 
     @property
@@ -139,9 +156,9 @@ class Hero(models.Model):
         """Calculate magic defense modifier from equipment and buffs"""
         mod = 0
         if self.armor:
-            mod += getattr(self.armor, 'magic_defense_bonus', 0)
+            mod += getattr(self.armor, "magic_defense_bonus", 0)
         if self.accessory:
-            mod += getattr(self.accessory, 'magic_defense_bonus', 0)
+            mod += getattr(self.accessory, "magic_defense_bonus", 0)
         return mod
 
     @property
@@ -149,9 +166,9 @@ class Hero(models.Model):
         """Get equipped weapon item"""
         try:
             from item.models import Equipment, EquipmentSlot
+
             equipment_slot = EquipmentSlot.objects.filter(
-                equipment__hero=self,
-                slot=EquipmentSlots.WEAPON.value
+                equipment__hero=self, slot=EquipmentSlots.WEAPON.value
             ).first()
             return equipment_slot.item if equipment_slot else None
         except Exception:
@@ -162,9 +179,9 @@ class Hero(models.Model):
         """Get equipped armor item"""
         try:
             from item.models import Equipment, EquipmentSlot
+
             equipment_slot = EquipmentSlot.objects.filter(
-                equipment__hero=self,
-                slot=EquipmentSlots.ARMOR.value
+                equipment__hero=self, slot=EquipmentSlots.ARMOR.value
             ).first()
             return equipment_slot.item if equipment_slot else None
         except Exception:
@@ -175,9 +192,9 @@ class Hero(models.Model):
         """Get equipped accessory item"""
         try:
             from item.models import Equipment, EquipmentSlot
+
             equipment_slot = EquipmentSlot.objects.filter(
-                equipment__hero=self,
-                slot=EquipmentSlots.ACCESSORY.value
+                equipment__hero=self, slot=EquipmentSlots.ACCESSORY.value
             ).first()
             return equipment_slot.item if equipment_slot else None
         except Exception:
@@ -208,16 +225,45 @@ class Hero(models.Model):
         """Add item to hero's inventory"""
         if not self.inventory:
             self.inventory = Inventory.objects.create()
-            self.save(update_fields=['inventory'])
+            self.save(update_fields=["inventory"])
 
         inventory_item, created = InventoryItem.objects.get_or_create(
-            inventory=self.inventory, item=item, defaults={'quantity': 0}
+            inventory=self.inventory, item=item, defaults={"quantity": 0}
         )
         inventory_item.quantity = inventory_item.quantity + quantity
-        inventory_item.save(update_fields=['quantity'])
+        inventory_item.save(update_fields=["quantity"])
+
+    def store_dungeon_run(self, dungeon_data):
+        """Store the current dungeon run data in the hero's record"""
+        if not self.validate_dungeon_data(dungeon_data):
+            raise ValueError("Invalid dungeon data format.")
+        self.dungeon_run = dungeon_data
+        self.dungeon_revision += 1
+        self.save(update_fields=["dungeon_run", "dungeon_revision"])
+
+    def validate_dungeon_data(self, dungeon_data):
+        """Validate the structure of the dungeon data"""
+        required_keys = {
+            "current_floor",
+            "current_encounter",
+            "phase",
+            "last_result",
+            "path_left",
+            "path_right",
+        }
+        if not isinstance(dungeon_data, dict):
+            return False
+        if not required_keys.issubset(dungeon_data.keys()):
+            return False
+        return True
 
     def __str__(self):
         return self.name
+
+    @property
+    def not_healed(self):
+        """Check if the hero is at less than 80% of max health"""
+        return self.max_health <= 0 or self.current_health * 5 < self.max_health * 4
 
 
 class HeroClass(models.Model):

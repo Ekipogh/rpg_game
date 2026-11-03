@@ -119,6 +119,14 @@ class HeroModelTest(TestCase):
     def test_str_method(self):
         self.assertEqual(str(self.hero), "Test Hero")
         self.assertEqual(str(self.hero_class), "Warrior")
+        
+    def test_dungeon_run_store(self):
+        from .dungeon import create_run
+        run_data = create_run()
+        self.hero.store_dungeon_run(run_data)
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.dungeon_run, run_data)
+        self.assertEqual(self.hero.dungeon_revision, 1)
 
 class HeroClassModelTest(TestCase):
     def setUp(self):
