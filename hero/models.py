@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from item.models import EquipmentSlots, Inventory, InventoryItem
 
@@ -299,3 +300,51 @@ class HeroClass(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Monster(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+    level = models.IntegerField(default=1)
+    current_health = models.IntegerField(default=50)
+    max_health = models.IntegerField(default=50)
+    current_mana = models.IntegerField(default=20)
+    max_mana = models.IntegerField(default=20)
+    attack = models.IntegerField(default=5)
+    defense = models.IntegerField(default=5)
+    magic = models.IntegerField(default=5)
+    magic_defense = models.IntegerField(default=5)
+    speed = models.IntegerField(default=5)
+    accuracy = models.IntegerField(default=100)
+    evasion = models.IntegerField(default=0)
+    critical_chance = models.IntegerField(default=5)
+    critical_damage = models.FloatField(default=1.5)
+    THREAT_LEVEL_CHOICES = [
+        (1, "common"),
+        (2, "miniboss"),
+        (3, "boss"),
+    ]
+    threat_level = models.IntegerField(choices=THREAT_LEVEL_CHOICES, default=1)
+    experience_reward = models.IntegerField(default=10)
+
+    def __str__(self):
+        return self.name
+
+
+class MonsterLoot(models.Model):
+    id = models.AutoField(primary_key=True)
+    monster = models.ForeignKey(Monster, on_delete=models.CASCADE, related_name="loot")
+    item = models.ForeignKey("item.Item", on_delete=models.CASCADE)
+    drop_chance = models.FloatField(default=0.0)  # Percentage chance to drop
+    min_quantity = models.IntegerField(default=1)
+    max_quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.item.name} from {self.monster.name}"
+
+    def clean(self):
+        """Ensure drop chance is between 0 and 100 and min_quantity <= max_quantity."""
+        if not (0 <= self.drop_chance <= 100):
+            raise ValidationError("Drop chance must be between 0 and 100.")
+        if self.min_quantity > self.max_quantity:
+            raise ValidationError("min_quantity cannot be greater than max_quantity.")
