@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from .models import Hero
+from .recovery import restore_resources
 
 # Path to communicate with daemon
 DAEMON_COMMANDS_FILE = Path(__file__).parent.parent / 'daemon_commands.json'
@@ -51,8 +52,8 @@ def rest_hero(hero_id):
         hero = Hero.objects.get(id=hero_id)
 
         if hero.current_health < hero.max_health:
-            hero.current_health = hero.max_health
-            hero.save()
+            if not restore_resources(hero_id, health_amount=hero.max_health):
+                return False
             print(f"💤 {hero.name} rested and is now at full health!")
 
             # Tell daemon to stop healing this hero
@@ -73,7 +74,7 @@ def damage_hero(hero_id, damage):
         hero = Hero.objects.get(id=hero_id)
         old_health = hero.current_health
         hero.current_health = max(0, hero.current_health - damage)
-        hero.save()
+        hero.save(update_fields=['current_health'])
 
         print(f"⚔️  Damaged {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
 
@@ -87,18 +88,7 @@ def damage_hero(hero_id, damage):
 
 def simple_heal_hero(hero_id, heal_amount=5):
     """Simple healing function that heals immediately"""
-    try:
-        hero = Hero.objects.get(id=hero_id)
-        old_health = hero.current_health
-        hero.current_health = min(hero.current_health + heal_amount, hero.max_health)
-        hero.save()
-
-        print(f"❤️  Healed {hero.name}: {old_health} → {hero.current_health}/{hero.max_health} HP")
-        return True
-
-    except Hero.DoesNotExist:
-        print(f"❌ Hero with ID {hero_id} not found")
-        return False
+    return bool(restore_resources(hero_id, health_amount=heal_amount))
 
 
 def get_daemon_status():
@@ -134,8 +124,10 @@ def heal_hero_over_time_simple(hero_id, duration_seconds=300):
                     break
 
                 old_health = hero.current_health
-                hero.current_health = min(hero.current_health + 1, hero.max_health)
-                hero.save()
+                if not restore_resources(hero_id, health_amount=1):
+                    time.sleep(30)
+                    continue
+                hero.refresh_from_db(fields=['current_health'])
 
                 print(f"❤️  Background heal: {hero.name} {old_health} → {hero.current_health}/{hero.max_health} HP")
 

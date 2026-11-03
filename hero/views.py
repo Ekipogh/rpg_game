@@ -1,4 +1,9 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.http import HttpResponseBadRequest
+from django.views.decorators.http import require_GET, require_POST
+from .dungeon import apply_action
+from .encounters import Encounter
 
 from hero.models import HeroClass, Hero
 
@@ -45,3 +50,55 @@ def delete_hero(request, hero_id):
     if request.session.get('hero_id') == hero_id:
         request.session.pop('hero_id', None)
     return redirect('hero_selection')
+
+
+@require_GET
+def dungeon_view(request, encounter_kind=None):
+    hero = Hero.objects.filter(pk=request.session.get('hero_id')).first()
+    if not hero:
+        return redirect('index')
+    if not hero.dungeon_run:
+        return redirect('home')
+    run = hero.dungeon_run
+    encounter = Encounter.from_dict(run['current_encounter'])
+    page = 'fight' if encounter.kind == 'battle' else encounter.kind
+    if run['phase'] == 'encounter':
+        if encounter_kind != page:
+            return redirect('dungeon_' + page)
+        template = f'hero/encounters/{page}.html'
+    else:
+        if encounter_kind is not None:
+            return redirect('dungeon')
+        template = 'hero/dungeon.html'
+    return render(request, template, {
+        'hero_name': hero.name, 'health': hero.current_health, 'max_health': hero.max_health,
+        'floor': run['current_floor'], 'phase': run['phase'],
+        'result': run['last_result'], 'revision': hero.dungeon_revision,
+        'title': encounter.definition.title, 'description': encounter.definition.description,
+        'is_battle': encounter.kind == 'battle',
+    })
+
+
+@require_POST
+def dungeon_action_view(request):
+    hero_id = request.session.get('hero_id')
+    if not hero_id or not Hero.objects.filter(pk=hero_id).exists():
+        return redirect('index')
+    try:
+        revision = int(request.POST['revision'])
+        raw_choice = request.POST.get('choice')
+        if raw_choice is not None and raw_choice not in ('0', '1'):
+            raise ValueError
+        choice = int(raw_choice) if raw_choice is not None else None
+    except (KeyError, ValueError):
+        return HttpResponseBadRequest('Invalid dungeon action.')
+    outcome = apply_action(hero_id, request.POST.get('action'), revision, choice)
+    if outcome == 'invalid':
+        return HttpResponseBadRequest('Invalid dungeon action.')
+    if outcome in ('retreat', 'defeat'):
+        messages.info(request, 'You retreated with your remaining HP and earned XP.'
+                      if outcome == 'retreat' else 'You were defeated and returned home with 1 HP.')
+        return redirect('home')
+    if outcome == 'stale':
+        messages.info(request, 'Your dungeon progress changed. The latest state is shown.')
+    return redirect('dungeon')

@@ -121,10 +121,12 @@ class HeroModelTest(TestCase):
         self.assertEqual(str(self.hero_class), "Warrior")
         
     def test_dungeon_run_store(self):
-        # floor, current encounter, phase, last result, next left and right paths
-        run_data = {1, 123, 'encounter', 456, 789}
+        from .dungeon import create_run
+        run_data = create_run()
         self.hero.store_dungeon_run(run_data)
-        self.assertIsNotNone(self.hero.dungeon_run)
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.dungeon_run, run_data)
+        self.assertEqual(self.hero.dungeon_revision, 1)
 
 class HeroClassModelTest(TestCase):
     def setUp(self):

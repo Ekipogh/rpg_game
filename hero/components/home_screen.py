@@ -1,8 +1,6 @@
 from django_unicorn.components import UnicornView
 from django.shortcuts import redirect
-
-# Use Windows-compatible healing system
-from hero.windows_tasks import rest_hero, start_hero_healing, simple_heal_hero
+from hero.dungeon import enter_or_resume
 
 
 class HomeScreenView(UnicornView):
@@ -10,8 +8,10 @@ class HomeScreenView(UnicornView):
 
     def navigate_to_battle(self):
         """Handle navigation to battle screen"""
-        # Add navigation logic here
-        pass
+        hero_id = self.request.session.get('hero_id')
+        if not hero_id or enter_or_resume(hero_id) == 'invalid':
+            return redirect('index')
+        return redirect('dungeon')
 
     def navigate_to_shop(self):
         """Handle navigation to shop screen"""

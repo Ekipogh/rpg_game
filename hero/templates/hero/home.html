@@ -6,6 +6,7 @@
 {% endblock %}
 {% block title %}{{ hero.name }} - Home{% endblock %}
 {% block content %}
+    {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
     {% csrf_token %}
     {% unicorn 'home-screen' %}
     <script type="text/javascript">
@@ -49,7 +50,9 @@
             }
         }
 
+        {% if not hero.dungeon_run and not hero.is_in_combat %}
         setInterval(heal, 1000); // Heal 1 HP every second
-        setInterval(manaRestore, 1000); // Restore 1 MP every second
+        setInterval(manaRestore, 1000);
+        {% endif %}
     </script>
 {% endblock %}
