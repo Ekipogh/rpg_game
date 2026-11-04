@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.db import transaction
 from django.core.exceptions import ValidationError
 from hero.models import Hero, HeroClass, Monster, MonsterLoot
 from item.models import Item
+from decimal import Decimal
 
 
 class HeroModelTest(TestCase):
@@ -169,88 +171,56 @@ class HeroCreationTest(TestCase):
 
 
 class MonsterModel(TestCase):
-    def test_create_monster(self):
-        monster = Monster.objects.create(
-            name="Goblin",
-            level=1,
-            current_health=30,
-            max_health=30,
-            current_mana=10,
-            max_mana=10,
-            attack=5,
-            defense=3,
-            magic=2,
-            magic_defense=1,
-            speed=4,
-            accuracy=90,
-            evasion=5,
-            critical_chance=2,
-            critical_damage=1.2,
-            threat_level=1,
-            experience_reward=15,
+    def test_monster_stats_match_hero_defaults(self):
+        hero = Hero()
+        monster = Monster.objects.create(name="Goblin")
+
+        stat_fields = (
+            "max_health",
+            "current_health",
+            "max_mana",
+            "current_mana",
+            "attack",
+            "defense",
+            "magic",
+            "magic_defense",
+            "speed",
+            "accuracy",
+            "evasion",
+            "critical_chance",
+            "critical_damage",
         )
-        self.assertIsInstance(monster, Monster)
-        self.assertEqual(monster.name, "Goblin")
+        for field in stat_fields:
+            with self.subTest(field=field):
+                self.assertEqual(getattr(monster, field), getattr(hero, field))
+
         self.assertEqual(monster.level, 1)
-        self.assertEqual(monster.current_health, 30)
-        self.assertEqual(monster.max_health, 30)
-        self.assertEqual(monster.current_mana, 10)
-        self.assertEqual(monster.max_mana, 10)
-        self.assertEqual(monster.attack, 5)
-        self.assertEqual(monster.defense, 3)
-        self.assertEqual(monster.magic, 2)
-        self.assertEqual(monster.magic_defense, 1)
-        self.assertEqual(monster.speed, 4)
-        self.assertEqual(monster.accuracy, 90)
-        self.assertEqual(monster.evasion, 5)
-        self.assertEqual(monster.critical_chance, 2)
-        self.assertEqual(monster.critical_damage, 1.2)
-        self.assertEqual(monster.threat_level, 1)
-        self.assertEqual(monster.experience_reward, 15)
+        self.assertEqual(monster.experience_reward, 0)
+        self.assertEqual(monster.threat_level, "common")
 
-    def test_monster_threat_level(self):
-        monster = Monster.objects.create(
-            name="Orc",
-            level=5,
-            current_health=100,
-            max_health=100,
-            current_mana=20,
-            max_mana=20,
-            attack=15,
-            defense=10,
-            magic=5,
-            magic_defense=3,
-            speed=8,
-            accuracy=85,
-            evasion=10,
-            critical_chance=3,
-            critical_damage=1.3,
-            threat_level=3,
-            experience_reward=50,
-        )
-        self.assertEqual(monster.threat_level, 3)
+    def test_allowed_threat_levels(self):
+        for threat_level in ("common", "miniboss", "boss"):
+            with self.subTest(threat_level=threat_level):
+                monster = Monster.objects.create(
+                    name=f"{threat_level} monster", threat_level=threat_level
+                )
+                self.assertEqual(monster.threat_level, threat_level)
 
-    def test_monster_reject_threat_level_out_of_bounds(self):
+    def test_invalid_threat_level_is_rejected(self):
+        monster = Monster(name="Invalid monster", threat_level="elite")
+        with self.assertRaises(ValidationError):
+            monster.full_clean()
+
         with self.assertRaises(IntegrityError):
-            Monster.objects.create(
-                name="Dragon",
-                level=10,
-                current_health=500,
-                max_health=500,
-                current_mana=100,
-                max_mana=100,
-                attack=50,
-                defense=30,
-                magic=20,
-                magic_defense=15,
-                speed=25,
-                accuracy=95,
-                evasion=15,
-                critical_chance=5,
-                critical_damage=2.0,
-                threat_level=6,
-                experience_reward=200,
-            )
+            with transaction.atomic():
+                Monster.objects.create(
+                    name="Invalid DB monster", threat_level="elite"
+                )
+
+    def test_negative_experience_reward_is_rejected_by_database(self):
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Monster.objects.create(name="Negative XP monster", experience_reward=-1)
 
 
 class MonsterLootModelTest(TestCase):
@@ -261,48 +231,68 @@ class MonsterLootModelTest(TestCase):
         self.monster = Monster.objects.create(
             name="Skeleton",
             level=2,
-            current_health=40,
-            max_health=40,
-            current_mana=5,
-            max_mana=5,
-            attack=6,
-            defense=4,
-            magic=1,
-            magic_defense=1,
-            speed=3,
-            accuracy=80,
-            evasion=5,
-            critical_chance=1,
-            critical_damage=1.1,
-            threat_level=1,
+            threat_level="common",
             experience_reward=20,
         )
 
     def test_create_monster_loot(self):
         loot = MonsterLoot.objects.create(
-            monster=self.monster, item=self.item, drop_chance=0.5
+            monster=self.monster, item=self.item, drop_chance=12.5
         )
         self.assertIsInstance(loot, MonsterLoot)
         self.assertEqual(loot.monster, self.monster)
         self.assertEqual(loot.item, self.item)
-        self.assertEqual(loot.drop_chance, 0.5)
+        self.assertEqual(loot.drop_chance, Decimal("12.50"))
+        self.assertEqual(loot.min_quantity, 1)
+        self.assertEqual(loot.max_quantity, 1)
+        self.assertEqual(list(self.monster.loot.all()), [loot])
 
     def test_monster_loot_invalid_drop_chance(self):
         with self.assertRaises(ValidationError):
-            MonsterLoot.objects.create(
+            MonsterLoot(
                 monster=self.monster, item=self.item, drop_chance=-1
-            ).clean()
+            ).full_clean()
         with self.assertRaises(ValidationError):
-            MonsterLoot.objects.create(
+            MonsterLoot(
                 monster=self.monster, item=self.item, drop_chance=101
-            ).clean()
+            ).full_clean()
+
+    def test_monster_loot_drop_chance_database_constraint(self):
+        for drop_chance in (-1, 101):
+            with self.subTest(drop_chance=drop_chance):
+                with self.assertRaises(IntegrityError):
+                    with transaction.atomic():
+                        MonsterLoot.objects.create(
+                            monster=self.monster,
+                            item=self.item,
+                            drop_chance=drop_chance,
+                        )
 
     def test_monster_loot_invalid_quantity(self):
         with self.assertRaises(ValidationError):
-            MonsterLoot.objects.create(
+            MonsterLoot(
                 monster=self.monster,
                 item=self.item,
-                drop_chance=1.0,
+                drop_chance=1,
                 min_quantity=5,
                 max_quantity=3,
-            ).clean()
+            ).full_clean()
+        with self.assertRaises(ValidationError):
+            MonsterLoot(
+                monster=self.monster,
+                item=self.item,
+                min_quantity=0,
+            ).full_clean()
+
+    def test_monster_loot_quantity_database_constraint(self):
+        invalid_quantities = ((0, 1), (1, 0), (5, 3))
+        for min_quantity, max_quantity in invalid_quantities:
+            with self.subTest(min_quantity=min_quantity, max_quantity=max_quantity):
+                with self.assertRaises(IntegrityError):
+                    with transaction.atomic():
+                        MonsterLoot.objects.create(
+                            monster=self.monster,
+                            item=self.item,
+                            min_quantity=min_quantity,
+                            max_quantity=max_quantity,
+                        )

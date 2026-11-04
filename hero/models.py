@@ -306,32 +306,38 @@ class Monster(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     level = models.IntegerField(default=1)
-    current_health = models.IntegerField(default=50)
-    max_health = models.IntegerField(default=50)
-    current_mana = models.IntegerField(default=20)
-    max_mana = models.IntegerField(default=20)
-    attack = models.IntegerField(default=5)
-    defense = models.IntegerField(default=5)
-    magic = models.IntegerField(default=5)
-    magic_defense = models.IntegerField(default=5)
-    speed = models.IntegerField(default=5)
+    max_health = models.IntegerField(default=100)
+    current_health = models.IntegerField(default=100)
+    max_mana = models.IntegerField(default=50)
+    current_mana = models.IntegerField(default=50)
+    attack = models.IntegerField(default=10)
+    defense = models.IntegerField(default=10)
+    magic = models.IntegerField(default=10)
+    magic_defense = models.IntegerField(default=10)
+    speed = models.IntegerField(default=10)
     accuracy = models.IntegerField(default=100)
     evasion = models.IntegerField(default=0)
     critical_chance = models.IntegerField(default=5)
     critical_damage = models.FloatField(default=1.5)
     THREAT_LEVEL_CHOICES = [
-        (1, "common"),
-        (2, "miniboss"),
-        (3, "boss"),
+        ("common", "Common"),
+        ("miniboss", "Miniboss"),
+        ("boss", "Boss"),
     ]
-    threat_level = models.IntegerField(choices=THREAT_LEVEL_CHOICES, default=1)
-    experience_reward = models.IntegerField(default=10)
+    threat_level = models.CharField(
+        max_length=10, choices=THREAT_LEVEL_CHOICES, default="common"
+    )
+    experience_reward = models.PositiveIntegerField(default=0)
 
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(threat_level__in=[1, 2, 3]),
+                condition=models.Q(threat_level__in=["common", "miniboss", "boss"]),
                 name="valid_threat_level",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(experience_reward__gte=0),
+                name="monster_experience_nonnegative",
             ),
         ]
 
@@ -343,16 +349,41 @@ class MonsterLoot(models.Model):
     id = models.AutoField(primary_key=True)
     monster = models.ForeignKey(Monster, on_delete=models.CASCADE, related_name="loot")
     item = models.ForeignKey("item.Item", on_delete=models.CASCADE)
-    drop_chance = models.FloatField(default=0.0)  # Percentage chance to drop
-    min_quantity = models.IntegerField(default=1)
-    max_quantity = models.IntegerField(default=1)
+    drop_chance = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
+    min_quantity = models.PositiveIntegerField(default=1)
+    max_quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(drop_chance__gte=0) & models.Q(drop_chance__lte=100),
+                name="monster_loot_drop_chance_range",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(min_quantity__gte=1),
+                name="monster_loot_min_quantity_positive",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(max_quantity__gte=1),
+                name="monster_loot_max_quantity_positive",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(min_quantity__lte=models.F("max_quantity")),
+                name="monster_loot_quantity_range",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.item.name} from {self.monster.name}"
 
     def clean(self):
         """Ensure drop chance is between 0 and 100 and min_quantity <= max_quantity."""
+        super().clean()
         if not (0 <= self.drop_chance <= 100):
             raise ValidationError("Drop chance must be between 0 and 100.")
+        if self.min_quantity < 1 or self.max_quantity < 1:
+            raise ValidationError("Loot quantities must be positive.")
         if self.min_quantity > self.max_quantity:
             raise ValidationError("min_quantity cannot be greater than max_quantity.")

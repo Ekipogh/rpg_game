@@ -31,6 +31,7 @@ class MonsterAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "level",
+        "threat_level",
         "current_health",
         "max_health",
         "attack",
@@ -38,9 +39,10 @@ class MonsterAdmin(admin.ModelAdmin):
         "magic",
         "magic_defense",
         "speed",
+        "experience_reward",
     )
     search_fields = ("name",)
-    list_filter = ("level",)
+    list_filter = ("level", "threat_level")
     inlines = [MonsterLootInline]
 
 
