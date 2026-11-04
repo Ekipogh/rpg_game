@@ -197,6 +197,7 @@ class MonsterModel(TestCase):
         self.assertEqual(monster.level, 1)
         self.assertEqual(monster.experience_reward, 0)
         self.assertEqual(monster.threat_level, "common")
+        self.assertEqual(monster.monster_class, "warrior")
 
     def test_allowed_threat_levels(self):
         for threat_level in ("common", "miniboss", "boss"):

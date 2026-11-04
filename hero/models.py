@@ -328,6 +328,17 @@ class Monster(models.Model):
         max_length=10, choices=THREAT_LEVEL_CHOICES, default="common"
     )
     experience_reward = models.PositiveIntegerField(default=0)
+    MONSTER_CLASS_CHOICES = [
+        ("warrior", "Warrior"),
+        ("mage", "Mage"),
+        ("archer", "Archer"),
+        ("rogue", "Rogue"),
+        ("tank", "Tank"),
+        ("healer", "Healer"),
+    ]
+    monster_class = models.CharField(
+        max_length=10, choices=MONSTER_CLASS_CHOICES, default="warrior"
+    )
 
     class Meta:
         constraints = [
@@ -349,9 +360,7 @@ class MonsterLoot(models.Model):
     id = models.AutoField(primary_key=True)
     monster = models.ForeignKey(Monster, on_delete=models.CASCADE, related_name="loot")
     item = models.ForeignKey("item.Item", on_delete=models.CASCADE)
-    drop_chance = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0
-    )
+    drop_chance = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     min_quantity = models.PositiveIntegerField(default=1)
     max_quantity = models.PositiveIntegerField(default=1)
 
