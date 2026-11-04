@@ -17,7 +17,10 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
         MonsterLoot = old_apps.get_model('hero', 'MonsterLoot')
         Item = old_apps.get_model('item', 'Item')
 
-        monster = Monster.objects.create(name='Migration test monster')
+        monster = Monster.objects.create(
+            name='Migration test monster',
+            experience_reward=-25,
+        )
         item = Item.objects.create(name='Migration test item')
         self.loot_ids = [
             MonsterLoot.objects.create(
@@ -38,6 +41,7 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
         executor.migrate(self.migrate_to)
         new_apps = executor.loader.project_state(self.migrate_to).apps
         self.MigratedMonsterLoot = new_apps.get_model('hero', 'MonsterLoot')
+        self.MigratedMonster = new_apps.get_model('hero', 'Monster')
 
     def tearDown(self):
         executor = MigrationExecutor(connection)
@@ -51,3 +55,7 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
             .values_list('min_quantity', 'max_quantity')
         )
         self.assertEqual(quantities, [(1, 1), (1, 1), (1, 1), (1, 3)])
+
+    def test_negative_experience_reward_is_normalized_before_field_alteration(self):
+        monster = self.MigratedMonster.objects.get(name='Migration test monster')
+        self.assertEqual(monster.experience_reward, 0)

@@ -34,6 +34,9 @@ def normalize_existing_quantities(apps, schema_editor):
                 max_quantity=max_quantity,
             )
 
+    Monster = apps.get_model("hero", "Monster")
+    Monster.objects.filter(experience_reward__lt=0).update(experience_reward=0)
+
 
 class Migration(migrations.Migration):
 
