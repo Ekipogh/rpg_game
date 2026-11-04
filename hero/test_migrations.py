@@ -4,7 +4,7 @@ from django.test import TransactionTestCase
 
 
 class MonsterLootQuantityMigrationTest(TransactionTestCase):
-    migrate_from = [('hero', '0017_remove_monster_valid_threat_level_and_more')]
+    migrate_from = [('hero', '0016_monster_valid_threat_level')]
     migrate_to = [('hero', '0018_monsterloot_monster_loot_min_quantity_positive_and_more')]
 
     def setUp(self):
@@ -26,7 +26,12 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
                 min_quantity=min_quantity,
                 max_quantity=max_quantity,
             ).pk
-            for min_quantity, max_quantity in ((0, 1), (0, 0), (1, 3))
+            for min_quantity, max_quantity in (
+                (-1, 1),
+                (-2, -1),
+                (0, 0),
+                (1, 3),
+            )
         ]
 
         executor = MigrationExecutor(connection)
@@ -39,10 +44,10 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
         executor.migrate(executor.loader.graph.leaf_nodes())
         super().tearDown()
 
-    def test_existing_quantities_are_normalized_before_constraints(self):
+    def test_negative_and_zero_quantities_are_normalized_before_field_alterations(self):
         quantities = list(
             self.MigratedMonsterLoot.objects.filter(pk__in=self.loot_ids)
             .order_by('pk')
             .values_list('min_quantity', 'max_quantity')
         )
-        self.assertEqual(quantities, [(1, 1), (1, 1), (1, 3)])
+        self.assertEqual(quantities, [(1, 1), (1, 1), (1, 1), (1, 3)])

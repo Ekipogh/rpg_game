@@ -23,6 +23,18 @@ def map_threat_levels_backward(apps, schema_editor):
         Monster.objects.filter(threat_level=old_value).update(threat_level=new_value)
 
 
+def normalize_existing_quantities(apps, schema_editor):
+    MonsterLoot = apps.get_model("hero", "MonsterLoot")
+    for loot in MonsterLoot.objects.all().iterator():
+        min_quantity = max(1, loot.min_quantity)
+        max_quantity = max(min_quantity, 1, loot.max_quantity)
+        if (loot.min_quantity, loot.max_quantity) != (min_quantity, max_quantity):
+            MonsterLoot.objects.filter(pk=loot.pk).update(
+                min_quantity=min_quantity,
+                max_quantity=max_quantity,
+            )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -31,6 +43,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(
+            normalize_existing_quantities,
+            migrations.RunPython.noop,
+        ),
         migrations.RemoveConstraint(
             model_name='monster',
             name='valid_threat_level',
