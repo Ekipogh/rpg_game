@@ -1,14 +1,19 @@
 from django.test import TestCase
-from hero.models import Hero, HeroClass
+from django.db.utils import IntegrityError
+from django.core.exceptions import ValidationError
+from hero.models import Hero, HeroClass, Monster, MonsterLoot
+from item.models import Item
 
 
 class HeroModelTest(TestCase):
     def setUp(self):
         # Create a HeroClass for testing
         self.hero_class = HeroClass.objects.create(
-            name="Warrior", description="A brave warrior.")
+            name="Warrior", description="A brave warrior."
+        )
         self.hero = Hero.objects.create(
-            name="Test Hero", hero_class=self.hero_class, level=1)
+            name="Test Hero", hero_class=self.hero_class, level=1
+        )
 
     def test_level_up(self):
         """Test that level up increases stats according to class bonuses"""
@@ -119,29 +124,33 @@ class HeroModelTest(TestCase):
     def test_str_method(self):
         self.assertEqual(str(self.hero), "Test Hero")
         self.assertEqual(str(self.hero_class), "Warrior")
-        
+
     def test_dungeon_run_store(self):
         from .dungeon import create_run
+
         run_data = create_run()
         self.hero.store_dungeon_run(run_data)
         self.hero.refresh_from_db()
         self.assertEqual(self.hero.dungeon_run, run_data)
         self.assertEqual(self.hero.dungeon_revision, 1)
 
+
 class HeroClassModelTest(TestCase):
     def setUp(self):
         self.hero_class = HeroClass.objects.create(
-            name="Mage", description="A wise mage.")
+            name="Mage", description="A wise mage."
+        )
 
     def test_str_method(self):
         self.assertEqual(str(self.hero_class), "Mage")
 
+
 class HeroCreationTest(TestCase):
     def test_create_hero(self):
         hero_class = HeroClass.objects.create(
-            name="Rogue", description="A stealthy rogue.")
-        hero = Hero.objects.create(
-            name="New Hero", hero_class=hero_class, level=1)
+            name="Rogue", description="A stealthy rogue."
+        )
+        hero = Hero.objects.create(name="New Hero", hero_class=hero_class, level=1)
         self.assertIsInstance(hero, Hero)
         self.assertEqual(hero.name, "New Hero")
         self.assertEqual(hero.hero_class, hero_class)
@@ -157,3 +166,143 @@ class HeroCreationTest(TestCase):
         self.assertEqual(hero.evasion, 0)
         self.assertEqual(hero.critical_chance, 5)
         self.assertEqual(hero.critical_damage, 1.5)
+
+
+class MonsterModel(TestCase):
+    def test_create_monster(self):
+        monster = Monster.objects.create(
+            name="Goblin",
+            level=1,
+            current_health=30,
+            max_health=30,
+            current_mana=10,
+            max_mana=10,
+            attack=5,
+            defense=3,
+            magic=2,
+            magic_defense=1,
+            speed=4,
+            accuracy=90,
+            evasion=5,
+            critical_chance=2,
+            critical_damage=1.2,
+            threat_level=1,
+            experience_reward=15,
+        )
+        self.assertIsInstance(monster, Monster)
+        self.assertEqual(monster.name, "Goblin")
+        self.assertEqual(monster.level, 1)
+        self.assertEqual(monster.current_health, 30)
+        self.assertEqual(monster.max_health, 30)
+        self.assertEqual(monster.current_mana, 10)
+        self.assertEqual(monster.max_mana, 10)
+        self.assertEqual(monster.attack, 5)
+        self.assertEqual(monster.defense, 3)
+        self.assertEqual(monster.magic, 2)
+        self.assertEqual(monster.magic_defense, 1)
+        self.assertEqual(monster.speed, 4)
+        self.assertEqual(monster.accuracy, 90)
+        self.assertEqual(monster.evasion, 5)
+        self.assertEqual(monster.critical_chance, 2)
+        self.assertEqual(monster.critical_damage, 1.2)
+        self.assertEqual(monster.threat_level, 1)
+        self.assertEqual(monster.experience_reward, 15)
+
+    def test_monster_threat_level(self):
+        monster = Monster.objects.create(
+            name="Orc",
+            level=5,
+            current_health=100,
+            max_health=100,
+            current_mana=20,
+            max_mana=20,
+            attack=15,
+            defense=10,
+            magic=5,
+            magic_defense=3,
+            speed=8,
+            accuracy=85,
+            evasion=10,
+            critical_chance=3,
+            critical_damage=1.3,
+            threat_level=3,
+            experience_reward=50,
+        )
+        self.assertEqual(monster.threat_level, 3)
+
+    def test_monster_reject_threat_level_out_of_bounds(self):
+        with self.assertRaises(IntegrityError):
+            Monster.objects.create(
+                name="Dragon",
+                level=10,
+                current_health=500,
+                max_health=500,
+                current_mana=100,
+                max_mana=100,
+                attack=50,
+                defense=30,
+                magic=20,
+                magic_defense=15,
+                speed=25,
+                accuracy=95,
+                evasion=15,
+                critical_chance=5,
+                critical_damage=2.0,
+                threat_level=6,
+                experience_reward=200,
+            )
+
+
+class MonsterLootModelTest(TestCase):
+    def setUp(self):
+        self.item = Item.objects.create(
+            name="Rusty Sword", description="An old and rusty sword."
+        )
+        self.monster = Monster.objects.create(
+            name="Skeleton",
+            level=2,
+            current_health=40,
+            max_health=40,
+            current_mana=5,
+            max_mana=5,
+            attack=6,
+            defense=4,
+            magic=1,
+            magic_defense=1,
+            speed=3,
+            accuracy=80,
+            evasion=5,
+            critical_chance=1,
+            critical_damage=1.1,
+            threat_level=1,
+            experience_reward=20,
+        )
+
+    def test_create_monster_loot(self):
+        loot = MonsterLoot.objects.create(
+            monster=self.monster, item=self.item, drop_chance=0.5
+        )
+        self.assertIsInstance(loot, MonsterLoot)
+        self.assertEqual(loot.monster, self.monster)
+        self.assertEqual(loot.item, self.item)
+        self.assertEqual(loot.drop_chance, 0.5)
+
+    def test_monster_loot_invalid_drop_chance(self):
+        with self.assertRaises(ValidationError):
+            MonsterLoot.objects.create(
+                monster=self.monster, item=self.item, drop_chance=-1
+            ).clean()
+        with self.assertRaises(ValidationError):
+            MonsterLoot.objects.create(
+                monster=self.monster, item=self.item, drop_chance=101
+            ).clean()
+
+    def test_monster_loot_invalid_quantity(self):
+        with self.assertRaises(ValidationError):
+            MonsterLoot.objects.create(
+                monster=self.monster,
+                item=self.item,
+                drop_chance=1.0,
+                min_quantity=5,
+                max_quantity=3,
+            ).clean()

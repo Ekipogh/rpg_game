@@ -327,6 +327,14 @@ class Monster(models.Model):
     threat_level = models.IntegerField(choices=THREAT_LEVEL_CHOICES, default=1)
     experience_reward = models.IntegerField(default=10)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(threat_level__in=[1, 2, 3]),
+                name="valid_threat_level",
+            ),
+        ]
+
     def __str__(self):
         return self.name
 
