@@ -1,4 +1,5 @@
 from copy import deepcopy
+from html import unescape
 from unittest.mock import patch
 
 from django.test import TestCase, Client, RequestFactory
@@ -62,7 +63,7 @@ class DungeonTests(TestCase):
         revision = self.hero.dungeon_revision
         self.assertEqual(enter_or_resume(self.hero.pk), 'success')
         for _ in range(2):
-            self.assertContains(self.client.get(reverse('dungeon'), follow=True), 'Fight')
+            self.assertContains(self.client.get(reverse('dungeon'), follow=True), 'Dungeon encounter')
         self.hero.refresh_from_db()
         self.assertEqual(self.hero.dungeon_run, saved)
         self.assertEqual(self.hero.dungeon_revision, revision)
@@ -214,6 +215,31 @@ class DungeonTests(TestCase):
              other.experience, other.dungeon_revision),
             original_other_state)
 
+    def test_fight_page_displays_encounter_and_continue_action(self):
+        self.start()
+
+        response = self.client.get(reverse('dungeon_fight'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Goblin ambush')
+        self.assertContains(response, 'A goblin blocks your path.')
+        self.assertContains(response, 'Battle log')
+        self.assertNotContains(response, 'Encounter details')
+        self.assertContains(response, 'Encounter started.')
+        self.assertContains(response, f'{self.hero.current_health} / {self.hero.max_health} HP')
+        self.assertContains(response, f'{self.hero.current_mana} / {self.hero.max_mana} MP')
+        self.assertContains(response, 'Skill actions')
+        self.assertEqual(
+            unescape(response.content.decode()).count('Blocked · No skill equipped'), 3)
+        self.assertContains(response, 'data-skill-slot="1" disabled')
+        self.assertContains(response, 'data-skill-slot="2" disabled')
+        self.assertContains(response, 'data-skill-slot="3" disabled')
+        self.assertContains(response, 'css/fight.css')
+        self.assertContains(response, 'name="action" value="resolve"')
+        self.assertContains(response, f'name="hero_id" value="{self.hero.pk}"')
+        self.assertContains(response, f'name="revision" value="{self.hero.dungeon_revision}"')
+        self.assertEqual(response.context['hero_id'], self.hero.pk)
+
 
     def test_earned_xp_survives_retreat_and_hero_switch(self):
         self.start()
@@ -270,7 +296,12 @@ class DungeonTests(TestCase):
                 self.assertRedirects(self.client.get(reverse('dungeon')), url)
                 response = self.client.get(url)
                 self.assertTemplateUsed(response, f'hero/encounters/{page}.html')
-                self.assertContains(response, 'encounter placeholder')
+                if page == 'fight':
+                    title = Encounter.from_dict(run['current_encounter']).definition.title
+                    self.assertContains(response, title)
+                    self.assertContains(response, 'Battlefield')
+                else:
+                    self.assertContains(response, 'encounter placeholder')
                 self.assertNotContains(response, 'Left path')
                 wrong = 'trap' if page != 'trap' else 'fight'
                 self.assertRedirects(self.client.get(reverse('dungeon_' + wrong)), url)

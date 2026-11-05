@@ -1,0 +1,468 @@
+.fight-screen {
+    --fight-background: #111827;
+    --fight-surface: #1f2937;
+    --fight-border: #374151;
+    --fight-muted: #aab5c5;
+    min-height: 100vh;
+    padding: 3.75rem 1rem 2rem;
+    color: #f3f4f6;
+    background: var(--fight-background);
+}
+
+.fight-shell {
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.fight-topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.fight-brand {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.fight-floor,
+.fight-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid #ffffff20;
+    border-radius: 999px;
+    color: #d1d5db;
+    background: #ffffff0d;
+    font-size: 0.8rem;
+}
+
+.fight-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 0.85fr);
+    gap: 1rem;
+}
+
+.fight-main,
+.fight-sidebar {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.fight-card {
+    overflow: hidden;
+    border: 1px solid var(--fight-border);
+    border-radius: 0.85rem;
+    color: #f3f4f6;
+    background: var(--fight-surface);
+    box-shadow: 0 0.5rem 1.5rem #00000018;
+}
+
+.fight-stage-card {
+    padding: 1.1rem;
+}
+
+.fight-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.fight-eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--fight-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.fight-section-heading h1,
+.fight-hero-heading h2,
+.fight-action-card h2 {
+    margin: 0;
+    color: #f9fafb;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.fight-status {
+    color: #fecaca;
+    background: #7f1d1d66;
+}
+
+.fight-status span {
+    width: 0.48rem;
+    height: 0.48rem;
+    border-radius: 50%;
+    background: #f87171;
+}
+
+.fight-battlefield {
+    position: relative;
+    display: flex;
+    min-height: 290px;
+    align-items: end;
+    overflow: hidden;
+    border: 1px solid #ffffff14;
+    border-radius: 0.7rem;
+    background:
+        repeating-linear-gradient(90deg, transparent 0, transparent calc(11.111% - 1px), #ffffff12 calc(11.111% - 1px), #ffffff12 11.111%),
+        linear-gradient(180deg, #25364b, #1d3540 67%, #263d30 67%, #23372d);
+}
+
+.fight-battlefield::after {
+    position: absolute;
+    right: 0;
+    bottom: 24%;
+    left: 0;
+    border-top: 1px solid #ffffff20;
+    content: "";
+}
+
+.fight-horizon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 67%;
+    background: linear-gradient(180deg, #ffffff08, transparent);
+}
+
+.fight-combatants {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    align-items: end;
+    padding: 1rem 0.5rem 2rem;
+}
+
+.fight-combatant {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.55rem 0.15rem;
+    border: 2px solid transparent;
+    border-radius: 0.7rem;
+    background: #0f172acc;
+    text-align: center;
+}
+
+.fight-hero {
+    grid-column: 2;
+    border-color: #60a5fa;
+}
+
+.fight-opponent {
+    grid-column: 8;
+    border-color: #fbbf24;
+}
+
+.fight-avatar {
+    margin-bottom: 0.25rem;
+    font-size: 2rem;
+    line-height: 1.3;
+}
+
+.fight-combatant strong,
+.fight-combatant small {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fight-combatant strong {
+    font-size: 0.78rem;
+}
+
+.fight-combatant small {
+    color: var(--fight-muted);
+    font-size: 0.68rem;
+}
+
+.fight-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.8rem;
+    color: var(--fight-muted);
+    font-size: 0.8rem;
+}
+
+.fight-hero-card {
+    display: grid;
+    grid-template-columns: minmax(145px, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.15rem;
+}
+
+.fight-hero-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.fight-shield {
+    font-size: 1.8rem;
+}
+
+.fight-hero-heading h2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fight-health-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.85rem;
+}
+
+.fight-health-label span {
+    color: #d1d5db;
+}
+
+.fight-health-progress {
+    display: block;
+    width: 100%;
+    height: 0.65rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    background: #394454;
+    appearance: none;
+}
+
+.fight-health-progress::-webkit-progress-bar {
+    border-radius: 999px;
+    background: #394454;
+}
+
+.fight-health-progress::-webkit-progress-value {
+    border-radius: 999px;
+    background: #dc3545;
+}
+
+.fight-health-progress::-moz-progress-bar {
+    border-radius: 999px;
+    background: #dc3545;
+}
+
+.fight-mana-label {
+    margin-top: 0.7rem;
+}
+
+.fight-mana-progress::-webkit-progress-value {
+    background: #0dcaf0;
+}
+
+.fight-mana-progress::-moz-progress-bar {
+    background: #0dcaf0;
+}
+
+.fight-skills-card {
+    padding: 1.15rem;
+}
+
+.fight-skills-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.fight-skills-heading h2 {
+    margin: 0;
+    color: #f9fafb;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.fight-skill-limit {
+    color: var(--fight-muted);
+    font-size: 0.78rem;
+}
+
+.fight-skill-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.fight-skill-button {
+    display: flex;
+    min-width: 0;
+    min-height: 4.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.7rem;
+    border: 1px dashed #6b7280;
+    border-radius: 0.6rem;
+    color: #d1d5db;
+    background: #11182780;
+    text-align: left;
+}
+
+.fight-skill-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+}
+
+.fight-skill-name {
+    color: #f3f4f6;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.fight-skill-status {
+    color: #fbbf24;
+    font-size: 0.75rem;
+}
+
+.fight-log-card {
+    padding: 0;
+}
+
+.fight-action-card {
+    padding: 1.2rem;
+}
+
+.fight-log-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--fight-border);
+}
+
+.fight-log-heading h2 {
+    margin: 0;
+    color: #f9fafb;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.fight-log-heading > span {
+    color: var(--fight-muted);
+    font-size: 0.78rem;
+}
+
+.fight-log {
+    height: 235px;
+    overflow: auto;
+    padding: 1rem;
+    color: #d1d5db;
+    font-size: 0.88rem;
+}
+
+.fight-log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 0;
+}
+
+.fight-log-entry strong {
+    color: #f3f4f6;
+}
+
+.fight-log-marker {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: 0 0 auto;
+    margin-top: 0.35rem;
+    border-radius: 50%;
+    background: #60a5fa;
+}
+
+.fight-action-card > p:not(.fight-eyebrow) {
+    margin: 0.8rem 0 1.2rem;
+    color: #d1d5db;
+    line-height: 1.55;
+}
+
+.fight-continue-button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.55rem;
+    color: #fff;
+    background: #4f46e5;
+    font-weight: 700;
+    text-align: left;
+}
+
+.fight-continue-button:hover,
+.fight-continue-button:focus-visible {
+    color: #fff;
+    background: #4338ca;
+}
+
+@media (max-width: 767.98px) {
+    .fight-screen {
+        padding: 4.25rem 0.75rem 1.25rem;
+    }
+
+    .fight-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fight-battlefield {
+        min-height: 230px;
+    }
+
+    .fight-combatants {
+        padding-right: 0.2rem;
+        padding-left: 0.2rem;
+    }
+
+    .fight-combatant {
+        padding: 0.45rem 0.05rem;
+    }
+
+    .fight-avatar {
+        font-size: 1.6rem;
+    }
+
+    .fight-combatant strong {
+        font-size: 0.65rem;
+    }
+
+    .fight-hero-card {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.9rem;
+    }
+
+    .fight-skill-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fight-section-heading h1 {
+        font-size: 1.05rem;
+    }
+
+    .fight-log {
+        height: 250px;
+    }
+}

@@ -74,7 +74,7 @@ def dungeon_view(request, encounter_kind=None):
         template = 'hero/dungeon.html'
     return render(request, template, {
         'hero_id': hero.pk, 'hero_name': hero.name, 'health': hero.current_health,
-        'max_health': hero.max_health,
+        'max_health': hero.max_health, 'mana': hero.current_mana, 'max_mana': hero.max_mana,
         'floor': run['current_floor'], 'phase': run['phase'],
         'result': run['last_result'], 'revision': hero.dungeon_revision,
         'title': encounter.definition.title, 'description': encounter.definition.description,
