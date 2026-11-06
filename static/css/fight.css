@@ -466,3 +466,60 @@
         height: 250px;
     }
 }
+
+/* Live battle controls and theme-aware surfaces. */
+.fight-screen [hidden] { display: none !important; }
+.fight-policy-options { display: flex; gap: .6rem; }
+.fight-screen .fight-policy-button {
+    --bs-btn-disabled-opacity: 1;
+    padding: .5rem .75rem;
+    border-radius: .5rem;
+    font: inherit;
+    color: #e5e7eb;
+    border: 2px solid #64748b;
+    background-color: #111827;
+}
+.fight-screen .fight-policy-button:hover { color: #fff; border-color: #93c5fd; }
+.fight-screen .fight-policy-button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
+.fight-screen .fight-policy-button:disabled { opacity: 1; cursor: not-allowed; }
+.fight-policy-options .fight-policy-button::before {
+    content: "✓";
+    display: inline-block;
+    width: 1em;
+    margin-right: .35rem;
+    visibility: hidden;
+}
+.fight-screen .fight-policy-button[aria-pressed="true"] {
+    color: #fff;
+    background-color: #4338ca;
+    border-color: #a5b4fc;
+    box-shadow: inset 0 0 0 1px #a5b4fc;
+    font-weight: 700;
+}
+.fight-policy-options .fight-policy-button[aria-pressed="true"]::before { visibility: visible; }
+.fight-combatant { color: #f8fafc; }
+.fight-combatant small { color: #cbd5e1; }
+.fight-combatant[aria-pressed="true"] { outline: 3px solid #a5b4fc; outline-offset: 2px; }
+.fight-combatant:disabled { cursor: default; opacity: .85; }
+.fight-combatant:focus-visible { outline: 3px solid #fff; }
+.fight-log-entry + .fight-log-entry { margin-top: .5rem; }
+.fight-attack-progress::-webkit-progress-value { background: #a5b4fc; }
+.fight-attack-progress::-moz-progress-bar { background: #a5b4fc; }
+[data-result] { padding: 1rem 0; font-weight: bold; }
+[data-bs-theme="light"] .fight-screen { --fight-background: #f1f5f9; --fight-surface: #fff; --fight-border: #cbd5e1; --fight-muted: #475569; color: #0f172a; }
+[data-bs-theme="light"] .fight-card,
+[data-bs-theme="light"] .fight-card h1,
+[data-bs-theme="light"] .fight-card h2,
+[data-bs-theme="light"] .fight-health-label span,
+[data-bs-theme="light"] .fight-log,
+[data-bs-theme="light"] .fight-action-card > p:not(.fight-eyebrow) { color: #0f172a; }
+[data-bs-theme="light"] .fight-floor { color: #334155; border-color: #94a3b8; }
+[data-bs-theme="light"] .fight-status { color: #7f1d1d; background: #fee2e2; }
+[data-bs-theme="light"] .fight-skill-button { background: #f1f5f9; }
+[data-bs-theme="light"] .fight-skill-name { color: #0f172a; }
+[data-bs-theme="light"] .fight-skill-status { color: #854d0e; }
+@media (max-width: 767.98px) {
+    .fight-battlefield { overflow-x: auto; }
+    .fight-combatants { min-width: 620px; }
+    .fight-combatant { min-height: 65px; }
+}

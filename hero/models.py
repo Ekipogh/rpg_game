@@ -33,6 +33,8 @@ class Hero(models.Model):
     dungeon_run = models.JSONField(default=dict, blank=True)
     dungeon_revision = models.IntegerField(default=0)
 
+    money = models.IntegerField(default=0)
+
     inventory = models.ForeignKey(
         "item.Inventory", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -223,16 +225,21 @@ class Hero(models.Model):
         self.save()
 
     def add_to_inventory(self, item, quantity=1):
-        """Add item to hero's inventory"""
-        if not self.inventory:
-            self.inventory = Inventory.objects.create()
-            self.save(update_fields=["inventory"])
+        """Receive items; Instant effects apply immediately instead of being stored."""
+        from item.services import receive_item
+        return receive_item(self, item, quantity)
 
+    def remove_item(self, item, quantity=1):
+        """Remove item from hero's inventory"""
+        if not self.inventory:
+            return
         inventory_item, created = InventoryItem.objects.get_or_create(
             inventory=self.inventory, item=item, defaults={"quantity": 0}
         )
-        inventory_item.quantity = inventory_item.quantity + quantity
+        inventory_item.quantity = max(0, inventory_item.quantity - quantity)
         inventory_item.save(update_fields=["quantity"])
+        if inventory_item.quantity == 0:
+            inventory_item.delete()
 
     def store_dungeon_run(self, dungeon_data):
         """Store the current dungeon run data in the hero's record"""

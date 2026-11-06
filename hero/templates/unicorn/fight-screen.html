@@ -1,105 +1,63 @@
-<main class="fight-screen">
+<main class="fight-screen" id="live-fight" {% if battle %}data-state-url="{% url 'battle:state' battle.pk %}" data-command-url="{% url 'battle:commands' battle.pk %}" data-events-url="{% url 'battle:events' battle.pk %}"{% endif %}>
   <div class="fight-shell">
     <header class="fight-topbar">
-      <div class="fight-brand">⚔️ Dungeon encounter</div>
+      <div class="fight-brand">Dungeon encounter</div>
       <span class="fight-floor">Floor {{ floor }}</span>
     </header>
-
-    {% for message in messages %}
-      <div class="alert alert-info" role="status">{{ message }}</div>
-    {% endfor %}
-
+    {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
     <div class="fight-layout">
       <div class="fight-main">
         <section class="fight-card fight-stage-card" aria-labelledby="fight-title">
           <div class="fight-section-heading">
-            <div>
-              <p class="fight-eyebrow">Encounter</p>
-              <h1 id="fight-title">{{ title }}</h1>
-            </div>
-            <span class="fight-status"><span aria-hidden="true"></span> In progress</span>
+            <div><p class="fight-eyebrow">Encounter</p><h1 id="fight-title">{{ title }}</h1></div>
+            <span class="fight-status" data-status>Waiting to begin</span>
           </div>
-          <div class="fight-battlefield" role="img" aria-label="Illustration of {{ hero_name }} facing {{ title }}">
+          <p>{{ description }}</p>
+          <p data-connection role="status">{% if battle %}Connecting to your fight…{% else %}Waiting for the battle worker to restore this encounter.{% endif %}</p>
+          <div class="fight-battlefield" aria-label="Battlefield">
             <div class="fight-horizon"></div>
-            <div class="fight-combatants">
-              <div class="fight-combatant fight-hero">
-                <span class="fight-avatar" aria-hidden="true">🛡️</span>
-                <strong>{{ hero_name }}</strong>
-                <small>Hero</small>
-              </div>
-              <div class="fight-combatant fight-opponent">
-                <span class="fight-avatar" aria-hidden="true">⚔️</span>
-                <strong>{{ title }}</strong>
-                <small>Encounter</small>
-              </div>
-            </div>
+            <div class="fight-combatants" data-combatants></div>
           </div>
+          <div class="fight-caption"><span>Battlefield · lanes 0–8</span><span data-target>Target: none</span></div>
+          <p data-intention></p>
+          <div data-result role="status" hidden></div>
+          <a class="btn fight-continue-button" data-continue hidden>Continue</a>
+          <noscript><p>Enable JavaScript to view the fight and change your movement policy. Combat continues on the server.</p><a href="{% url 'dungeon' %}">Refresh dungeon</a></noscript>
         </section>
-
         <section class="fight-card fight-hero-card" aria-labelledby="hero-status-title">
-          <div class="fight-hero-heading">
-            <span class="fight-shield" aria-hidden="true">🛡️</span>
-            <div>
-              <p class="fight-eyebrow">Adventurer</p>
-              <h2 id="hero-status-title">{{ hero_name }}</h2>
-            </div>
-          </div>
+          <div class="fight-hero-heading"><div><p class="fight-eyebrow">Adventurer</p><h2 id="hero-status-title">{{ hero_name }}</h2></div></div>
           <div class="fight-health">
-            <div class="fight-health-label">
-              <strong>Health</strong>
-              <span>{{ health }} / {{ max_health }} HP</span>
-            </div>
-            <progress class="fight-health-progress" value="{{ health }}" max="{{ max_health }}" aria-label="Health"></progress>
-            <div class="fight-health-label fight-mana-label">
-              <strong>Mana</strong>
-              <span>{{ mana }} / {{ max_mana }} MP</span>
-            </div>
-            <progress class="fight-health-progress fight-mana-progress" value="{{ mana }}" max="{{ max_mana }}" aria-label="Mana"></progress>
+            <div class="fight-health-label"><strong>Health</strong><span data-health-text>{{ health }} / {{ max_health }} HP</span></div>
+            <progress class="fight-health-progress" data-health value="{{ health }}" max="{{ max_health }}" aria-label="Health"></progress>
+            <div class="fight-health-label fight-mana-label"><strong>Mana</strong><span data-mana-text>{{ mana }} / {{ max_mana }} MP</span></div>
+            <progress class="fight-health-progress fight-mana-progress" data-mana value="{{ mana }}" max="{{ max_mana }}" aria-label="Mana"></progress>
+            <div class="fight-health-label fight-mana-label"><strong>Basic attack</strong><span data-attack-text>Waiting</span></div>
+            <progress class="fight-health-progress fight-attack-progress" data-attack value="0" max="1" aria-label="Basic attack progress"></progress>
           </div>
         </section>
-
         <section class="fight-card fight-skills-card" aria-labelledby="skill-actions-title">
-          <div class="fight-skills-heading">
-            <div>
-              <p class="fight-eyebrow">Combat</p>
-              <h2 id="skill-actions-title">Skill actions</h2>
-            </div>
-            <span class="fight-skill-limit">Up to 3 active skills</span>
-          </div>
+          <div class="fight-skills-heading"><h2 id="skill-actions-title">Skill actions</h2><span class="fight-skill-limit">Up to 3 active skills</span></div>
           <div class="fight-skill-list">
-            {% for slot in "123"|make_list %}
-              <button class="fight-skill-button" type="button" data-skill-slot="{{ forloop.counter }}" disabled>
-                <span class="fight-skill-name">Skill slot {{ forloop.counter }}</span>
-                <span class="fight-skill-status">Blocked · No skill equipped</span>
-              </button>
-            {% endfor %}
+            {% for slot in "123"|make_list %}<button class="fight-skill-button" type="button" data-skill-slot="{{ forloop.counter }}" disabled><span class="fight-skill-name">Skill slot {{ forloop.counter }}</span><span class="fight-skill-status">Blocked · No skill equipped</span></button>{% endfor %}
           </div>
         </section>
       </div>
-
       <aside class="fight-sidebar">
-        <section class="fight-card fight-log-card" aria-labelledby="battle-log-title">
-          <div class="fight-log-heading">
-            <h2 id="battle-log-title">Battle log</h2>
+        <section class="fight-card fight-action-card" aria-labelledby="movement-policy-title">
+          <p class="fight-eyebrow">Combat movement</p>
+          <h2 id="movement-policy-title">Movement policy</h2>
+          <p>Approach moves toward your target and stops in melee range. Hold keeps your current position. Basic attacks remain automatic.</p>
+          <div class="fight-policy-options" role="group" aria-label="Movement policy">
+            <button type="button" class="btn fight-policy-button" data-policy="approach" aria-pressed="false" disabled>Approach</button>
+            <button type="button" class="btn fight-policy-button" data-policy="hold" aria-pressed="false" disabled>Hold</button>
           </div>
-          <div class="fight-log" role="log" aria-live="polite" aria-relevant="additions text">
-            <p class="fight-log-entry">
-              <span class="fight-log-marker" aria-hidden="true"></span>
-              <span><strong>Encounter started.</strong> {{ description }}</span>
-            </p>
-          </div>
+          <p data-command-status role="status"></p>
+          <button type="button" class="btn fight-policy-button" data-retry-command hidden>Retry command</button>
+          <form hidden>{% csrf_token %}</form>
         </section>
-
-        <section class="fight-card fight-action-card" aria-labelledby="next-step-title">
-          <p class="fight-eyebrow">Dungeon run</p>
-          <h2 id="next-step-title">Ready to continue?</h2>
-          <p>Resolve this encounter and see what lies ahead.</p>
-          <form method="post" action="{% url 'dungeon_action' %}">
-            {% csrf_token %}
-            <input type="hidden" name="hero_id" value="{{ hero_id }}" />
-            <input type="hidden" name="revision" value="{{ revision }}" />
-            <button class="btn fight-continue-button" name="action" value="resolve">Continue <span aria-hidden="true">→</span></button>
-          </form>
+        <section class="fight-card fight-log-card" aria-labelledby="battle-log-title">
+          <div class="fight-log-heading"><h2 id="battle-log-title">Battle log</h2><button type="button" class="btn fight-policy-button" data-older hidden>Older</button></div>
+          <div class="fight-log" role="log" aria-live="polite" aria-relevant="additions" data-log><p class="fight-log-entry">Encounter started. {{ description }}</p></div>
         </section>
       </aside>
     </div>

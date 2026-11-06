@@ -18,8 +18,11 @@ class DungeonTests(TestCase):
         session['hero_id'] = self.hero.pk
         session.save()
 
-    def start(self):
-        self.assertEqual(enter_or_resume(self.hero.pk), 'success')
+    def start(self, kind='goblin_ambush'):
+        run = create_run()
+        run['current_encounter'] = Encounter.create(kind, 1).to_dict()
+        with patch('hero.dungeon.create_run', return_value=run):
+            self.assertEqual(enter_or_resume(self.hero.pk), 'success')
         self.hero.refresh_from_db()
 
     def act(self, action, choice=None):
@@ -28,8 +31,7 @@ class DungeonTests(TestCase):
         return result
 
     def test_effects_and_pure_transitions(self):
-        cases = [('goblin_ambush', (5, 10), 90, 0), ('ogre_guard', (10, 15), 80, 0),
-                 ('dungeon_guardian', (15, 20), 70, 0), ('spike_pit', (3, 8), 94, 0),
+        cases = [('spike_pit', (3, 8), 94, 0),
                  ('forgotten_cache', None, 100, 20), ('wandering_healer', None, 100, 0)]
         for key, bounds, expected_hp, expected_xp in cases:
             run = create_run()
@@ -91,7 +93,7 @@ class DungeonTests(TestCase):
                 self.assertEqual(' disabled' in button_markup, not is_enabled)
 
     def test_duplicates_invalid_phases_and_choices(self):
-        self.start()
+        self.start('spike_pit')
         revision = self.hero.dungeon_revision
         self.assertEqual(self.act('choose', 0), 'invalid')
         self.assertEqual(self.act('retreat'), 'invalid')
@@ -108,14 +110,14 @@ class DungeonTests(TestCase):
         self.assertEqual(self.hero.dungeon_run['current_encounter'], snapshot['path_right'])
 
     def test_retreat_and_defeat(self):
-        self.start()
+        self.start('spike_pit')
         self.act('resolve')
         hp = self.hero.current_health
         self.assertEqual(self.act('retreat'), 'retreat')
         self.assertEqual(self.hero.current_health, hp)
         self.assertFalse(self.hero.is_in_combat)
         self.assertEqual(self.hero.dungeon_run, {})
-        self.start()
+        self.start('spike_pit')
         Hero.objects.filter(pk=self.hero.pk).update(current_health=1, experience=27)
         self.hero.refresh_from_db()
         self.assertEqual(self.act('resolve'), 'defeat')
@@ -123,7 +125,7 @@ class DungeonTests(TestCase):
         self.assertFalse(self.hero.is_in_combat)
 
     def test_conflicting_resource_change_is_not_overwritten(self):
-        self.start()
+        self.start('spike_pit')
         from . import dungeon
         original = dungeon.resolve_encounter
         def conflicting(*args):
@@ -136,7 +138,7 @@ class DungeonTests(TestCase):
         self.assertEqual(self.hero.dungeon_run['phase'], 'encounter')
 
     def test_routes_hidden_paths_csrf_and_hero_switch(self):
-        self.start()
+        self.start('spike_pit')
         self.act('resolve')
         response = self.client.get(reverse('dungeon'))
         for label in ('Left path', 'Right path', 'Retreat'):
@@ -165,7 +167,7 @@ class DungeonTests(TestCase):
         self.client.get(reverse('select_hero', args=[other.pk]))
         self.assertRedirects(self.client.get(reverse('dungeon')), reverse('home'))
         self.client.get(reverse('select_hero', args=[self.hero.pk]))
-        self.start()
+        self.start('spike_pit')
         self.assertRedirects(self.client.get(reverse('home')), reverse('dungeon'),
                              fetch_redirect_response=False)
 
@@ -189,7 +191,6 @@ class DungeonTests(TestCase):
 
         response = self.client.get(reverse('dungeon_fight'))
         self.assertEqual(response.context['hero_id'], self.hero.pk)
-        self.assertContains(response, f'name="hero_id" value="{self.hero.pk}"')
         form_data = {
             'action': 'resolve',
             'hero_id': response.context['hero_id'],
@@ -215,7 +216,7 @@ class DungeonTests(TestCase):
              other.experience, other.dungeon_revision),
             original_other_state)
 
-    def test_fight_page_displays_encounter_and_continue_action(self):
+    def test_fight_page_displays_live_battle_and_movement_policy(self):
         self.start()
 
         response = self.client.get(reverse('dungeon_fight'))
@@ -235,14 +236,17 @@ class DungeonTests(TestCase):
         self.assertContains(response, 'data-skill-slot="2" disabled')
         self.assertContains(response, 'data-skill-slot="3" disabled')
         self.assertContains(response, 'css/fight.css')
-        self.assertContains(response, 'name="action" value="resolve"')
-        self.assertContains(response, f'name="hero_id" value="{self.hero.pk}"')
-        self.assertContains(response, f'name="revision" value="{self.hero.dungeon_revision}"')
+        self.assertNotContains(response, 'name="action" value="resolve"')
+        self.assertContains(response, 'Movement policy')
+        self.assertContains(response, 'data-policy="approach"')
+        self.assertContains(response, 'data-policy="hold"')
+        self.assertNotContains(response, '>Dungeon run<')
+        self.assertContains(response, 'js/fight.js')
         self.assertEqual(response.context['hero_id'], self.hero.pk)
 
 
     def test_earned_xp_survives_retreat_and_hero_switch(self):
-        self.start()
+        self.start('forgotten_cache')
         run = self.hero.dungeon_run
         run['current_encounter'] = Encounter.create('forgotten_cache', 1).to_dict()
         Hero.objects.filter(pk=self.hero.pk).update(dungeon_run=run)
@@ -274,7 +278,7 @@ class DungeonTests(TestCase):
         self.assertEqual(self.hero.dungeon_revision, 0)
 
     def test_defeat_message(self):
-        self.start()
+        self.start('spike_pit')
         Hero.objects.filter(pk=self.hero.pk).update(current_health=1)
         response = self.client.post(reverse('dungeon_action'), {
             'action': 'resolve', 'hero_id': self.hero.pk,
@@ -287,6 +291,8 @@ class DungeonTests(TestCase):
                           ('dungeon_guardian', 'fight'), ('forgotten_cache', 'treasure'),
                           ('spike_pit', 'trap'), ('wandering_healer', 'npc')]:
             with self.subTest(key=key):
+                from battle.models import Battle
+                Battle.objects.all().delete()  # Each subcase constructs a separate saved run.
                 run = create_run()
                 run['current_encounter'] = Encounter.create(key, 1).to_dict()
                 Hero.objects.filter(pk=self.hero.pk).update(dungeon_run=run)
@@ -310,6 +316,9 @@ class DungeonTests(TestCase):
                 response = self.client.post(reverse('dungeon_action'), {
                     'action': 'resolve', 'hero_id': self.hero.pk,
                     'revision': revision}, follow=True)
+                if page == 'fight':
+                    self.assertEqual(response.status_code, 400)
+                    continue
                 self.assertTemplateUsed(response, 'hero/dungeon.html')
                 self.assertContains(response, 'Choose your next path')
                 self.assertNotContains(response, 'encounter placeholder')

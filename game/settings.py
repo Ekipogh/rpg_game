@@ -83,6 +83,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            # Admin reads and validates before saving. Acquire the write lock
+            # at transaction entry so concurrent daemon writes cannot cause a
+            # deferred read-to-write upgrade to fail without waiting.
+            'transaction_mode': 'IMMEDIATE',
+            'timeout': 20,
+        },
     }
 }
 

@@ -4,6 +4,7 @@ from django.http import HttpResponseBadRequest
 from django.views.decorators.http import require_GET, require_POST
 from .dungeon import apply_action
 from .encounters import Encounter
+from battle.models import Battle
 
 from hero.models import HeroClass, Hero
 
@@ -79,6 +80,8 @@ def dungeon_view(request, encounter_kind=None):
         'result': run['last_result'], 'revision': hero.dungeon_revision,
         'title': encounter.definition.title, 'description': encounter.definition.description,
         'is_battle': encounter.kind == 'battle',
+        'battle': Battle.objects.filter(hero=hero, encounter_id=encounter.id).first()
+                  if encounter.kind == 'battle' else None,
     })
 
 

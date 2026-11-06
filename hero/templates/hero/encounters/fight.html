@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load unicorn %}
 {% block title %}
   {{ title }} - Floor {{ floor }}
 {% endblock %}
 {% block extra_head %}
-  <link rel="stylesheet" href="{% static 'css/fight.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/fight.css' %}?v=2" />
+  <script src="{% static 'js/fight.js' %}" defer></script>
 {% endblock %}
 {% block content %}
-  {% unicorn 'fight-screen' %}
+  {% include 'unicorn/fight-screen.html' %}
 {% endblock %}
