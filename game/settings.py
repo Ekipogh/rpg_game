@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_unicorn',
     'hero',
     'item',
+    'battle.apps.BattleConfig',
 ]
 
 MIDDLEWARE = [

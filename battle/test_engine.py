@@ -5,7 +5,7 @@ import json
 from unittest import TestCase
 from unittest.mock import patch
 
-from .combat import (
+from .engine import (
     AdvanceResult, BattleCommandInput, BattleRules, BattleSnapshot,
     CombatStats, CombatantSnapshot, LootEntry, RewardSnapshot, RngState,
     SimulationLimitReached, advance, attack_interval_ms, create_battle,
@@ -162,10 +162,10 @@ class CombatTests(TestCase):
         hero = replace(base.combatants[0].stats, accuracy=0, critical_chance=200)
         snapshot = fixture(adjacent=True, hero_stats=hero)
         # Enemy draws first, then hero hit roll at the 5% boundary.
-        with patch('hero.combat.random_integer', side_effect=[0, 9999, 500]):
+        with patch('battle.engine.random_integer', side_effect=[0, 9999, 500]):
             result = advance(snapshot, create_battle(snapshot), 1000)
         self.assertTrue(any(e.event_type == 'miss' and e.actor_id == 'hero' for e in result.events))
-        with patch('hero.combat.random_integer', side_effect=[0, 9999, 499, 9999]):
+        with patch('battle.engine.random_integer', side_effect=[0, 9999, 499, 9999]):
             result = advance(snapshot, create_battle(snapshot), 1000)
         self.assertTrue(any(e.event_type == 'critical' and e.actor_id == 'hero' for e in result.events))
 
@@ -247,7 +247,7 @@ class CombatTests(TestCase):
         draws = [random_integer(a, 2, 4) for _ in range(100)]
         self.assertEqual(draws, [random_integer(b, 2, 4) for _ in range(100)])
         self.assertEqual(set(draws), {2, 3, 4})
-        with patch('hero.combat.hashlib.sha256') as digest:
+        with patch('battle.engine.hashlib.sha256') as digest:
             digest.return_value.digest.side_effect = [b'\xff'*32, b'\x00'*32]
             rng = RngState('seed', 0)
             self.assertEqual(random_integer(rng, 0, 2), 0)
@@ -281,7 +281,7 @@ class CombatTests(TestCase):
         hero = replace(base.combatants[0].stats, accuracy=999, attack=0)
         enemy = replace(base.combatants[1].stats, defense=999)
         snapshot = fixture(adjacent=True, hero_stats=hero, enemy_stats=enemy)
-        with patch('hero.combat.random_integer', return_value=9999):
+        with patch('battle.engine.random_integer', return_value=9999):
             result = advance(snapshot, create_battle(snapshot), 1000)
         event = next(e for e in result.events if e.event_type == 'damage' and e.actor_id == 'hero')
         self.assertEqual(event.payload['damage'], 1)
