@@ -13,7 +13,18 @@
       <div class="card-body">
         {% if result %}
         <div class="alert alert-info" role="status">
-          <p role="status">{{ result.title }}: HP {{ result.health_change }}, XP +{{ result.experience_change }}.</p>
+          <p>{{ result.title }}: HP {{ result.health_change }}, XP +{{ result.experience_change }}.</p>
+          {% if result.money_change %}<p>Money received: +{{ result.money_change }}.</p>{% endif %}
+          {% if result.loot %}
+          <p class="mb-1">Loot received:</p>
+          <ul>
+            {% for drop in result.loot %}
+            <li>{{ drop.name }} &times; {{ drop.quantity }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>No loot received.</p>
+          {% endif %}
         </div>
         {% endif %}
         <h2 class="card-title">Choose your next path</h2>

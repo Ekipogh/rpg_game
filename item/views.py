@@ -1,11 +1,13 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
+from django.db import transaction
+from django.db.models import F
 from typing import Optional, Tuple
 
 from hero.models import Hero
 from item.models import (
     Inventory, InventoryItem, Item, Weapon, Armor,
-    Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory
+    Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory, Instant
 )
 
 # Create your views here.
@@ -21,6 +23,7 @@ def item_detail(request, item_id):
     # Gather type-specific information
     item_info = {
         'item': item,
+        'is_instant': isinstance(item, Instant),
         'item_type': item.__class__.__name__,
         'item_type_lower': item.__class__.__name__.lower(),
         'level_requirement': getattr(item, 'level_requirement', 1),
@@ -205,6 +208,8 @@ def use_item_api(request, item_id):
 
     # Polymorphic usage - different behavior for each type!
     try:
+        if isinstance(item, Instant):
+            return JsonResponse({'error': 'This item is used automatically when received.'}, status=400)
         # Check if item is in inventory for equipment items
         if isinstance(item, (Weapon, Armor, Accessory)):
             inventory = get_or_create_inventory(hero)
@@ -234,7 +239,16 @@ def use_item_api(request, item_id):
             result, unequipped_item, did_change = handler(hero, item)
             action_type = 'equipped'
         elif isinstance(item, Consumable):
-            result = item.use(hero)  # Uses the polymorphic method
+            with transaction.atomic():
+                # Recheck ownership under the same write lock as consumption.
+                Hero.objects.filter(pk=hero.pk).update(money=F('money'))
+                hero.refresh_from_db()
+                if hero.is_in_combat:
+                    return JsonResponse({'error': 'Consumables cannot be used during a dungeon run.'}, status=400)
+                if not hero.inventory_id or not InventoryItem.objects.filter(
+                        inventory_id=hero.inventory_id, item=item, quantity__gt=0).exists():
+                    return JsonResponse({'error': 'Item not found in inventory'}, status=400)
+                result = item.use(hero)
             action_type = 'consumed'
         else:
             result = f"Used {item.name}"

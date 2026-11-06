@@ -2,6 +2,7 @@
 from copy import deepcopy
 import random
 
+from django.db import transaction
 from django.db.models import F
 
 from .encounters import ENCOUNTER_DEFINITIONS, Encounter
@@ -32,9 +33,8 @@ def resolve_encounter(run, health, max_health, experience):
     if encounter.floor != floor:
         raise ValueError('Encounter floor mismatch.')
     old_health, old_xp = health, experience
-    ranges = {'enemy': (5, 10), 'miniboss': (10, 15), 'boss': (15, 20)}
     if encounter.kind == 'battle':
-        health -= random.randint(*ranges[encounter.battle_tier]) * floor
+        raise ValueError('Battles are resolved by the combat engine.')
     elif encounter.kind == 'trap':
         health -= random.randint(3, 8) * floor
     elif encounter.kind == 'treasure':
@@ -43,7 +43,7 @@ def resolve_encounter(run, health, max_health, experience):
         health = min(max_health, health + 5)
     health = max(0, health)
     result = {'health_change': health - old_health, 'experience_change': experience - old_xp,
-              'survived': health > 0, 'title': encounter.definition.title}
+              'survived': health > 0, 'title': encounter.definition.title, 'loot': []}
     if health == 0:
         return {}, 1, experience
     run['last_result'] = result
@@ -76,12 +76,18 @@ def enter_or_resume(hero_id):
     hero = Hero.objects.filter(pk=hero_id).first()
     if hero is None:
         return 'invalid'
+    if hero.dungeon_run:
+        with transaction.atomic():
+            ensure_battle(hero)
+        return 'success'
     if hero.not_healed:
         return 'not_healed'
-    if hero.dungeon_run:
-        return 'success'
-    updated = _snapshot(hero).update(dungeon_run=create_run(), is_in_combat=True,
-                                     dungeon_revision=F('dungeon_revision') + 1)
+    with transaction.atomic():
+        updated = _snapshot(hero).update(dungeon_run=create_run(), is_in_combat=True,
+                                         dungeon_revision=F('dungeon_revision') + 1)
+        if updated:
+            hero.refresh_from_db()
+            ensure_battle(hero)
     return 'success' if updated else 'stale'
 
 
@@ -109,7 +115,26 @@ def apply_action(hero_id, action, expected_revision, choice=None):
             return 'invalid'
     except (ValueError, KeyError, TypeError):
         return 'invalid'
-    updated = _snapshot(hero).update(
-        dungeon_run=run, current_health=health, experience=xp, is_in_combat=bool(run),
-        dungeon_revision=F('dungeon_revision') + 1)
+    with transaction.atomic():
+        updated = _snapshot(hero).update(
+            dungeon_run=run, current_health=health, experience=xp, is_in_combat=bool(run),
+            dungeon_revision=F('dungeon_revision') + 1)
+        if updated:
+            hero.refresh_from_db()
+            ensure_battle(hero)
     return outcome if updated else 'stale'
+
+
+def ensure_battle(hero):
+    """Called inside accepted transition transactions; GET never creates a fight."""
+    from battle.models import Battle
+    run = hero.dungeon_run
+    if not run or run['phase'] != 'encounter':
+        return None
+    encounter = Encounter.from_dict(run['current_encounter'])
+    if encounter.kind != 'battle':
+        return None
+    battle, _ = Battle.objects.get_or_create(encounter_id=encounter.id, defaults={'hero': hero})
+    if battle.hero_id != hero.pk:
+        raise ValueError('Encounter belongs to another hero.')
+    return battle

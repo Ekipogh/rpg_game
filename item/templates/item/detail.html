@@ -92,7 +92,9 @@
       <div class="row mb-4">
         <div class="col-12">
           <div class="d-flex flex-wrap gap-2 justify-content-center">
-            {% if item.item_type == 'consumable' %}
+            {% if is_instant %}
+              <p>Used automatically when received.</p>
+            {% elif item.item_type == 'consumable' %}
               <button class="btn btn-success dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="useItem({{ item.id }})">🧪 Use Item</button>
             {% elif item.item_type == 'weapon' or item.item_type == 'armor' %}
               <button class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
@@ -194,8 +196,11 @@
                 <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">🧪</span>Magical Effects</h5>
               </div>
               <div class="card-body">
-                {% if item.heal_amount > 0 or item.mana_restore > 0 or item.duration > 0 %}
+                {% if item.heal_amount > 0 or item.mana_restore > 0 or item.money_amount > 0 or item.duration > 0 %}
                   <div class="row g-3">
+                    {% if item.money_amount > 0 %}
+                      <div class="col-12"><p>Adds {{ item.money_amount }} money{% if is_instant %} immediately when received{% else %} when consumed{% endif %}.</p></div>
+                    {% endif %}
                     {% if item.heal_amount > 0 %}
                       <div class="col-12">
                         <div class="card border-danger dark:border-red-600 !bg-white dark:!bg-gray-700">

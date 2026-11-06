@@ -22,7 +22,12 @@ class RecoveryTests(TestCase):
             restore_resources(self.hero.pk, health_amount=-1)
 
     def test_suppression_in_both_phases_and_resume(self):
-        enter_or_resume(self.hero.pk)
+        from .encounters import Encounter
+        from .dungeon import create_run
+        run = create_run()
+        run['current_encounter'] = Encounter.create('spike_pit', 1).to_dict()
+        with patch('hero.dungeon.create_run', return_value=run):
+            enter_or_resume(self.hero.pk)
         for phase in ('encounter', 'choices'):
             self.hero.refresh_from_db()
             saved = self.hero.dungeon_run
