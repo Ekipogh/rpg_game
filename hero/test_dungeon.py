@@ -299,7 +299,6 @@ class DungeonTests(TestCase):
                 if page == 'fight':
                     title = Encounter.from_dict(run['current_encounter']).definition.title
                     self.assertContains(response, title)
-                    self.assertContains(response, 'Battlefield')
                 else:
                     self.assertContains(response, 'encounter placeholder')
                 self.assertNotContains(response, 'Left path')

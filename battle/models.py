@@ -3,7 +3,7 @@ from django.db import models
 
 class Battle(models.Model):
     id = models.AutoField(primary_key=True)
-    hero = models.ForeignKey("Hero", on_delete=models.CASCADE)
+    hero = models.ForeignKey("hero.Hero", on_delete=models.CASCADE)
     encounter_id = models.IntegerField()
     status = models.CharField(
         max_length=20,
