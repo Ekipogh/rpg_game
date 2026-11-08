@@ -14,7 +14,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from hero.dungeon import _snapshot, generate_paths
-from hero.encounters import Encounter
+from hero.encounters import ENCOUNTER_DEFINITIONS, Encounter
 from hero.models import Hero
 from item.models import EquipmentSlot, Item, Instant
 from item.services import receive_item
@@ -133,10 +133,18 @@ def _encounter(hero, battle=None):
 
 def discover_battles(token, limit=100):
     """Adopt saved encounters, including runs created before the worker existed."""
-    # Exclude already managed heroes before applying the bound to avoid starvation.
+    if limit <= 0:
+        return 0
+    # Choices and peaceful encounters retain is_in_combat for resource recovery.
+    # Exclude them and managed heroes before bounding candidates, not creations:
+    # even a candidate rejected on revalidation must consume the tick's budget.
     managed = Battle.objects.exclude(status="FINISHED").values("hero_id")
-    ids = list(Hero.objects.filter(is_in_combat=True).exclude(dungeon_run={})
-               .exclude(pk__in=managed).order_by("pk").values_list("pk", flat=True))
+    battle_keys = [key for key, definition in ENCOUNTER_DEFINITIONS.items()
+                   if definition.kind == "battle"]
+    ids = list(Hero.objects.filter(is_in_combat=True,
+               dungeon_run__phase="encounter",
+               dungeon_run__current_encounter__definition_key__in=battle_keys)
+               .exclude(pk__in=managed).order_by("pk").values_list("pk", flat=True)[:limit])
     created = 0
     for hero_id in ids:
         with transaction.atomic():
@@ -149,8 +157,6 @@ def discover_battles(token, limit=100):
             if not Battle.objects.filter(encounter_id=encounter.id).exists():
                 Battle.objects.create(hero=hero, encounter_id=encounter.id)
                 created += 1
-        if created >= limit:
-            break
     return created
 
 

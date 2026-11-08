@@ -4,7 +4,9 @@ from datetime import timedelta
 import json
 from unittest.mock import patch
 
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from battle_daemon import BattleDaemon, main
@@ -31,6 +33,48 @@ class WorkerTests(TestCase):
     def adopt(self):
         discover_battles(self.token)
         return Battle.objects.get(hero=self.hero)
+
+    def test_discovery_skips_idle_expeditions_before_bounding_candidates(self):
+        choices = create_run()
+        choices['phase'] = 'choices'
+        runs = [choices]
+        for key in ('spike_pit', 'forgotten_cache', 'wandering_healer'):
+            run = create_run()
+            run['current_encounter'] = Encounter.create(key, 1).to_dict()
+            runs.append(run)
+        Hero.objects.filter(pk=self.hero.pk).update(dungeon_run=runs[0])
+        for index, run in enumerate(runs[1:] * 3):
+            Hero.objects.create(name=f'Idle {index}', hero_class=self.hero.hero_class,
+                                dungeon_run=run, is_in_combat=True)
+        fighters = [Hero.objects.create(name=f'Legacy fighter {index}', hero_class=self.hero.hero_class,
+                                       dungeon_run=create_run(), is_in_combat=True)
+                    for index in range(3)]
+        from .services import fence
+        with patch('battle.services.fence', wraps=fence) as fencing:
+            self.assertEqual(discover_battles(self.token, limit=2), 2)
+            self.assertEqual(fencing.call_count, 2)
+        self.assertSetEqual(set(Battle.objects.values_list('hero_id', flat=True)),
+                            {hero.pk for hero in fighters[:2]})
+        self.assertEqual(discover_battles(self.token, limit=2), 1)
+        with CaptureQueriesContext(connection) as queries:
+            self.assertEqual(discover_battles(self.token, limit=2), 0)
+        self.assertEqual(len(queries), 1)  # Idle expeditions need only a read, no fencing writes.
+
+    def test_discovery_rejections_consume_candidate_budget(self):
+        run = create_run()
+        run['current_encounter']['floor'] = 2  # Rejected by transactional revalidation.
+        Hero.objects.filter(pk=self.hero.pk).update(dungeon_run=run)
+        other = Hero.objects.create(name='Later fighter', hero_class=self.hero.hero_class,
+                                   dungeon_run=create_run(), is_in_combat=True)
+        from .services import fence
+        with patch('battle.services.fence', wraps=fence) as fencing:
+            self.assertEqual(discover_battles(self.token, limit=1), 0)
+            self.assertEqual(fencing.call_count, 1)
+        self.assertFalse(Battle.objects.filter(hero=other).exists())
+
+    def test_discovery_zero_budget_does_no_work(self):
+        with self.assertNumQueries(0):
+            self.assertEqual(discover_battles(self.token, limit=0), 0)
 
     def fight(self, battle):
         for _ in range(20):
