@@ -15,6 +15,9 @@ restore using Python 3.14 rather than reusing its old virtualenv.
 Commit and push these deployment changes before building: release packaging uses
 `git archive HEAD` and deliberately excludes uncommitted files.
 
+Create a ./deployment/nginx-config file with your Nginx configuration for the game,
+or use default, defined in the script.
+
 On the Ubuntu machine, check out the repository and run:
 
 ```bash
