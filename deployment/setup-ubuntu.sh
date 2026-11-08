@@ -56,23 +56,27 @@ trap 'rm -f -- "$SUDO_FILE"' EXIT
 printf '%s ALL=(root) NOPASSWD: /usr/local/sbin/rpg-game-deploy *\n' "$AGENT_USER" > "$SUDO_FILE"
 visudo -cf "$SUDO_FILE"
 install -m 0440 "$SUDO_FILE" /etc/sudoers.d/rpg-game-deploy
-# Dedicated LAN listener; preserve Ubuntu's existing default site on port 80.
-cat > /etc/nginx/sites-available/rpg_game <<'EOF'
-server {
-    listen 8080 default_server;
-    server_name _;
-    location /static/ {
-        alias /opt/rpg_game/current/staticfiles/;
+if [ ! -f ./nginx-config ]; then
+    cp ./nginx-config /etc/nginx/sites-available/rpg_game
+else
+    # Dedicated LAN listener; preserve Ubuntu's existing default site on port 80.
+    cat > /etc/nginx/sites-available/rpg_game <<'EOF'
+    server {
+        listen 8080 default_server;
+        server_name _;
+        location /static/ {
+            alias /opt/rpg_game/current/staticfiles/;
+        }
+        location / {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
     }
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
+    EOF
+fi
 ln -sfn /etc/nginx/sites-available/rpg_game /etc/nginx/sites-enabled/rpg_game
 nginx -t
 systemctl daemon-reload
