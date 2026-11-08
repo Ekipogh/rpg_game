@@ -8,6 +8,7 @@ import django
 import threading
 import time
 import json
+import signal
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -22,6 +23,7 @@ django.setup()
 from hero.models import Hero
 from hero.recovery import restore_resources
 from django.db.models import F
+from django.conf import settings
 
 
 class HealingDaemon:
@@ -38,7 +40,7 @@ class HealingDaemon:
         self.mana_restore_interval = 1  # seconds
 
         # File to store healing state (persist across restarts)
-        self.state_file = project_dir / 'healing_state.json'
+        self.state_file = settings.DATA_DIR / 'healing_state.json'
         self.load_state()
 
         print(f"🏥 Healing Daemon started at {datetime.now()}")
@@ -49,9 +51,11 @@ class HealingDaemon:
             try:
                 with open(self.state_file, 'r') as f:
                     data = json.load(f)
-                    self.healing_heroes = {int(k): v for k, v in data.items()}
+                    # Saved records are not running threads. Passive mode
+                    # discovers eligible heroes from the database after restart.
+                    self.healing_heroes = {}
                     print(
-                        f"📄 Loaded healing state for {len(self.healing_heroes)} heroes")
+                        f"📄 Found previous healing state for {len(data)} heroes; passive mode will rescan")
             except Exception as e:
                 print(f"⚠️  Could not load healing state: {e}")
 
@@ -62,7 +66,9 @@ class HealingDaemon:
             data = {}
             for hero_id, info in self.healing_heroes.items():
                 data[hero_id] = {
-                    'last_heal': info.get('last_heal', datetime.now().isoformat()).isoformat(),
+                    'last_heal': (info['last_heal'].isoformat()
+                                  if isinstance(info.get('last_heal'), datetime)
+                                  else info.get('last_heal', datetime.now().isoformat())),
                     'active': True
                 }
 
@@ -404,6 +410,8 @@ class HealingDaemon:
 
 if __name__ == '__main__':
     daemon = HealingDaemon()
+    signal.signal(signal.SIGTERM, lambda *_: daemon.shutdown())
+    signal.signal(signal.SIGINT, lambda *_: daemon.shutdown())
 
     if len(sys.argv) > 1:
         command = sys.argv[1].lower()

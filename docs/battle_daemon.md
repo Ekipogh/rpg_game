@@ -84,7 +84,8 @@ Read-only GET requests do not create or advance battles.
 
 ## Linux service
 
-`deployment/rpg_game-battle.service` runs the same standalone script. Adjust paths
-and user for the installation, migrate and configure content first, then install
-and start it using the normal service deployment process. It is not installed or
-started by this change. Run one worker per SQLite database.
+`deployment/rpg_game-battle.service` runs the same standalone script from
+`/opt/rpg_game/current`, using the `rpg-game` account and the shared environment
+in `/etc/rpg_game/environment`. The [Ubuntu setup and deployment procedure](deployment_guide.md)
+installs this unit, migrates the shared database, and starts the worker alongside
+the web and healing services. Run one worker per SQLite database.

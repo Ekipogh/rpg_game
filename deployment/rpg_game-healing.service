@@ -1,0 +1,27 @@
+[Unit]
+Description=RPG Game passive healing
+After=network.target
+ConditionPathExists=/opt/rpg_game/current/RELEASE.json
+
+[Service]
+Type=simple
+User=rpg-game
+Group=rpg-game
+WorkingDirectory=/opt/rpg_game/current
+EnvironmentFile=/etc/rpg_game/environment
+Environment=DJANGO_SETTINGS_MODULE=game.settings
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/rpg_game/current/.venv/bin/python /opt/rpg_game/current/healing_daemon.py passive
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/rpg_game
+
+[Install]
+WantedBy=multi-user.target

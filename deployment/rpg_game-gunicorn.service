@@ -1,52 +1,27 @@
 [Unit]
-Description=RPG Game Django Application (Gunicorn)
+Description=RPG Game web server
 After=network.target
-Wants=network.target
+ConditionPathExists=/opt/rpg_game/current/RELEASE.json
 
 [Service]
-Type=notify
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/rpg_game
-Environment=PATH=/var/www/rpg_game/.venv/bin
+Type=simple
+User=rpg-game
+Group=rpg-game
+WorkingDirectory=/opt/rpg_game/current
+EnvironmentFile=/etc/rpg_game/environment
 Environment=DJANGO_SETTINGS_MODULE=game.settings
-Environment=PYTHONPATH=/var/www/rpg_game
-Environment=DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
-Environment=DJANGO_DEBUG=False
-Environment=DJANGO_SECRET_KEY=your-secret-key-here
-ExecStart=/var/www/rpg_game/.venv/bin/gunicorn \
-    --bind 0.0.0.0:8000 \
-    --workers 3 \
-    --worker-class sync \
-    --timeout 60 \
-    --keep-alive 2 \
-    --max-requests 1000 \
-    --max-requests-jitter 50 \
-    --preload \
-    --access-logfile /var/log/rpg_game/access.log \
-    --error-logfile /var/log/rpg_game/error.log \
-    --log-level info \
-    --capture-output \
-    game.wsgi:application
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=mixed
-Restart=always
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/rpg_game/current/.venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 2 --timeout 60 --access-logfile - --error-logfile - game.wsgi:application
+Restart=on-failure
 RestartSec=3
+TimeoutStopSec=30
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=rpg_game
-
-# Security settings
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/var/www/rpg_game
-ReadWritePaths=/var/log/rpg_game
 ProtectHome=true
-PrivateDevices=true
-ProtectKernelTunables=true
-ProtectControlGroups=true
-RestrictRealtime=true
+ReadWritePaths=/var/lib/rpg_game
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+# Deployment files must be usable on Ubuntu after a Windows checkout.
+*.sh text eol=lf
+*.service text eol=lf
+*.py text eol=lf
+*.kts text eol=lf

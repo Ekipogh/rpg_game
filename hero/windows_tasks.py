@@ -6,13 +6,13 @@ import json
 import threading
 import time
 from datetime import datetime
-from pathlib import Path
+from django.conf import settings
 from .models import Hero
 from .recovery import restore_resources
 
 # Path to communicate with daemon
-DAEMON_COMMANDS_FILE = Path(__file__).parent.parent / 'daemon_commands.json'
-DAEMON_STATUS_FILE = Path(__file__).parent.parent / 'daemon_status.json'
+DAEMON_COMMANDS_FILE = settings.DATA_DIR / 'daemon_commands.json'
+DAEMON_STATUS_FILE = settings.DATA_DIR / 'daemon_status.json'
 
 
 def send_daemon_command(command, **kwargs):
