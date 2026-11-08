@@ -56,7 +56,7 @@ trap 'rm -f -- "$SUDO_FILE"' EXIT
 printf '%s ALL=(root) NOPASSWD: /usr/local/sbin/rpg-game-deploy *\n' "$AGENT_USER" > "$SUDO_FILE"
 visudo -cf "$SUDO_FILE"
 install -m 0440 "$SUDO_FILE" /etc/sudoers.d/rpg-game-deploy
-if [ -f .$SOURCE_DIR/nginx-config ]; then
+if [ -f $SOURCE_DIR/nginx-config ]; then
     echo "Found predifined nginx config."
     echo "Copying"
     cp ./nginx-config /etc/nginx/sites-available/rpg_game
