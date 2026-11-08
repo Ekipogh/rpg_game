@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 from hero.models import Hero, HeroClass
-from item.models import Inventory, Item, EquipmentSlots, Weapon, Armor, OffHand, Consumable
+from item.models import Inventory, Item, EquipmentSlots, Weapon, Armor, Accessory, Consumable
 
 
 class CharacterFormView(UnicornView):
