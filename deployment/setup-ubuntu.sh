@@ -57,6 +57,8 @@ printf '%s ALL=(root) NOPASSWD: /usr/local/sbin/rpg-game-deploy *\n' "$AGENT_USE
 visudo -cf "$SUDO_FILE"
 install -m 0440 "$SUDO_FILE" /etc/sudoers.d/rpg-game-deploy
 if [ -f .$SOURCE_DIR/nginx-config ]; then
+    echo "Found predifined nginx config."
+    echo "Copying"
     cp ./nginx-config /etc/nginx/sites-available/rpg_game
 else
     # Dedicated LAN listener; preserve Ubuntu's existing default site on port 80.
