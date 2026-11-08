@@ -6,10 +6,9 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 version = "2019.2"
 
 project {
-    description = "TeamCity project for rpg_game - example Kotlin DSL"
-
+    description = "Tested release artifacts and local Ubuntu deployment"
     vcsRoot(GitHubRepo)
-
+    buildType(BuildRelease)
     buildType(Deploy)
 }
 
@@ -19,73 +18,70 @@ object GitHubRepo : GitVcsRoot({
     url = "https://github.com/Ekipogh/rpg_game.git"
     branch = "refs/heads/main"
     branchSpec = "+:refs/heads/*"
-    // authentication should be configured in TeamCity (ssh key or token)
+    // Configure GitHub authentication in TeamCity.
+})
+
+object BuildRelease : BuildType({
+    id("BuildRelease")
+    name = "Build and test release"
+    artifactRules = "dist/rpg-game.tar.gz"
+    vcs {
+        root(GitHubRepo)
+        cleanCheckout = true
+        branchFilter = "+:<default>"
+    }
+    steps {
+        script {
+            name = "Test and package exact revision with offline dependencies"
+            scriptContent = """
+                #!/bin/bash
+                set -euo pipefail
+                bash deployment/build-release.sh
+            """.trimIndent()
+        }
+    }
+    requirements {
+        equals("teamcity.agent.jvm.os.name", "Linux")
+        equals("rpg.deploy.target", "local-ubuntu")
+    }
 })
 
 object Deploy : BuildType({
     id("Deploy")
-    name = "Deploy to same-server agent"
-
-    vcs {
-        root(GitHubRepo)
-        cleanCheckout = true
-    }
-
+    name = "Deploy game to local Ubuntu"
+    type = BuildTypeSettings.Type.DEPLOYMENT
+    maxRunningBuilds = 1
     steps {
         script {
-            name = "Install dependencies"
+            name = "Install tested release and verify services"
             scriptContent = """
-            #!/bin/bash
-            echo "Creating virtual environment"
-            python3 -m venv .venv
-            echo "Installing Python dependencies"
-            source .venv/bin/activate
-            pip install -r requirements.txt
-            """
-        }
-
-        script {
-            name = "Run migrations"
-            scriptContent = """
-            #!/bin/bash
-            source .venv/bin/activate
-            python manage.py migrate --noinput
-            """
-        }
-
-        script {
-            name = "Collect static"
-            scriptContent = """
-            #!/bin/bash
-            source .venv/bin/activate
-            python manage.py collectstatic --noinput
-            """
-        }
-
-        script {
-            name = "Restart application service"
-            scriptContent = """
-            #!/bin/bash
-            echo "Restarting rpg_game systemd service"
-            sudo systemctl restart rpg_game || true
-            sudo systemctl status rpg_game --no-pager
-            """
+                #!/bin/bash
+                set -euo pipefail
+                sudo -n /usr/local/sbin/rpg-game-deploy --artifact "%teamcity.build.checkoutDir%/incoming/rpg-game.tar.gz"
+            """.trimIndent()
         }
     }
-
+    dependencies {
+        snapshot(BuildRelease) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+        }
+        artifacts(BuildRelease) {
+            buildRule = sameChain()
+            artifactRules = "rpg-game.tar.gz => incoming"
+            cleanDestination = true
+        }
+    }
+    // Automatic deployment is deliberately disabled until the first supervised run.
     triggers {
         vcs {
+            enabled = false
             branchFilter = "+:<default>"
+            watchChangesInDependencies = true
         }
     }
-
     requirements {
-        // Require agent to be on Ubuntu/Linux deployment server
         equals("teamcity.agent.jvm.os.name", "Linux")
-    }
-
-    params {
-        // Secrets should be stored in TeamCity parameters or vault, not in VCS
-        // Example: teamcity.agent.ENV_PROD_DB
+        equals("rpg.deploy.target", "local-ubuntu")
     }
 })

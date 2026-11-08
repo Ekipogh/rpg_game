@@ -1,25 +1,27 @@
 [Unit]
-Description=RPG Game Battle Daemon
+Description=RPG Game battle worker
 After=network.target
+ConditionPathExists=/opt/rpg_game/current/RELEASE.json
 
 [Service]
 Type=simple
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/rpg_game
+User=rpg-game
+Group=rpg-game
+WorkingDirectory=/opt/rpg_game/current
+EnvironmentFile=/etc/rpg_game/environment
 Environment=DJANGO_SETTINGS_MODULE=game.settings
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/var/www/rpg_game/.venv/bin/python /var/www/rpg_game/battle_daemon.py
+ExecStart=/opt/rpg_game/current/.venv/bin/python /opt/rpg_game/current/battle_daemon.py
 Restart=on-failure
 RestartSec=3
-TimeoutStopSec=20
+TimeoutStopSec=30
 StandardOutput=journal
 StandardError=journal
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/var/www/rpg_game
 ProtectHome=true
+ReadWritePaths=/var/lib/rpg_game
 
 [Install]
 WantedBy=multi-user.target
