@@ -163,6 +163,7 @@ class ItemViewTests(TestCase):
 
         # Record initial health
         initial_health = self.hero.current_health
+        self.hero.add_to_inventory(self.consumable)
 
         response = self.client.post(f'/item/{self.consumable.id}/use/')
         self.assertEqual(response.status_code, 200)
