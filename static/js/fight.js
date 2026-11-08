@@ -4,7 +4,18 @@
   const root = document.querySelector('#live-fight');
   if (!root) return;
   const find = (name) => root.querySelector(`[data-${name}]`);
-  if (!root.dataset.stateUrl) return;
+  if (!root.dataset.stateUrl) {
+    // Legacy encounters can precede their battle record. A read-only page
+    // refresh picks up worker discovery (and any redirect after completion).
+    let retry;
+    const scheduleRefresh = () => {
+      clearTimeout(retry);
+      if (!document.hidden) retry = setTimeout(() => window.location.reload(), 2000);
+    };
+    document.addEventListener('visibilitychange', scheduleRefresh);
+    scheduleRefresh();
+    return;
+  }
   let sequence = 0, revision = -1, timer, busy = false, done = false;
   let latest = null, pending = null, connected = false;
   const names = new Map();
