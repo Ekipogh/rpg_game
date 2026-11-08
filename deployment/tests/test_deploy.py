@@ -28,8 +28,37 @@ class DeployTests(unittest.TestCase):
             directory.mkdir(parents=True)
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)
-        for name, value in [('ROOT', self.root), ('DATA', self.data), ('BACKUPS', self.backups)]:
+        self.environment = self.base / 'environment'
+        for name, value in [('ROOT', self.root), ('DATA', self.data), ('BACKUPS', self.backups),
+                            ('ENVIRONMENT', self.environment)]:
             self.stack.enter_context(patch.object(deploy, name, value))
+
+    def test_existing_install_defaults_to_original_app_port(self):
+        self.assertEqual(deploy.configured_app_port(), 8000)
+        self.environment.write_text('DJANGO_DEBUG=False\n')
+        self.assertEqual(deploy.configured_app_port(), 8000)
+
+    def test_app_port_reads_saved_configuration_not_callers_environment(self):
+        self.environment.write_text('RPG_APP_PORT=9000\nRPG_APP_PORT="12000"\n')
+        with patch.dict(deploy.os.environ, {'RPG_APP_PORT': '9999'}):
+            self.assertEqual(deploy.configured_app_port(), 12000)
+
+    def test_invalid_app_ports_are_rejected(self):
+        for port in ['0', '80', '65536', '-1', '9000/path', 'abc', '', '09000', '$OTHER_PORT', '12000 # comment']:
+            with self.subTest(port=port):
+                self.environment.write_text(f'RPG_APP_PORT={port}\n')
+                with self.assertRaises(ValueError):
+                    deploy.configured_app_port()
+
+    def test_readiness_uses_configured_port(self):
+        self.environment.write_text('RPG_APP_PORT=12000\nRPG_HTTP_PORT=9090\n')
+        release = self.root / 'releases/new'
+        self.make_release(release)
+        with patch.object(deploy, 'run'), patch.object(deploy.time, 'sleep'), \
+                patch.object(deploy.urllib.request, 'urlopen', side_effect=lambda *a, **k:
+                             io.BytesIO(json.dumps({'status': 'ok', 'revision': 'a' * 40}).encode())) as request:
+            deploy.start_and_verify(release)
+        request.assert_called_once_with('http://127.0.0.1:12000/health/', timeout=2)
 
     def archive(self, entries):
         archive = self.base / 'artifact.tar.gz'
