@@ -66,7 +66,7 @@ class DeployTests(unittest.TestCase):
     def make_release(self, location):
         location.mkdir(exist_ok=True)
         (location / 'RELEASE.json').write_text(json.dumps({
-            'revision': 'a' * 40, 'python': '3.12', 'machine': platform.machine(),
+            'revision': 'a' * 40, 'python': '3.14', 'machine': platform.machine(),
         }))
         (location / 'manage.py').touch()
         (location / 'requirements-resolved.txt').touch()
@@ -78,6 +78,16 @@ class DeployTests(unittest.TestCase):
         with patch.object(deploy.platform, 'machine', return_value='wrong-machine'):
             with self.assertRaises(ValueError):
                 deploy.validate_manifest(release)
+
+    def test_manifest_rejects_previous_python_runtime(self):
+        release = self.root / 'releases' / 'old-runtime'
+        self.make_release(release)
+        manifest_path = release / 'RELEASE.json'
+        manifest = json.loads(manifest_path.read_text())
+        manifest['python'] = '3.12'
+        manifest_path.write_text(json.dumps(manifest))
+        with self.assertRaisesRegex(ValueError, 'Python 3.14'):
+            deploy.validate_manifest(release)
 
     def test_database_and_state_backup_preserves_original(self):
         (self.data / 'db.sqlite3').write_bytes(b'database-before-migration')

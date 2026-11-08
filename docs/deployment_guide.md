@@ -1,8 +1,14 @@
 # Local Ubuntu deployment guide
 
-The deployment target is **Ubuntu 24.04, Python 3.12**, with an existing TeamCity
+The deployment target is **Ubuntu 26.04, Python 3.14**, with an existing TeamCity
 agent. The build and deployment configurations use the same marked agent host,
 so downloaded wheels match the target architecture and operating system.
+
+Ubuntu 26.04 supplies [Python 3.14](https://packages.ubuntu.com/resolute/python3).
+Build new release artifacts on the Ubuntu 26.04 agent after upgrading the host;
+Python 3.12 artifacts and old virtualenvs are not compatible with this deployment
+target. Preserve database backups and rebuild any older revision you need to
+restore using Python 3.14 rather than reusing its old virtualenv.
 
 ## First-time machine setup
 
@@ -114,7 +120,7 @@ old database. Keep a separate backup of that installation. Then, for example:
 
 ```bash
 sudo systemctl stop rpg_game rpg_game-battle rpg_game-healing
-sudo python3.12 - <<'PY'
+sudo python3.14 - <<'PY'
 import sqlite3
 with sqlite3.connect('/var/www/rpg_game/db.sqlite3') as source:
     with sqlite3.connect('/var/lib/rpg_game/db.sqlite3') as destination:
@@ -209,7 +215,7 @@ Environment secrets are not part of deployment snapshots. Back up
 `/etc/rpg_game/` separately and keep the corresponding secret available. Releases
 and backups are retained until an operator removes them; monitor disk space.
 Do not delete the active release or releases referenced by backups you intend to
-restore. Restore assumes the original operating system/Python 3.12 remains
+restore. Restore assumes the original operating system/Python 3.14 remains
 compatible with the retained virtualenv.
 
 ## Troubleshooting
@@ -218,7 +224,7 @@ compatible with the retained virtualenv.
 | --- | --- |
 | No compatible TeamCity agent | Check the custom `rpg.deploy.target` value and Linux agent requirement. |
 | Sudo asks for a password/fails | Verify setup used the actual agent account and `/etc/sudoers.d/rpg-game-deploy` exists. |
-| Wrong architecture or Python | Build on the marked Ubuntu 24.04/Python 3.12 host. |
+| Wrong architecture or Python | Build on the marked Ubuntu 26.04/Python 3.14 host. |
 | Artifact build ignores edits | Commit/push them: packaging intentionally uses `HEAD`. |
 | HTTP 400 | Add the requested hostname/IP to `DJANGO_ALLOWED_HOSTS` and restart services. |
 | Readiness fails | Inspect all three journals, port 8000 conflicts, migrations, and the release revision. |

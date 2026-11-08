@@ -2,7 +2,12 @@
 # Build on the same Ubuntu architecture and Python version as the target.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-PYTHON="${PYTHON:-python3.12}"
+PYTHON="${PYTHON:-python3.14}"
+"$PYTHON" - <<'PY'
+import sys
+if sys.version_info[:2] != (3, 14):
+    raise SystemExit('Ubuntu 26.04 releases require Python 3.14')
+PY
 BUILD_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$BUILD_DIR"' EXIT
 mkdir "$BUILD_DIR/package"

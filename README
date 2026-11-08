@@ -2,7 +2,7 @@ Hobby Django project for a simple RPG game
 
 Ubuntu setup and deployment guide: [docs/deployment_guide.md](docs/deployment_guide.md)
 
-Prepare an Ubuntu 24.04 machine with an existing TeamCity agent:
+Prepare an Ubuntu 26.04 machine with an existing TeamCity agent:
 `sudo bash deployment/setup-ubuntu.sh teamcity YOUR_UBUNTU_HOST_OR_IP`
 
 Images provided by [batareya](https://batareya.itch.io/500-free-pixel-art-fantasy-character-pack)

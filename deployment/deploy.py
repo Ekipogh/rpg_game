@@ -21,7 +21,7 @@ DATA = Path('/var/lib/rpg_game')
 BACKUPS = Path('/var/backups/rpg_game')
 ACCOUNT = 'rpg-game'
 SERVICES = ('rpg_game', 'rpg_game-battle', 'rpg_game-healing')
-PYTHON = '/usr/bin/python3.12'
+PYTHON = '/usr/bin/python3.14'
 
 
 def run(*args):
@@ -89,8 +89,8 @@ def validate_manifest(release):
     manifest = json.loads((release / 'RELEASE.json').read_text())
     if not re.fullmatch(r'[0-9a-f]{40}', manifest['revision']):
         raise ValueError('Invalid release revision')
-    if manifest['python'] != '3.12' or manifest['machine'] != platform.machine():
-        raise ValueError('Build and target must use Python 3.12 and the same architecture')
+    if manifest['python'] != '3.14' or manifest['machine'] != platform.machine():
+        raise ValueError('Build and target must use Python 3.14 and the same architecture')
     for filename in ('manage.py', 'requirements-resolved.txt', 'wheels'):
         if not (release / filename).exists():
             raise ValueError(f'Incomplete artifact: missing {filename}')
