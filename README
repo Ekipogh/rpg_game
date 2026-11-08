@@ -5,4 +5,6 @@ Ubuntu setup and deployment guide: [docs/deployment_guide.md](docs/deployment_gu
 Prepare an Ubuntu 26.04 machine with an existing TeamCity agent:
 `sudo bash deployment/setup-ubuntu.sh teamcity YOUR_UBUNTU_HOST_OR_IP`
 
+Optional public/backend ports: append `9090 12000` (defaults: `8080 8000`).
+
 Images provided by [batareya](https://batareya.itch.io/500-free-pixel-art-fantasy-character-pack)

@@ -8,10 +8,11 @@ Type=simple
 User=rpg-game
 Group=rpg-game
 WorkingDirectory=/opt/rpg_game/current
+Environment=RPG_APP_PORT=8000
 EnvironmentFile=/etc/rpg_game/environment
 Environment=DJANGO_SETTINGS_MODULE=game.settings
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/opt/rpg_game/current/.venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 2 --timeout 60 --access-logfile - --error-logfile - game.wsgi:application
+ExecStart=/opt/rpg_game/current/.venv/bin/gunicorn --bind 127.0.0.1:${RPG_APP_PORT} --workers 2 --timeout 60 --access-logfile - --error-logfile - game.wsgi:application
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=30

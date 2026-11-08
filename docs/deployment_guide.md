@@ -15,14 +15,30 @@ restore using Python 3.14 rather than reusing its old virtualenv.
 Commit and push these deployment changes before building: release packaging uses
 `git archive HEAD` and deliberately excludes uncommitted files.
 
-Create a ./deployment/nginx-config file with your Nginx configuration for the game,
-or use default, defined in the script.
+The default Nginx template is `deployment/nginx.conf.template`. To customize it,
+copy it to `deployment/nginx-config` and edit that file. Both templates must keep
+the `${RPG_HTTP_PORT}` listener and `${RPG_APP_PORT}` upstream placeholders;
+setup replaces only those placeholders, preserving Nginx variables such as
+`$http_host` and `$scheme`. Existing custom configurations with hardcoded ports
+must be updated to use the placeholders.
 
 On the Ubuntu machine, check out the repository and run:
 
 ```bash
 sudo bash deployment/setup-ubuntu.sh teamcity 192.168.1.50
 ```
+
+Optional third and fourth arguments select the public Nginx port and the internal
+Gunicorn port, respectively:
+
+```bash
+sudo bash deployment/setup-ubuntu.sh teamcity 192.168.1.50 9090 12000
+```
+
+Defaults on a new installation are 8080 and 8000. On subsequent runs omitted
+arguments preserve the saved values in `/etc/rpg_game/environment`. Ports must
+differ; the public port is 1-65535 and the unprivileged Gunicorn port is
+1024-65535. Use decimal integers without leading zeros.
 
 Replace `teamcity` with the Linux account that actually runs your TeamCity agent.
 Replace the IP with the address or hostname you will use to open the game. Supply
@@ -34,11 +50,11 @@ server, agent, or Java runtime.
 The setup script installs Python/venv, Git, curl, Nginx, sudo, and util-linux. It
 creates the application account, generates a random Django secret, installs a
 root-owned deployment helper, enables three systemd services, and configures
-Nginx on port 8080. It starts/reloads Nginx but leaves application services alone
+Nginx on the configured public port. It starts/reloads Nginx but leaves application services alone
 until the first deployment. Existing environment and game data are preserved on
 reruns. Existing service definitions and the RPG Nginx site are replaced; back up
-any custom versions before rerunning setup. Port 8000 must be available for
-Gunicorn, and port 8080 must be available for this Nginx site.
+any custom versions before rerunning setup. The selected backend port must be
+available for Gunicorn and the selected public port for this Nginx site.
 
 The resulting layout is:
 
@@ -52,8 +68,9 @@ The resulting layout is:
 /usr/local/lib/rpg_game/deploy.py     root-owned deployment implementation
 ```
 
-The game will be available at `http://192.168.1.50:8080/` after deployment. Setup
-does not change the firewall. If UFW is enabled, allow port 8080 only from your
+Setup prints the game URL using the selected public port, for example
+`http://192.168.1.50:9090/`. Setup does not change the firewall. If UFW is enabled,
+allow the configured public port only from your
 trusted LAN as appropriate. This setup uses HTTP for local use; configure TLS and
 Django's HTTPS/cookie settings before exposing it beyond the trusted local network.
 
@@ -154,12 +171,27 @@ Edit `/etc/rpg_game/environment` as root. Settings consume:
 | `DJANGO_DEBUG` | Setup sets `False`. |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames/IPs, including localhost and 127.0.0.1 for readiness checks. Do not include ports or URL schemes. |
 | `RPG_DATA_DIR` | Database and daemon-state directory; setup uses `/var/lib/rpg_game`. Defaults to the project directory for existing development workflows. |
+| `RPG_HTTP_PORT` | Nginx's public port; new installations default to 8080. Set through setup to regenerate the Nginx configuration. |
+| `RPG_APP_PORT` | Gunicorn's loopback port and the deployment readiness-check port; new installations default to 8000. Set through setup to update Nginx's upstream too. |
 
 The file is read by systemd and Bash, so use Bash-compatible `KEY=value` syntax
 and quote values containing shell metacharacters. `.env` is not loaded
 implicitly; `DATABASE_URL` is not used. After changing runtime environment values,
 restart all application services. Changing only this file does not require
 `daemon-reload`; changing unit files does.
+
+To change ports on an existing installation, rerun setup with the desired ports,
+then restart the web service (or deploy a release):
+
+```bash
+sudo bash deployment/setup-ubuntu.sh teamcity 192.168.1.50 9090 12000
+sudo systemctl restart rpg_game
+```
+
+Setup regenerates/reloads Nginx and updates the shared environment; it does not
+restart Gunicorn itself. A brief interruption can occur until that restart.
+Editing port values in the environment file alone does not regenerate Nginx.
+Use literal numeric values for ports; shell variable expressions are unsupported.
 
 To create the first administrator after deployment:
 
@@ -177,8 +209,8 @@ paused-fight recovery. The supplied healing service runs passive recovery.
 ```bash
 sudo systemctl status rpg_game rpg_game-battle rpg_game-healing --no-pager
 sudo journalctl -u rpg_game -u rpg_game-battle -u rpg_game-healing -n 100 --no-pager
-curl --fail http://127.0.0.1:8000/health/
-curl --fail http://192.168.1.50:8080/health/
+sudo bash -c 'source /etc/rpg_game/environment; curl --fail "http://127.0.0.1:${RPG_APP_PORT}/health/"'
+sudo bash -c 'source /etc/rpg_game/environment; curl --fail "http://192.168.1.50:${RPG_HTTP_PORT}/health/"'
 cat /opt/rpg_game/current/RELEASE.json
 ```
 
@@ -234,7 +266,7 @@ compatible with the retained virtualenv.
 | Wrong architecture or Python | Build on the marked Ubuntu 26.04/Python 3.14 host. |
 | Artifact build ignores edits | Commit/push them: packaging intentionally uses `HEAD`. |
 | HTTP 400 | Add the requested hostname/IP to `DJANGO_ALLOWED_HOSTS` and restart services. |
-| Readiness fails | Inspect all three journals, port 8000 conflicts, migrations, and the release revision. |
+| Readiness fails | Inspect all three journals, conflicts on the saved `RPG_APP_PORT`, migrations, and the release revision. |
 | Static files fail | Check Nginx configuration, collectstatic output, and read permissions under the active release. |
 | SQLite locked/read-only | Stop stale writers and check data-directory ownership; do not delete SQLite journals to clear a lock. |
 | First deploy fails on database | Check imported database permissions and migration compatibility; inspect the preserved snapshot. |

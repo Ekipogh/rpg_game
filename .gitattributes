@@ -3,3 +3,4 @@
 *.service text eol=lf
 *.py text eol=lf
 *.kts text eol=lf
+*.template text eol=lf

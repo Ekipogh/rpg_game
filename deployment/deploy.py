@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -22,6 +23,22 @@ BACKUPS = Path('/var/backups/rpg_game')
 ACCOUNT = 'rpg-game'
 SERVICES = ('rpg_game', 'rpg_game-battle', 'rpg_game-healing')
 PYTHON = '/usr/bin/python3.14'
+ENVIRONMENT = Path('/etc/rpg_game/environment')
+
+
+def configured_app_port():
+    port = '8000'  # Compatibility with installations created before port configuration.
+    if ENVIRONMENT.exists():
+        for line in ENVIRONMENT.read_text().splitlines():
+            match = re.match(r'^\s*(?:export\s+)?RPG_APP_PORT=(.*)$', line)
+            if match:
+                values = shlex.split(match[1])
+                if len(values) != 1:
+                    raise ValueError('RPG_APP_PORT must be a literal port number')
+                port = values[0]
+    if not re.fullmatch(r'[1-9][0-9]{0,4}', port) or not 1024 <= int(port) <= 65535:
+        raise ValueError('RPG_APP_PORT must be an integer from 1024 to 65535')
+    return int(port)
 
 
 def run(*args):
@@ -111,13 +128,14 @@ def stop_services():
 
 
 def start_and_verify(release):
+    port = configured_app_port()
     run('/usr/bin/systemd-analyze', 'verify',
         *(f'/etc/systemd/system/{service}.service' for service in SERVICES))
     run('/usr/bin/systemctl', 'start', *SERVICES)
     expected = json.loads((release / 'RELEASE.json').read_text())['revision']
     for attempt in range(30):
         try:
-            with urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=2) as response:
+            with urllib.request.urlopen(f'http://127.0.0.1:{port}/health/', timeout=2) as response:
                 body = json.load(response)
             if body.get('status') == 'ok' and body.get('revision') == expected:
                 # Check again after workers have had time to fail on startup.
@@ -127,7 +145,7 @@ def start_and_verify(release):
         except (OSError, ValueError):
             pass
         time.sleep(1)
-    raise RuntimeError('Readiness check failed or the wrong revision is serving port 8000')
+    raise RuntimeError(f'Readiness check failed or the wrong revision is serving port {port}')
 
 
 def backup(previous):
@@ -143,6 +161,7 @@ def backup(previous):
 
 
 def deploy(artifact):
+    configured_app_port()  # Reject invalid settings before entering maintenance.
     previous = current_release()
     release = ROOT / 'releases' / identifier()
     release.mkdir(mode=0o755)
@@ -183,6 +202,7 @@ def deploy(artifact):
 
 
 def restore(name):
+    configured_app_port()
     if not re.fullmatch(r'\d{8}T\d{12}Z', name):
         raise ValueError('Use a backup ID printed by deployment')
     source = BACKUPS / name
