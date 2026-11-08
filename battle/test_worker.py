@@ -76,6 +76,24 @@ class WorkerTests(TestCase):
         with self.assertNumQueries(0):
             self.assertEqual(discover_battles(self.token, limit=0), 0)
 
+    def test_discovery_skips_deleted_candidate_and_worker_processes_later_fight(self):
+        other = Hero.objects.create(name='Surviving fighter', hero_class=self.hero.hero_class,
+                                   dungeon_run=create_run(), is_in_combat=True)
+        deleted_id = self.hero.pk
+        from .services import fence
+
+        def delete_before_revalidation(token):
+            fence(token)
+            # Discovery has already materialized its candidate IDs at this point.
+            Hero.objects.filter(pk=deleted_id).delete()
+
+        worker = BattleDaemon()
+        worker.token = self.token
+        with patch('battle.services.fence', side_effect=delete_before_revalidation):
+            self.assertEqual(worker.tick(), 1)
+        self.assertFalse(Hero.objects.filter(pk=deleted_id).exists())
+        self.assertEqual(Battle.objects.get(hero=other).status, 'ACTIVE')
+
     def fight(self, battle):
         for _ in range(20):
             status = process_battle(battle.pk, self.token, 1000)

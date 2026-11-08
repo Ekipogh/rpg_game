@@ -149,10 +149,10 @@ def discover_battles(token, limit=100):
     for hero_id in ids:
         with transaction.atomic():
             fence(token)
-            hero = Hero.objects.get(pk=hero_id)
             try:
+                hero = Hero.objects.get(pk=hero_id)
                 encounter = _encounter(hero)
-            except (BattleConflict, ValueError, KeyError, TypeError):
+            except (Hero.DoesNotExist, BattleConflict, ValueError, KeyError, TypeError):
                 continue
             if not Battle.objects.filter(encounter_id=encounter.id).exists():
                 Battle.objects.create(hero=hero, encounter_id=encounter.id)
