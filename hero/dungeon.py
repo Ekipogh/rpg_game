@@ -3,23 +3,35 @@ from copy import deepcopy
 import random
 
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 
 from .encounters import ENCOUNTER_DEFINITIONS, Encounter
 from .models import Hero
 
 
+def available_encounter_keys():
+    """Keep definitions for saved runs, but offer only playable battles."""
+    from battle.models import EncounterMonster
+
+    configured = set(EncounterMonster.objects.values('encounter_definition_key')
+                     .annotate(total=Sum('quantity')).filter(total__gte=1, total__lte=3)
+                     .values_list('encounter_definition_key', flat=True))
+    return tuple(key for key, definition in ENCOUNTER_DEFINITIONS.items()
+                 if definition.kind != 'battle' or key in configured)
+
+
 def create_run():
     return {
         'current_floor': 1,
-        'current_encounter': Encounter.create('goblin_ambush', 1).to_dict(),
+        'current_encounter': Encounter.create(random.choice(available_encounter_keys()), 1).to_dict(),
         'phase': 'encounter', 'last_result': None,
         'path_left': None, 'path_right': None,
     }
 
 
 def generate_paths(floor):
-    return {side: Encounter.create(random.choice(tuple(ENCOUNTER_DEFINITIONS)), floor).to_dict()
+    options = available_encounter_keys()
+    return {side: Encounter.create(random.choice(options), floor).to_dict()
             for side in ('path_left', 'path_right')}
 
 

@@ -22,6 +22,9 @@ from .engine import create_battle, snapshot_to_json, state_to_json
 
 class WorkerTests(TestCase):
     def setUp(self):
+        choice = patch('hero.dungeon.random.choice', return_value='goblin_ambush')
+        choice.start()
+        self.addCleanup(choice.stop)
         self.hero = Hero.objects.create(name='Fighter', hero_class=HeroClass.objects.create(name='Warrior'),
             attack=1000, max_health=1000, current_health=1000, dungeon_run=create_run(), is_in_combat=True)
         self.monster = Monster.objects.create(name='Goblin', max_health=10, current_health=3,

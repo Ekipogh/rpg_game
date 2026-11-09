@@ -1,6 +1,8 @@
 """Encounter content and immutable instances stored in a hero's dungeon JSON."""
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 from types import MappingProxyType
 from uuid import uuid4
 
@@ -53,6 +55,11 @@ ENCOUNTER_DEFINITIONS = MappingProxyType({
                             "You discover a cache of ancient knowledge.", EncounterKind.TREASURE),
         EncounterDefinition("wandering_healer", "Wandering healer",
                             "A friendly healer offers aid.", EncounterKind.NPC),
+    ) + tuple(
+        EncounterDefinition(**entry)
+        for entry in json.loads(
+            Path(__file__).with_name("content_encounters.json").read_text(encoding="utf-8")
+        )
     )
 })
 

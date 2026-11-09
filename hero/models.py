@@ -310,6 +310,31 @@ class HeroClass(models.Model):
         return self.name
 
 
+class HeroClassEquipment(models.Model):
+    """Imported starting loadout, shared by new heroes of a class."""
+
+    hero_class = models.ForeignKey(HeroClass, on_delete=models.CASCADE, related_name="initial_equipment")
+    slot = models.CharField(max_length=50, choices=EquipmentSlots.choices())
+    item = models.ForeignKey("item.Item", on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["hero_class", "slot"], name="hero_class_initial_slot_unique"),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.item_id:
+            from item.models import Weapon, Armor, Accessory
+            expected = {"weapon": Weapon, "armor": Armor, "accessory": Accessory}.get(self.slot)
+            if expected is None or not isinstance(self.item, expected) or self.item.equipment_slot != self.slot:
+                raise ValidationError("Initial equipment must match its slot.")
+            if self.item.level_requirement > 1:
+                raise ValidationError("Initial equipment must be usable at level 1.")
+            if self.item.hero_class_restriction_id not in (None, self.hero_class_id):
+                raise ValidationError("Initial equipment is restricted to another class.")
+
+
 class Monster(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)

@@ -1,0 +1,338 @@
+[
+  {
+    "key": "level_01_skirmish",
+    "title": "Briarwood Verge: Skirmish",
+    "description": "Briarwood Verge (recommended level 1).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_01_assault",
+    "title": "Briarwood Verge: Assault",
+    "description": "Briarwood Verge (recommended level 1).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_02_skirmish",
+    "title": "Briarwood Verge: Skirmish",
+    "description": "Briarwood Verge (recommended level 2).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_02_assault",
+    "title": "Briarwood Verge: Assault",
+    "description": "Briarwood Verge (recommended level 2).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_03_skirmish",
+    "title": "Mossbound Ruins: Skirmish",
+    "description": "Mossbound Ruins (recommended level 3).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_03_assault",
+    "title": "Mossbound Ruins: Assault",
+    "description": "Mossbound Ruins (recommended level 3).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_03_champion",
+    "title": "Confront The Drowned Captain",
+    "description": "Mossbound Ruins (recommended level 3).",
+    "kind": "battle",
+    "battle_tier": "miniboss"
+  },
+  {
+    "key": "level_04_skirmish",
+    "title": "Mossbound Ruins: Skirmish",
+    "description": "Mossbound Ruins (recommended level 4).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_04_assault",
+    "title": "Mossbound Ruins: Assault",
+    "description": "Mossbound Ruins (recommended level 4).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_05_skirmish",
+    "title": "Sunken Causeway: Skirmish",
+    "description": "Sunken Causeway (recommended level 5).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_05_assault",
+    "title": "Sunken Causeway: Assault",
+    "description": "Sunken Causeway (recommended level 5).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_05_champion",
+    "title": "Confront The Thorn Castellan",
+    "description": "Sunken Causeway (recommended level 5).",
+    "kind": "battle",
+    "battle_tier": "boss"
+  },
+  {
+    "key": "level_06_skirmish",
+    "title": "Sunken Causeway: Skirmish",
+    "description": "Sunken Causeway (recommended level 6).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_06_assault",
+    "title": "Sunken Causeway: Assault",
+    "description": "Sunken Causeway (recommended level 6).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_07_skirmish",
+    "title": "Ashen Quarry: Skirmish",
+    "description": "Ashen Quarry (recommended level 7).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_07_assault",
+    "title": "Ashen Quarry: Assault",
+    "description": "Ashen Quarry (recommended level 7).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_07_champion",
+    "title": "Confront The White Maw",
+    "description": "Ashen Quarry (recommended level 7).",
+    "kind": "battle",
+    "battle_tier": "miniboss"
+  },
+  {
+    "key": "level_08_skirmish",
+    "title": "Ashen Quarry: Skirmish",
+    "description": "Ashen Quarry (recommended level 8).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_08_assault",
+    "title": "Ashen Quarry: Assault",
+    "description": "Ashen Quarry (recommended level 8).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_09_skirmish",
+    "title": "Thornwatch Keep: Skirmish",
+    "description": "Thornwatch Keep (recommended level 9).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_09_assault",
+    "title": "Thornwatch Keep: Assault",
+    "description": "Thornwatch Keep (recommended level 9).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_10_skirmish",
+    "title": "Thornwatch Keep: Skirmish",
+    "description": "Thornwatch Keep (recommended level 10).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_10_assault",
+    "title": "Thornwatch Keep: Assault",
+    "description": "Thornwatch Keep (recommended level 10).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_10_champion",
+    "title": "Confront Abbot of the Black Star",
+    "description": "Thornwatch Keep (recommended level 10).",
+    "kind": "battle",
+    "battle_tier": "boss"
+  },
+  {
+    "key": "level_11_skirmish",
+    "title": "Hollow Fen: Skirmish",
+    "description": "Hollow Fen (recommended level 11).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_11_assault",
+    "title": "Hollow Fen: Assault",
+    "description": "Hollow Fen (recommended level 11).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_12_skirmish",
+    "title": "Hollow Fen: Skirmish",
+    "description": "Hollow Fen (recommended level 12).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_12_assault",
+    "title": "Hollow Fen: Assault",
+    "description": "Hollow Fen (recommended level 12).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_12_champion",
+    "title": "Confront The Crystal Matriarch",
+    "description": "Hollow Fen (recommended level 12).",
+    "kind": "battle",
+    "battle_tier": "miniboss"
+  },
+  {
+    "key": "level_13_skirmish",
+    "title": "Frostglass Pass: Skirmish",
+    "description": "Frostglass Pass (recommended level 13).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_13_assault",
+    "title": "Frostglass Pass: Assault",
+    "description": "Frostglass Pass (recommended level 13).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_14_skirmish",
+    "title": "Frostglass Pass: Skirmish",
+    "description": "Frostglass Pass (recommended level 14).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_14_assault",
+    "title": "Frostglass Pass: Assault",
+    "description": "Frostglass Pass (recommended level 14).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_15_skirmish",
+    "title": "Cinder Warrens: Skirmish",
+    "description": "Cinder Warrens (recommended level 15).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_15_assault",
+    "title": "Cinder Warrens: Assault",
+    "description": "Cinder Warrens (recommended level 15).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_15_champion",
+    "title": "Confront The Hollow Sovereign",
+    "description": "Cinder Warrens (recommended level 15).",
+    "kind": "battle",
+    "battle_tier": "boss"
+  },
+  {
+    "key": "level_16_skirmish",
+    "title": "Cinder Warrens: Skirmish",
+    "description": "Cinder Warrens (recommended level 16).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_16_assault",
+    "title": "Cinder Warrens: Assault",
+    "description": "Cinder Warrens (recommended level 16).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_17_skirmish",
+    "title": "Obsidian Monastery: Skirmish",
+    "description": "Obsidian Monastery (recommended level 17).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_17_assault",
+    "title": "Obsidian Monastery: Assault",
+    "description": "Obsidian Monastery (recommended level 17).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_17_champion",
+    "title": "Confront The Eclipse Herald",
+    "description": "Obsidian Monastery (recommended level 17).",
+    "kind": "battle",
+    "battle_tier": "miniboss"
+  },
+  {
+    "key": "level_18_skirmish",
+    "title": "Obsidian Monastery: Skirmish",
+    "description": "Obsidian Monastery (recommended level 18).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_18_assault",
+    "title": "Obsidian Monastery: Assault",
+    "description": "Obsidian Monastery (recommended level 18).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_19_skirmish",
+    "title": "Starfall Citadel: Skirmish",
+    "description": "Starfall Citadel (recommended level 19).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_19_assault",
+    "title": "Starfall Citadel: Assault",
+    "description": "Starfall Citadel (recommended level 19).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_20_skirmish",
+    "title": "Starfall Citadel: Skirmish",
+    "description": "Starfall Citadel (recommended level 20).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_20_assault",
+    "title": "Starfall Citadel: Assault",
+    "description": "Starfall Citadel (recommended level 20).",
+    "kind": "battle",
+    "battle_tier": "enemy"
+  },
+  {
+    "key": "level_20_champion",
+    "title": "Confront The Unmaking King",
+    "description": "Starfall Citadel (recommended level 20).",
+    "kind": "battle",
+    "battle_tier": "boss"
+  }
+]

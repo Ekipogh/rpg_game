@@ -15,9 +15,39 @@ from django.urls import reverse
 
 from hero.components.character_form import CharacterFormView
 from hero.models import HeroClass
+from hero.models import Hero, HeroClassEquipment
+from hero.creation import create_character
+from item.models import Weapon, Inventory, Equipment
+from unittest.mock import patch
 
 
 class CharacterCreationTests(TestCase):
+    def test_submit_uses_imported_equipment_and_database_stats(self):
+        hero_class = HeroClass.objects.create(name='Custom class', base_attack=23)
+        weapon = Weapon.objects.create(name='Configured sword', attack_bonus=5)
+        HeroClassEquipment.objects.create(hero_class=hero_class, slot='weapon', item=weapon)
+        component = CharacterFormView(component_name='character-form', component_id='test-character')
+        component.select_class(hero_class.pk)
+        component.name = 'New hero'
+        component.attack_total = 999
+        with patch.object(component, 'is_valid', return_value=True):
+            response = component.submit()
+        hero = Hero.objects.get(name='New hero')
+        self.assertEqual(hero.attack, 23)
+        self.assertEqual(hero.weapon, weapon)
+        self.assertEqual(Weapon.objects.count(), 1)
+        self.assertEqual(response.url, reverse('select_hero', kwargs={'hero_id': hero.pk}))
+
+    def test_creation_rolls_back_when_loadout_is_invalid(self):
+        hero_class = HeroClass.objects.create(name='Custom class')
+        weapon = Weapon.objects.create(name='Wrong slot')
+        HeroClassEquipment.objects.create(hero_class=hero_class, slot='armor', item=weapon)
+        with self.assertRaises(ValidationError):
+            create_character('Invalid hero', hero_class)
+        self.assertEqual(Hero.objects.count(), 0)
+        self.assertEqual(Inventory.objects.count(), 0)
+        self.assertEqual(Equipment.objects.count(), 0)
+
     def test_screen_uses_current_database_classes(self):
         hero_class = HeroClass.objects.create(
             name="Alchemist's Apprentice", description="Brews potions.", base_attack=23,
