@@ -95,6 +95,63 @@ class ContentImportTests(TestCase):
         self.assertEqual(warrior.initial_equipment.count(), 0)
         self.assertEqual(hero.equipment.slots.count(), 3)
 
+    def test_retained_loadouts_reject_incompatible_item_updates(self):
+        self.run_import()
+        data = yaml.safe_load((Path(settings.BASE_DIR) / 'rpg_content.yaml').read_text(encoding='utf-8'))
+        blade = next(item for item in data['items'] if item['key'] == 'rustleaf_blade')
+        classes = copy.deepcopy(data['hero_classes'])
+        for row in classes:
+            row.pop('initial_equipment')
+        original_loadouts = list(HeroClassEquipment.objects.order_by('pk').values())
+        updates = ({'level_requirement': 2}, {'hero_class_restriction': 'wizard'},
+                   {'equipment_slot': 'armor'})
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'changed.yaml'
+            for update in updates:
+                changed = copy.deepcopy(blade)
+                changed.update(update)
+                catalog = dict(schema_version=1, hero_classes=classes, items=[changed],
+                               monsters=[], monster_loot=[], encounters=[])
+                path.write_text(yaml.safe_dump(catalog), encoding='utf-8')
+                for dry_run in (False, True):
+                    with self.subTest(update=update, dry_run=dry_run):
+                        with self.assertRaises(CommandError):
+                            self.run_import(path=str(path), dry_run=dry_run)
+                        item = Item.objects.get(name=blade['name'])
+                        self.assertEqual(item.level_requirement, 1)
+                        self.assertEqual(item.equipment_slot, 'weapon')
+                        self.assertEqual(item.hero_class_restriction.name, 'Warrior')
+                        self.assertEqual(list(HeroClassEquipment.objects.order_by('pk').values()), original_loadouts)
+        hero = create_character('Still playable', HeroClass.objects.get(name='Warrior'))
+        self.assertEqual(hero.weapon.name, blade['name'])
+
+    def test_item_updates_validate_loadouts_of_omitted_classes(self):
+        self.run_import()
+        blade = Item.objects.get(name='Rustleaf Blade')
+        catalog = dict(schema_version=1, items=[dict(key='rustleaf_blade', model='Weapon',
+                       name=blade.name, level_requirement=2)], monsters=[], monster_loot=[], encounters=[])
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'changed.yaml'
+            path.write_text(yaml.safe_dump(catalog), encoding='utf-8')
+            for dry_run in (False, True):
+                with self.subTest(dry_run=dry_run), self.assertRaises(CommandError):
+                    self.run_import(path=str(path), dry_run=dry_run)
+        blade.refresh_from_db()
+        self.assertEqual(blade.level_requirement, 1)
+
+    def test_final_loadout_can_remove_item_made_ineligible(self):
+        self.run_import()
+        catalog = dict(schema_version=1,
+            hero_classes=[dict(key='warrior', name='Warrior', initial_equipment={})],
+            items=[dict(key='rustleaf_blade', model='Weapon', name='Rustleaf Blade', level_requirement=2)],
+            monsters=[], monster_loot=[], encounters=[])
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'changed.yaml'
+            path.write_text(yaml.safe_dump(catalog), encoding='utf-8')
+            self.run_import(path=str(path))
+        self.assertEqual(Item.objects.get(name='Rustleaf Blade').level_requirement, 2)
+        self.assertEqual(HeroClass.objects.get(name='Warrior').initial_equipment.count(), 0)
+
     def test_existing_class_identity_image_and_hero_are_preserved(self):
         warrior = HeroClass.objects.create(name='Warrior', base_attack=999, image='hero_classes/custom.png')
         hero = Hero.objects.create(name='Veteran', hero_class=warrior, attack=123)

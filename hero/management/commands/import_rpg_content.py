@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db.models import Q
 
 from battle.models import EncounterMonster
 from hero.encounters import ENCOUNTER_DEFINITIONS
@@ -110,6 +111,14 @@ class Command(BaseCommand):
                         entry = HeroClassEquipment(hero_class=hero_class, slot=slot, item=items[key])
                         entry.full_clean()
                         entry.save()
+                # Re-fetch related items after all updates and loadout replacements.
+                # Retained loadouts can belong to classes omitted from this catalog.
+                affected_loadouts = HeroClassEquipment.objects.filter(
+                    Q(item_id__in=[item.pk for item in items.values()])
+                    | Q(hero_class_id__in=[hero_class.pk for hero_class in classes.values()])
+                ).prefetch_related("item")
+                for entry in affected_loadouts:
+                    entry.full_clean()
                 monsters = {}
                 for row in sections["monsters"]:
                     monsters[row["key"]] = save_record(Monster, row, {"key"}, {"name": row["name"]})

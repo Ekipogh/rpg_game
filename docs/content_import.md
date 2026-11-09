@@ -39,7 +39,9 @@ initial_equipment:
 
 The importer stores these in `HeroClassEquipment` after importing items. Reruns
 replace only the specified class loadout; `{}` clears it and an omitted field
-retains it. Wrong slots, incompatible class restrictions, missing item keys, and
+retains it. Retained loadouts using updated items are revalidated against the final
+imported state, including loadouts of classes omitted from the catalog. Wrong
+slots, incompatible class restrictions, missing item keys, and
 items requiring a level above 1 reject the entire import. Apply migrations and
 rerun the import before creating characters with these loadouts.
 
