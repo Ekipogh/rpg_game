@@ -80,16 +80,26 @@ class CharacterCreationTests(TestCase):
         )
         page = self.client.get(reverse("create_character"))
         soup = BeautifulSoup(page.content, "html.parser")
-        state = json.loads(soup.find("script", id=lambda value: value and value.startswith("unicorn:data:")).string)
-        data = state["data"]
+        root = soup.find(attrs={"unicorn:id": True})
+        self.assertIsNotNone(root, "Character form component was not rendered")
+        component_id = root["unicorn:id"]
+        checksum_field = "meta" if root.has_attr("unicorn:meta") else "checksum"
+        if root.has_attr("unicorn:data"):
+            # Unicorn 0.67 embeds state directly on the component root.
+            data = json.loads(root["unicorn:data"])
+        else:
+            # Older local environments embed it in a separate JSON script.
+            script = soup.find("script", id=f"unicorn:data:{component_id}")
+            self.assertIsNotNone(script, "Character form state was not rendered")
+            data = json.loads(script.string)["data"]
         self.assertEqual(data["selected_class"], first.pk)
         for chosen in (second, first):
             response = self.client.post(
                 "/unicorn/message/character-form",
                 data={
-                    "id": state["id"],
+                    "id": component_id,
                     "data": data,
-                    "checksum": generate_checksum(data),
+                    checksum_field: generate_checksum(data),
                     "epoch": time(),
                     "actionQueue": [{
                         "type": "callMethod",
@@ -100,6 +110,7 @@ class CharacterCreationTests(TestCase):
             )
             self.assertEqual(response.status_code, 200)
             result = response.json()
+            self.assertNotIn("error", result, result)
             data.update(result["data"])
             self.assertEqual(data["selected_class"], chosen.pk)
             self.assertEqual(data["attack_total"], chosen.base_attack)
