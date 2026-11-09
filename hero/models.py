@@ -278,6 +278,7 @@ class HeroClass(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.TextField()
+    image = models.ImageField(upload_to="hero_classes/", blank=True)
 
     # Base stats at level 1
     base_health = models.IntegerField(default=100)  # HP

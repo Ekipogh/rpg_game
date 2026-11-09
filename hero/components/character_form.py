@@ -6,21 +6,17 @@ from item.models import Inventory, Item, EquipmentSlots, Weapon, Armor, Accessor
 
 
 class CharacterFormView(UnicornView):
+    class Meta:
+        # Render database choices on the server without hydrating this read-only property.
+        javascript_exclude = ("hero_classes",)
+
     name: str = ""
-    hero_class = HeroClass.objects.first()
-    selected_class: str = hero_class.name if hero_class else ""
-    if hero_class:
-        attack: int = hero_class.base_attack
-        defense: int = hero_class.base_defense
-        magic: int = hero_class.base_magic
-        magic_defense: int = hero_class.base_magic_defense
-        speed: int = hero_class.base_speed
-    else:
-        attack: int = 10
-        defense: int = 10
-        magic: int = 10
-        magic_defense: int = 10
-        speed: int = 10
+    selected_class: int = 0
+    attack: int = 0
+    defense: int = 0
+    magic: int = 0
+    magic_defense: int = 0
+    speed: int = 0
     attack_mod: int = 0
     defense_mod: int = 0
     magic_mod: int = 0
@@ -33,16 +29,34 @@ class CharacterFormView(UnicornView):
     magic_defense_total: int = magic_defense + magic_defense_mod
     speed_total: int = speed + speed_mod
 
-    def select_class(self, cls: str):
-        hero_class = HeroClass.objects.filter(name=cls).first()
+    @property
+    def hero_classes(self):
+        classes = []
+        for hero_class in HeroClass.objects.order_by("pk"):
+            classes.append({
+                "id": hero_class.pk,
+                "name": hero_class.name,
+                "description": hero_class.description,
+                "image": hero_class.image.url if hero_class.image else "",
+            })
+        return classes
+
+    def mount(self):
+        hero_class = HeroClass.objects.order_by("pk").first()
         if hero_class:
-            self.attack = hero_class.base_attack
-            self.defense = hero_class.base_defense
-            self.magic = hero_class.base_magic
-            self.magic_defense = hero_class.base_magic_defense
-            self.speed = hero_class.base_speed
+            self.select_class(hero_class.pk)
+
+    def select_class(self, class_id: int):
+        hero_class = HeroClass.objects.filter(pk=class_id).first()
+        if hero_class is None:
+            return
+        self.attack = hero_class.base_attack
+        self.defense = hero_class.base_defense
+        self.magic = hero_class.base_magic
+        self.magic_defense = hero_class.base_magic_defense
+        self.speed = hero_class.base_speed
+        self.selected_class = hero_class.pk
         self.update_totals()
-        self.selected_class = cls
 
     def update_totals(self):
         self.attack_total = self.attack + self.attack_mod
@@ -57,7 +71,7 @@ class CharacterFormView(UnicornView):
         if not self.is_valid():
             return
         print(f"Creating character: {self.name}, Class: {self.selected_class}")
-        hero_class = HeroClass.objects.get(name=self.selected_class)
+        hero_class = HeroClass.objects.get(pk=self.selected_class)
         inventory = Inventory.objects.create()
         hero = Hero.objects.create(
             name=self.name,
@@ -197,7 +211,7 @@ class CharacterFormView(UnicornView):
         elif Hero.objects.filter(name=self.name).exists():
             errors["name"] = "Name already taken."
 
-        if not self.selected_class:
+        if not HeroClass.objects.filter(pk=self.selected_class).exists():
             errors["selected_class"] = "You must select a class."
 
         if errors:
