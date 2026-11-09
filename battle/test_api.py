@@ -15,6 +15,9 @@ from .services import acquire_lease, process_battle
 
 class BattleApiTests(TestCase):
     def setUp(self):
+        choice = patch('hero.dungeon.random.choice', return_value='goblin_ambush')
+        choice.start()
+        self.addCleanup(choice.stop)
         cls = HeroClass.objects.create(name='Warrior')
         self.hero = Hero.objects.create(name='Explorer', hero_class=cls, attack=1000)
         self.other = Hero.objects.create(name='Other', hero_class=cls)
@@ -219,7 +222,10 @@ class CommandConcurrencyTests(TransactionTestCase):
         from django.db import OperationalError, connections
         from .services import submit_command
         hero = Hero.objects.create(name='Concurrent', hero_class=HeroClass.objects.create(name='Warrior'))
-        enter_or_resume(hero.pk)
+        monster = Monster.objects.create(name='Concurrent enemy')
+        EncounterMonster.objects.create(encounter_definition_key='goblin_ambush', monster=monster)
+        with patch('hero.dungeon.random.choice', return_value='goblin_ambush'):
+            enter_or_resume(hero.pk)
         battle = Battle.objects.get(hero=hero)
         barrier = Barrier(2)
 

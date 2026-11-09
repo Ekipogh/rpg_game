@@ -65,7 +65,8 @@ class DungeonTests(TestCase):
         revision = self.hero.dungeon_revision
         self.assertEqual(enter_or_resume(self.hero.pk), 'success')
         for _ in range(2):
-            self.assertContains(self.client.get(reverse('dungeon'), follow=True), 'Dungeon encounter')
+            title = Encounter.from_dict(saved['current_encounter']).definition.title
+            self.assertContains(self.client.get(reverse('dungeon'), follow=True), title)
         self.hero.refresh_from_db()
         self.assertEqual(self.hero.dungeon_run, saved)
         self.assertEqual(self.hero.dungeon_revision, revision)

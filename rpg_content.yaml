@@ -1,0 +1,6965 @@
+schema_version: 1
+notes:
+- Custom seed-data YAML, not Django loaddata fixture format.
+- Items model values are stored in item.Item polymorphic subclasses.
+- Encounter keys must be registered in hero.encounters.ENCOUNTER_DEFINITIONS before creating EncounterMonster rows.
+- All encounter groups have at most three monsters; each spawn quantity is 1-3.
+- Elemental resistance values are damage multipliers (0.80 means 20% reduction).
+- Damage, skill effects, and difficulty require playtesting against your battle engine.
+- 'Coin denominations: Copper Coin = 1 money, Silver Coin = 10 money, Gold Coin = 100 money; Instant items automatically
+  credit money on receipt.'
+- Coin loot is guaranteed on every monster defeat; quantity scales with level and threat. No goblin monster exists
+  in the supplied roster.
+- hero_class_restriction is a HeroClass lookup by key; null means unrestricted.
+- initial_equipment is seed metadata, not a HeroClass model field. Apply it during hero creation by creating Equipment
+  and EquipmentSlot records.
+- 'Weapon magic bonuses are not supported by the current Weapon model: wizard staffs give modest ATK and elemental
+  damage, while wizard accessories give MAG.'
+- Accessory passive_effects and armor health_bonus require combat-engine support to have an effect.
+- Equipment drop chances are independent rolls; original loot, coins, monsters and encounters are preserved.
+items:
+- key: rustleaf_blade
+  model: Weapon
+  name: Rustleaf Blade
+  description: Warrior weapon from the level 1 region.
+  value: 20
+  level_requirement: 1
+  attack_bonus: 5
+  accuracy_bonus: 0
+  element: null
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: padded_jerkin
+  model: Armor
+  name: Padded Jerkin
+  description: Warrior battle armor for level 1 expeditions.
+  value: 18
+  level_requirement: 1
+  defense_bonus: 3
+  magic_defense_bonus: 1
+  health_bonus: 4
+  armor_type: mail
+  elemental_resistances: {}
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: copper_charm
+  model: Accessory
+  name: Copper Charm
+  description: Warrior insignia for level 1 expeditions.
+  value: 15
+  level_requirement: 1
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 1
+  magic_defense_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_1
+  model: Consumable
+  name: Healing Draught 1
+  description: A single-use restorative.
+  value: 6
+  level_requirement: 1
+  heal_amount: 32
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_1
+  model: Consumable
+  name: Mana Tonic 1
+  description: A single-use restorative.
+  value: 6
+  level_requirement: 1
+  heal_amount: 0
+  mana_restore: 16
+  money_amount: 0
+  duration: 0
+- key: briar_spear
+  model: Weapon
+  name: Briar Spear
+  description: Warrior weapon from the level 2 region.
+  value: 80
+  level_requirement: 2
+  attack_bonus: 7
+  accuracy_bonus: 0
+  element: null
+  weapon_type: spear
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: barkhide_vest
+  model: Armor
+  name: Barkhide Vest
+  description: Warrior battle armor for level 2 expeditions.
+  value: 72
+  level_requirement: 2
+  defense_bonus: 4
+  magic_defense_bonus: 2
+  health_bonus: 8
+  armor_type: mail
+  elemental_resistances: {}
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: thorn_pendant
+  model: Accessory
+  name: Thorn Pendant
+  description: Warrior insignia for level 2 expeditions.
+  value: 60
+  level_requirement: 2
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 1
+  magic_defense_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_2
+  model: Consumable
+  name: Healing Draught 2
+  description: A single-use restorative.
+  value: 24
+  level_requirement: 2
+  heal_amount: 44
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_2
+  model: Consumable
+  name: Mana Tonic 2
+  description: A single-use restorative.
+  value: 24
+  level_requirement: 2
+  heal_amount: 0
+  mana_restore: 22
+  money_amount: 0
+  duration: 0
+- key: marsh_cleaver
+  model: Weapon
+  name: Marsh Cleaver
+  description: Warrior weapon from the level 3 region.
+  value: 180
+  level_requirement: 3
+  attack_bonus: 9
+  accuracy_bonus: 1
+  element: null
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: bogwalker_coat
+  model: Armor
+  name: Bogwalker Coat
+  description: Warrior battle armor for level 3 expeditions.
+  value: 162
+  level_requirement: 3
+  defense_bonus: 5
+  magic_defense_bonus: 2
+  health_bonus: 12
+  armor_type: mail
+  elemental_resistances: {}
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: reed_talisman
+  model: Accessory
+  name: Reed Talisman
+  description: Warrior insignia for level 3 expeditions.
+  value: 135
+  level_requirement: 3
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 2
+  magic_defense_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_3
+  model: Consumable
+  name: Healing Draught 3
+  description: A single-use restorative.
+  value: 54
+  level_requirement: 3
+  heal_amount: 56
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_3
+  model: Consumable
+  name: Mana Tonic 3
+  description: A single-use restorative.
+  value: 54
+  level_requirement: 3
+  heal_amount: 0
+  mana_restore: 28
+  money_amount: 0
+  duration: 0
+- key: stonebreaker
+  model: Weapon
+  name: Stonebreaker
+  description: Warrior weapon from the level 4 region.
+  value: 320
+  level_requirement: 4
+  attack_bonus: 11
+  accuracy_bonus: 1
+  element: null
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: quarry_mail
+  model: Armor
+  name: Quarry Mail
+  description: Warrior battle armor for level 4 expeditions.
+  value: 288
+  level_requirement: 4
+  defense_bonus: 6
+  magic_defense_bonus: 3
+  health_bonus: 16
+  armor_type: mail
+  elemental_resistances: {}
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: granite_band
+  model: Accessory
+  name: Granite Band
+  description: Warrior insignia for level 4 expeditions.
+  value: 240
+  level_requirement: 4
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 2
+  magic_defense_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_4
+  model: Consumable
+  name: Healing Draught 4
+  description: A single-use restorative.
+  value: 96
+  level_requirement: 4
+  heal_amount: 68
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_4
+  model: Consumable
+  name: Mana Tonic 4
+  description: A single-use restorative.
+  value: 96
+  level_requirement: 4
+  heal_amount: 0
+  mana_restore: 34
+  money_amount: 0
+  duration: 0
+- key: watchman_sabre
+  model: Weapon
+  name: Watchman Sabre
+  description: Warrior weapon from the level 5 region.
+  value: 500
+  level_requirement: 5
+  attack_bonus: 13
+  accuracy_bonus: 1
+  element: holy
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: watchguard_plate
+  model: Armor
+  name: Watchguard Plate
+  description: Warrior battle armor for level 5 expeditions.
+  value: 450
+  level_requirement: 5
+  defense_bonus: 7
+  magic_defense_bonus: 3
+  health_bonus: 20
+  armor_type: mail
+  elemental_resistances:
+    holy: 0.9
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: sentinel_badge
+  model: Accessory
+  name: Sentinel Badge
+  description: Warrior insignia for level 5 expeditions.
+  value: 375
+  level_requirement: 5
+  defense_bonus: 1
+  speed_bonus: 2
+  magic_bonus: 2
+  magic_defense_bonus: 1
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_5
+  model: Consumable
+  name: Healing Draught 5
+  description: A single-use restorative.
+  value: 150
+  level_requirement: 5
+  heal_amount: 80
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_5
+  model: Consumable
+  name: Mana Tonic 5
+  description: A single-use restorative.
+  value: 150
+  level_requirement: 5
+  heal_amount: 0
+  mana_restore: 40
+  money_amount: 0
+  duration: 0
+- key: fenfang_dagger
+  model: Weapon
+  name: Fenfang Dagger
+  description: Warrior weapon from the level 6 region.
+  value: 720
+  level_requirement: 6
+  attack_bonus: 15
+  accuracy_bonus: 2
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: mireweave_robes
+  model: Armor
+  name: Mireweave Robes
+  description: Warrior battle armor for level 6 expeditions.
+  value: 648
+  level_requirement: 6
+  defense_bonus: 8
+  magic_defense_bonus: 4
+  health_bonus: 24
+  armor_type: mail
+  elemental_resistances:
+    dark: 0.89
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: fenlight_brooch
+  model: Accessory
+  name: Fenlight Brooch
+  description: Warrior insignia for level 6 expeditions.
+  value: 540
+  level_requirement: 6
+  defense_bonus: 1
+  speed_bonus: 2
+  magic_bonus: 3
+  magic_defense_bonus: 1
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_6
+  model: Consumable
+  name: Healing Draught 6
+  description: A single-use restorative.
+  value: 216
+  level_requirement: 6
+  heal_amount: 92
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_6
+  model: Consumable
+  name: Mana Tonic 6
+  description: A single-use restorative.
+  value: 216
+  level_requirement: 6
+  heal_amount: 0
+  mana_restore: 46
+  money_amount: 0
+  duration: 0
+- key: rime_pike
+  model: Weapon
+  name: Rime Pike
+  description: Warrior weapon from the level 7 region.
+  value: 980
+  level_requirement: 7
+  attack_bonus: 17
+  accuracy_bonus: 2
+  element: ice
+  weapon_type: spear
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: frostglass_mantle
+  model: Armor
+  name: Frostglass Mantle
+  description: Warrior battle armor for level 7 expeditions.
+  value: 882
+  level_requirement: 7
+  defense_bonus: 9
+  magic_defense_bonus: 4
+  health_bonus: 28
+  armor_type: mail
+  elemental_resistances:
+    ice: 0.88
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: snoweye_ring
+  model: Accessory
+  name: Snoweye Ring
+  description: Warrior insignia for level 7 expeditions.
+  value: 735
+  level_requirement: 7
+  defense_bonus: 1
+  speed_bonus: 2
+  magic_bonus: 3
+  magic_defense_bonus: 1
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_7
+  model: Consumable
+  name: Healing Draught 7
+  description: A single-use restorative.
+  value: 294
+  level_requirement: 7
+  heal_amount: 104
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_7
+  model: Consumable
+  name: Mana Tonic 7
+  description: A single-use restorative.
+  value: 294
+  level_requirement: 7
+  heal_amount: 0
+  mana_restore: 52
+  money_amount: 0
+  duration: 0
+- key: cinder_axe
+  model: Weapon
+  name: Cinder Axe
+  description: Warrior weapon from the level 8 region.
+  value: 1280
+  level_requirement: 8
+  attack_bonus: 19
+  accuracy_bonus: 2
+  element: fire
+  weapon_type: axe
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: emberforged_hauberk
+  model: Armor
+  name: Emberforged Hauberk
+  description: Warrior battle armor for level 8 expeditions.
+  value: 1152
+  level_requirement: 8
+  defense_bonus: 10
+  magic_defense_bonus: 5
+  health_bonus: 32
+  armor_type: mail
+  elemental_resistances:
+    fire: 0.87
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: coalheart_amulet
+  model: Accessory
+  name: Coalheart Amulet
+  description: Warrior insignia for level 8 expeditions.
+  value: 960
+  level_requirement: 8
+  defense_bonus: 1
+  speed_bonus: 3
+  magic_bonus: 3
+  magic_defense_bonus: 1
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_8
+  model: Consumable
+  name: Healing Draught 8
+  description: A single-use restorative.
+  value: 384
+  level_requirement: 8
+  heal_amount: 116
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_8
+  model: Consumable
+  name: Mana Tonic 8
+  description: A single-use restorative.
+  value: 384
+  level_requirement: 8
+  heal_amount: 0
+  mana_restore: 58
+  money_amount: 0
+  duration: 0
+- key: obsidian_edge
+  model: Weapon
+  name: Obsidian Edge
+  description: Warrior weapon from the level 9 region.
+  value: 1620
+  level_requirement: 9
+  attack_bonus: 21
+  accuracy_bonus: 3
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: obsidian_vestments
+  model: Armor
+  name: Obsidian Vestments
+  description: Warrior battle armor for level 9 expeditions.
+  value: 1458
+  level_requirement: 9
+  defense_bonus: 11
+  magic_defense_bonus: 5
+  health_bonus: 36
+  armor_type: mail
+  elemental_resistances:
+    dark: 0.86
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: silent_prayer_beads
+  model: Accessory
+  name: Silent Prayer Beads
+  description: Warrior insignia for level 9 expeditions.
+  value: 1215
+  level_requirement: 9
+  defense_bonus: 1
+  speed_bonus: 3
+  magic_bonus: 4
+  magic_defense_bonus: 1
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_9
+  model: Consumable
+  name: Healing Draught 9
+  description: A single-use restorative.
+  value: 486
+  level_requirement: 9
+  heal_amount: 128
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_9
+  model: Consumable
+  name: Mana Tonic 9
+  description: A single-use restorative.
+  value: 486
+  level_requirement: 9
+  heal_amount: 0
+  mana_restore: 64
+  money_amount: 0
+  duration: 0
+- key: starlit_rapier
+  model: Weapon
+  name: Starlit Rapier
+  description: Warrior weapon from the level 10 region.
+  value: 2000
+  level_requirement: 10
+  attack_bonus: 23
+  accuracy_bonus: 3
+  element: lightning
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: starfall_cuirass
+  model: Armor
+  name: Starfall Cuirass
+  description: Warrior battle armor for level 10 expeditions.
+  value: 1800
+  level_requirement: 10
+  defense_bonus: 12
+  magic_defense_bonus: 6
+  health_bonus: 40
+  armor_type: plate
+  elemental_resistances:
+    lightning: 0.85
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: astral_compass
+  model: Accessory
+  name: Astral Compass
+  description: Warrior insignia for level 10 expeditions.
+  value: 1500
+  level_requirement: 10
+  defense_bonus: 2
+  speed_bonus: 3
+  magic_bonus: 4
+  magic_defense_bonus: 2
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_10
+  model: Consumable
+  name: Healing Draught 10
+  description: A single-use restorative.
+  value: 600
+  level_requirement: 10
+  heal_amount: 140
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_10
+  model: Consumable
+  name: Mana Tonic 10
+  description: A single-use restorative.
+  value: 600
+  level_requirement: 10
+  heal_amount: 0
+  mana_restore: 70
+  money_amount: 0
+  duration: 0
+- key: gravebrand
+  model: Weapon
+  name: Gravebrand
+  description: Warrior weapon from the level 11 region.
+  value: 2420
+  level_requirement: 11
+  attack_bonus: 25
+  accuracy_bonus: 3
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: graveward_mail
+  model: Armor
+  name: Graveward Mail
+  description: Warrior battle armor for level 11 expeditions.
+  value: 2178
+  level_requirement: 11
+  defense_bonus: 13
+  magic_defense_bonus: 6
+  health_bonus: 44
+  armor_type: plate
+  elemental_resistances:
+    dark: 0.84
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: gravesalt_locket
+  model: Accessory
+  name: Gravesalt Locket
+  description: Warrior insignia for level 11 expeditions.
+  value: 1815
+  level_requirement: 11
+  defense_bonus: 2
+  speed_bonus: 3
+  magic_bonus: 4
+  magic_defense_bonus: 2
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_11
+  model: Consumable
+  name: Healing Draught 11
+  description: A single-use restorative.
+  value: 726
+  level_requirement: 11
+  heal_amount: 152
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_11
+  model: Consumable
+  name: Mana Tonic 11
+  description: A single-use restorative.
+  value: 726
+  level_requirement: 11
+  heal_amount: 0
+  mana_restore: 76
+  money_amount: 0
+  duration: 0
+- key: shard_lance
+  model: Weapon
+  name: Shard Lance
+  description: Warrior weapon from the level 12 region.
+  value: 2880
+  level_requirement: 12
+  attack_bonus: 27
+  accuracy_bonus: 4
+  element: ice
+  weapon_type: spear
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: crystal_carapace
+  model: Armor
+  name: Crystal Carapace
+  description: Warrior battle armor for level 12 expeditions.
+  value: 2592
+  level_requirement: 12
+  defense_bonus: 14
+  magic_defense_bonus: 7
+  health_bonus: 48
+  armor_type: plate
+  elemental_resistances:
+    ice: 0.83
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: prism_loop
+  model: Accessory
+  name: Prism Loop
+  description: Warrior insignia for level 12 expeditions.
+  value: 2160
+  level_requirement: 12
+  defense_bonus: 2
+  speed_bonus: 4
+  magic_bonus: 5
+  magic_defense_bonus: 2
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_12
+  model: Consumable
+  name: Healing Draught 12
+  description: A single-use restorative.
+  value: 864
+  level_requirement: 12
+  heal_amount: 164
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_12
+  model: Consumable
+  name: Mana Tonic 12
+  description: A single-use restorative.
+  value: 864
+  level_requirement: 12
+  heal_amount: 0
+  mana_restore: 82
+  money_amount: 0
+  duration: 0
+- key: clockwork_saber
+  model: Weapon
+  name: Clockwork Saber
+  description: Warrior weapon from the level 13 region.
+  value: 3380
+  level_requirement: 13
+  attack_bonus: 29
+  accuracy_bonus: 4
+  element: lightning
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: gearplate_harness
+  model: Armor
+  name: Gearplate Harness
+  description: Warrior battle armor for level 13 expeditions.
+  value: 3042
+  level_requirement: 13
+  defense_bonus: 15
+  magic_defense_bonus: 7
+  health_bonus: 52
+  armor_type: plate
+  elemental_resistances:
+    lightning: 0.82
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: wound_spring
+  model: Accessory
+  name: Wound Spring
+  description: Warrior insignia for level 13 expeditions.
+  value: 2535
+  level_requirement: 13
+  defense_bonus: 2
+  speed_bonus: 4
+  magic_bonus: 5
+  magic_defense_bonus: 2
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_13
+  model: Consumable
+  name: Healing Draught 13
+  description: A single-use restorative.
+  value: 1014
+  level_requirement: 13
+  heal_amount: 176
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_13
+  model: Consumable
+  name: Mana Tonic 13
+  description: A single-use restorative.
+  value: 1014
+  level_requirement: 13
+  heal_amount: 0
+  mana_restore: 88
+  money_amount: 0
+  duration: 0
+- key: rift_cutter
+  model: Weapon
+  name: Rift Cutter
+  description: Warrior weapon from the level 14 region.
+  value: 3920
+  level_requirement: 14
+  attack_bonus: 31
+  accuracy_bonus: 4
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: voidwoven_shroud
+  model: Armor
+  name: Voidwoven Shroud
+  description: Warrior battle armor for level 14 expeditions.
+  value: 3528
+  level_requirement: 14
+  defense_bonus: 16
+  magic_defense_bonus: 8
+  health_bonus: 56
+  armor_type: plate
+  elemental_resistances:
+    dark: 0.81
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: rift_anchor
+  model: Accessory
+  name: Rift Anchor
+  description: Warrior insignia for level 14 expeditions.
+  value: 2940
+  level_requirement: 14
+  defense_bonus: 2
+  speed_bonus: 4
+  magic_bonus: 5
+  magic_defense_bonus: 2
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_14
+  model: Consumable
+  name: Healing Draught 14
+  description: A single-use restorative.
+  value: 1176
+  level_requirement: 14
+  heal_amount: 188
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_14
+  model: Consumable
+  name: Mana Tonic 14
+  description: A single-use restorative.
+  value: 1176
+  level_requirement: 14
+  heal_amount: 0
+  mana_restore: 94
+  money_amount: 0
+  duration: 0
+- key: pale_oathblade
+  model: Weapon
+  name: Pale Oathblade
+  description: Warrior weapon from the level 15 region.
+  value: 4500
+  level_requirement: 15
+  attack_bonus: 33
+  accuracy_bonus: 5
+  element: holy
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: pale_knight_plate
+  model: Armor
+  name: Pale Knight Plate
+  description: Warrior battle armor for level 15 expeditions.
+  value: 4050
+  level_requirement: 15
+  defense_bonus: 17
+  magic_defense_bonus: 8
+  health_bonus: 60
+  armor_type: plate
+  elemental_resistances:
+    holy: 0.8
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: oathkeeper_seal
+  model: Accessory
+  name: Oathkeeper Seal
+  description: Warrior insignia for level 15 expeditions.
+  value: 3375
+  level_requirement: 15
+  defense_bonus: 3
+  speed_bonus: 4
+  magic_bonus: 6
+  magic_defense_bonus: 3
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_15
+  model: Consumable
+  name: Healing Draught 15
+  description: A single-use restorative.
+  value: 1350
+  level_requirement: 15
+  heal_amount: 200
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_15
+  model: Consumable
+  name: Mana Tonic 15
+  description: A single-use restorative.
+  value: 1350
+  level_requirement: 15
+  heal_amount: 0
+  mana_restore: 100
+  money_amount: 0
+  duration: 0
+- key: stormcaller
+  model: Weapon
+  name: Stormcaller
+  description: Warrior weapon from the level 16 region.
+  value: 5120
+  level_requirement: 16
+  attack_bonus: 35
+  accuracy_bonus: 5
+  element: lightning
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: stormscale_armor
+  model: Armor
+  name: Stormscale Armor
+  description: Warrior battle armor for level 16 expeditions.
+  value: 4608
+  level_requirement: 16
+  defense_bonus: 18
+  magic_defense_bonus: 9
+  health_bonus: 64
+  armor_type: plate
+  elemental_resistances:
+    lightning: 0.79
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: thunderstone
+  model: Accessory
+  name: Thunderstone
+  description: Warrior insignia for level 16 expeditions.
+  value: 3840
+  level_requirement: 16
+  defense_bonus: 3
+  speed_bonus: 5
+  magic_bonus: 6
+  magic_defense_bonus: 3
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_16
+  model: Consumable
+  name: Healing Draught 16
+  description: A single-use restorative.
+  value: 1536
+  level_requirement: 16
+  heal_amount: 212
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_16
+  model: Consumable
+  name: Mana Tonic 16
+  description: A single-use restorative.
+  value: 1536
+  level_requirement: 16
+  heal_amount: 0
+  mana_restore: 106
+  money_amount: 0
+  duration: 0
+- key: eclipse_fang
+  model: Weapon
+  name: Eclipse Fang
+  description: Warrior weapon from the level 17 region.
+  value: 5780
+  level_requirement: 17
+  attack_bonus: 37
+  accuracy_bonus: 5
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: eclipse_cloak
+  model: Armor
+  name: Eclipse Cloak
+  description: Warrior battle armor for level 17 expeditions.
+  value: 5202
+  level_requirement: 17
+  defense_bonus: 19
+  magic_defense_bonus: 9
+  health_bonus: 68
+  armor_type: plate
+  elemental_resistances:
+    dark: 0.78
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: eclipse_sigil
+  model: Accessory
+  name: Eclipse Sigil
+  description: Warrior insignia for level 17 expeditions.
+  value: 4335
+  level_requirement: 17
+  defense_bonus: 3
+  speed_bonus: 5
+  magic_bonus: 6
+  magic_defense_bonus: 3
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_17
+  model: Consumable
+  name: Healing Draught 17
+  description: A single-use restorative.
+  value: 1734
+  level_requirement: 17
+  heal_amount: 224
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_17
+  model: Consumable
+  name: Mana Tonic 17
+  description: A single-use restorative.
+  value: 1734
+  level_requirement: 17
+  heal_amount: 0
+  mana_restore: 112
+  money_amount: 0
+  duration: 0
+- key: abyss_splitter
+  model: Weapon
+  name: Abyss Splitter
+  description: Warrior weapon from the level 18 region.
+  value: 6480
+  level_requirement: 18
+  attack_bonus: 39
+  accuracy_bonus: 6
+  element: fire
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: abyssal_bulwark
+  model: Armor
+  name: Abyssal Bulwark
+  description: Warrior battle armor for level 18 expeditions.
+  value: 5832
+  level_requirement: 18
+  defense_bonus: 20
+  magic_defense_bonus: 10
+  health_bonus: 72
+  armor_type: plate
+  elemental_resistances:
+    fire: 0.77
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: abyss_eye
+  model: Accessory
+  name: Abyss Eye
+  description: Warrior insignia for level 18 expeditions.
+  value: 4860
+  level_requirement: 18
+  defense_bonus: 3
+  speed_bonus: 5
+  magic_bonus: 7
+  magic_defense_bonus: 3
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_18
+  model: Consumable
+  name: Healing Draught 18
+  description: A single-use restorative.
+  value: 1944
+  level_requirement: 18
+  heal_amount: 236
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_18
+  model: Consumable
+  name: Mana Tonic 18
+  description: A single-use restorative.
+  value: 1944
+  level_requirement: 18
+  heal_amount: 0
+  mana_restore: 118
+  money_amount: 0
+  duration: 0
+- key: seraphic_judgment
+  model: Weapon
+  name: Seraphic Judgment
+  description: Warrior weapon from the level 19 region.
+  value: 7220
+  level_requirement: 19
+  attack_bonus: 41
+  accuracy_bonus: 6
+  element: holy
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: seraphic_aegis
+  model: Armor
+  name: Seraphic Aegis
+  description: Warrior battle armor for level 19 expeditions.
+  value: 6498
+  level_requirement: 19
+  defense_bonus: 21
+  magic_defense_bonus: 10
+  health_bonus: 76
+  armor_type: plate
+  elemental_resistances:
+    holy: 0.76
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: halo_fragment
+  model: Accessory
+  name: Halo Fragment
+  description: Warrior insignia for level 19 expeditions.
+  value: 5415
+  level_requirement: 19
+  defense_bonus: 3
+  speed_bonus: 5
+  magic_bonus: 7
+  magic_defense_bonus: 3
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_19
+  model: Consumable
+  name: Healing Draught 19
+  description: A single-use restorative.
+  value: 2166
+  level_requirement: 19
+  heal_amount: 248
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_19
+  model: Consumable
+  name: Mana Tonic 19
+  description: A single-use restorative.
+  value: 2166
+  level_requirement: 19
+  heal_amount: 0
+  mana_restore: 124
+  money_amount: 0
+  duration: 0
+- key: world_ender
+  model: Weapon
+  name: World-Ender
+  description: Warrior weapon from the level 20 region.
+  value: 8000
+  level_requirement: 20
+  attack_bonus: 43
+  accuracy_bonus: 6
+  element: dark
+  weapon_type: sword
+  equipment_slot: weapon
+  hero_class_restriction: warrior
+- key: last_bastion
+  model: Armor
+  name: Last Bastion
+  description: Warrior battle armor for level 20 expeditions.
+  value: 7200
+  level_requirement: 20
+  defense_bonus: 22
+  magic_defense_bonus: 11
+  health_bonus: 80
+  armor_type: plate
+  elemental_resistances:
+    dark: 0.75
+  equipment_slot: armor
+  hero_class_restriction: warrior
+- key: hourglass_of_ends
+  model: Accessory
+  name: Hourglass of Ends
+  description: Warrior insignia for level 20 expeditions.
+  value: 6000
+  level_requirement: 20
+  defense_bonus: 4
+  speed_bonus: 6
+  magic_bonus: 7
+  magic_defense_bonus: 4
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+  hero_class_restriction: warrior
+- key: healing_draught_20
+  model: Consumable
+  name: Healing Draught 20
+  description: A single-use restorative.
+  value: 2400
+  level_requirement: 20
+  heal_amount: 260
+  mana_restore: 0
+  money_amount: 0
+  duration: 0
+- key: mana_tonic_20
+  model: Consumable
+  name: Mana Tonic 20
+  description: A single-use restorative.
+  value: 2400
+  level_requirement: 20
+  heal_amount: 0
+  mana_restore: 130
+  money_amount: 0
+  duration: 0
+- key: copper_coin
+  model: Instant
+  name: Copper Coin
+  description: A coin worth 1 money. Automatically credited to the hero when looted.
+  value: 1
+  level_requirement: 1
+  heal_amount: 0
+  mana_restore: 0
+  money_amount: 1
+  duration: 0
+- key: silver_coin
+  model: Instant
+  name: Silver Coin
+  description: A coin worth 10 money. Automatically credited to the hero when looted.
+  value: 10
+  level_requirement: 1
+  heal_amount: 0
+  mana_restore: 0
+  money_amount: 10
+  duration: 0
+- key: gold_coin
+  model: Instant
+  name: Gold Coin
+  description: A coin worth 100 money. Automatically credited to the hero when looted.
+  value: 100
+  level_requirement: 1
+  heal_amount: 0
+  mana_restore: 0
+  money_amount: 100
+  duration: 0
+- key: briarwood_wizard_1_weapon
+  model: Weapon
+  name: Briarwood Channeling Staff
+  description: Wizard weapon attuned to the Briarwood region.
+  value: 20
+  level_requirement: 1
+  hero_class_restriction: wizard
+  attack_bonus: 3
+  accuracy_bonus: 1
+  element: fire
+  weapon_type: staff
+  equipment_slot: weapon
+- key: briarwood_wizard_1_armor
+  model: Armor
+  name: Briarwood Spellweave Robes
+  description: Wizard protection woven for the Briarwood region.
+  value: 18
+  level_requirement: 1
+  hero_class_restriction: wizard
+  defense_bonus: 1
+  magic_defense_bonus: 4
+  health_bonus: 2
+  armor_type: robe
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: briarwood_wizard_1_accessory
+  model: Accessory
+  name: Briarwood Focus Crystal
+  description: Wizard trinket from the Briarwood region.
+  value: 15
+  level_requirement: 1
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 0
+  magic_bonus: 2
+  magic_defense_bonus: 1
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: briarwood_ranger_1_weapon
+  model: Weapon
+  name: Briarwood Longbow
+  description: Ranger weapon attuned to the Briarwood region.
+  value: 20
+  level_requirement: 1
+  hero_class_restriction: ranger
+  attack_bonus: 6
+  accuracy_bonus: 2
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: briarwood_ranger_1_armor
+  model: Armor
+  name: Briarwood Trailwarden Leathers
+  description: Ranger protection woven for the Briarwood region.
+  value: 18
+  level_requirement: 1
+  hero_class_restriction: ranger
+  defense_bonus: 3
+  magic_defense_bonus: 2
+  health_bonus: 3
+  armor_type: leather
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: briarwood_ranger_1_accessory
+  model: Accessory
+  name: Briarwood Hunter Mark
+  description: Ranger trinket from the Briarwood region.
+  value: 15
+  level_requirement: 1
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 0
+  magic_defense_bonus: 0
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: briarwood_wizard_2_weapon
+  model: Weapon
+  name: Thornroot Channeling Staff
+  description: Wizard weapon attuned to the Briarwood region.
+  value: 80
+  level_requirement: 2
+  hero_class_restriction: wizard
+  attack_bonus: 4
+  accuracy_bonus: 1
+  element: fire
+  weapon_type: staff
+  equipment_slot: weapon
+- key: briarwood_wizard_2_armor
+  model: Armor
+  name: Thornroot Spellweave Robes
+  description: Wizard protection woven for the Briarwood region.
+  value: 72
+  level_requirement: 2
+  hero_class_restriction: wizard
+  defense_bonus: 2
+  magic_defense_bonus: 5
+  health_bonus: 4
+  armor_type: robe
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: briarwood_wizard_2_accessory
+  model: Accessory
+  name: Thornroot Focus Crystal
+  description: Wizard trinket from the Briarwood region.
+  value: 60
+  level_requirement: 2
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 0
+  magic_bonus: 3
+  magic_defense_bonus: 1
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: briarwood_ranger_2_weapon
+  model: Weapon
+  name: Thornroot Longbow
+  description: Ranger weapon attuned to the Briarwood region.
+  value: 80
+  level_requirement: 2
+  hero_class_restriction: ranger
+  attack_bonus: 8
+  accuracy_bonus: 2
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: briarwood_ranger_2_armor
+  model: Armor
+  name: Thornroot Trailwarden Leathers
+  description: Ranger protection woven for the Briarwood region.
+  value: 72
+  level_requirement: 2
+  hero_class_restriction: ranger
+  defense_bonus: 4
+  magic_defense_bonus: 3
+  health_bonus: 6
+  armor_type: leather
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: briarwood_ranger_2_accessory
+  model: Accessory
+  name: Thornroot Hunter Mark
+  description: Ranger trinket from the Briarwood region.
+  value: 60
+  level_requirement: 2
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 0
+  magic_defense_bonus: 0
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: drowned_fen_wizard_3_weapon
+  model: Weapon
+  name: Drowned Fen Channeling Staff
+  description: Wizard weapon attuned to the Drowned Fen region.
+  value: 180
+  level_requirement: 3
+  hero_class_restriction: wizard
+  attack_bonus: 5
+  accuracy_bonus: 1
+  element: fire
+  weapon_type: staff
+  equipment_slot: weapon
+- key: drowned_fen_wizard_3_armor
+  model: Armor
+  name: Drowned Fen Spellweave Robes
+  description: Wizard protection woven for the Drowned Fen region.
+  value: 162
+  level_requirement: 3
+  hero_class_restriction: wizard
+  defense_bonus: 2
+  magic_defense_bonus: 6
+  health_bonus: 6
+  armor_type: robe
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: drowned_fen_wizard_3_accessory
+  model: Accessory
+  name: Drowned Fen Focus Crystal
+  description: Wizard trinket from the Drowned Fen region.
+  value: 135
+  level_requirement: 3
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 0
+  magic_bonus: 3
+  magic_defense_bonus: 1
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: drowned_fen_ranger_3_weapon
+  model: Weapon
+  name: Drowned Fen Longbow
+  description: Ranger weapon attuned to the Drowned Fen region.
+  value: 180
+  level_requirement: 3
+  hero_class_restriction: ranger
+  attack_bonus: 10
+  accuracy_bonus: 3
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: drowned_fen_ranger_3_armor
+  model: Armor
+  name: Drowned Fen Trailwarden Leathers
+  description: Ranger protection woven for the Drowned Fen region.
+  value: 162
+  level_requirement: 3
+  hero_class_restriction: ranger
+  defense_bonus: 5
+  magic_defense_bonus: 3
+  health_bonus: 9
+  armor_type: leather
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: drowned_fen_ranger_3_accessory
+  model: Accessory
+  name: Drowned Fen Hunter Mark
+  description: Ranger trinket from the Drowned Fen region.
+  value: 135
+  level_requirement: 3
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 0
+  magic_defense_bonus: 0
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: quarry_wizard_4_weapon
+  model: Weapon
+  name: Quarry Channeling Staff
+  description: Wizard weapon attuned to the Quarry region.
+  value: 320
+  level_requirement: 4
+  hero_class_restriction: wizard
+  attack_bonus: 6
+  accuracy_bonus: 1
+  element: ice
+  weapon_type: staff
+  equipment_slot: weapon
+- key: quarry_wizard_4_armor
+  model: Armor
+  name: Quarry Spellweave Robes
+  description: Wizard protection woven for the Quarry region.
+  value: 288
+  level_requirement: 4
+  hero_class_restriction: wizard
+  defense_bonus: 3
+  magic_defense_bonus: 7
+  health_bonus: 8
+  armor_type: robe
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: quarry_wizard_4_accessory
+  model: Accessory
+  name: Quarry Focus Crystal
+  description: Wizard trinket from the Quarry region.
+  value: 240
+  level_requirement: 4
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 0
+  magic_bonus: 4
+  magic_defense_bonus: 2
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: quarry_ranger_4_weapon
+  model: Weapon
+  name: Quarry Longbow
+  description: Ranger weapon attuned to the Quarry region.
+  value: 320
+  level_requirement: 4
+  hero_class_restriction: ranger
+  attack_bonus: 12
+  accuracy_bonus: 3
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: quarry_ranger_4_armor
+  model: Armor
+  name: Quarry Trailwarden Leathers
+  description: Ranger protection woven for the Quarry region.
+  value: 288
+  level_requirement: 4
+  hero_class_restriction: ranger
+  defense_bonus: 6
+  magic_defense_bonus: 4
+  health_bonus: 12
+  armor_type: leather
+  elemental_resistances: {}
+  equipment_slot: armor
+- key: quarry_ranger_4_accessory
+  model: Accessory
+  name: Quarry Hunter Mark
+  description: Ranger trinket from the Quarry region.
+  value: 240
+  level_requirement: 4
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 0
+  magic_defense_bonus: 0
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: watchtower_wizard_5_weapon
+  model: Weapon
+  name: Watchtower Channeling Staff
+  description: Wizard weapon attuned to the Watchtower region.
+  value: 500
+  level_requirement: 5
+  hero_class_restriction: wizard
+  attack_bonus: 7
+  accuracy_bonus: 2
+  element: ice
+  weapon_type: staff
+  equipment_slot: weapon
+- key: watchtower_wizard_5_armor
+  model: Armor
+  name: Watchtower Spellweave Robes
+  description: Wizard protection woven for the Watchtower region.
+  value: 450
+  level_requirement: 5
+  hero_class_restriction: wizard
+  defense_bonus: 3
+  magic_defense_bonus: 8
+  health_bonus: 10
+  armor_type: robe
+  elemental_resistances:
+    ice: 0.9
+  equipment_slot: armor
+- key: watchtower_wizard_5_accessory
+  model: Accessory
+  name: Watchtower Focus Crystal
+  description: Wizard trinket from the Watchtower region.
+  value: 375
+  level_requirement: 5
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 0
+  magic_bonus: 4
+  magic_defense_bonus: 2
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: watchtower_ranger_5_weapon
+  model: Weapon
+  name: Watchtower Longbow
+  description: Ranger weapon attuned to the Watchtower region.
+  value: 500
+  level_requirement: 5
+  hero_class_restriction: ranger
+  attack_bonus: 14
+  accuracy_bonus: 3
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: watchtower_ranger_5_armor
+  model: Armor
+  name: Watchtower Trailwarden Leathers
+  description: Ranger protection woven for the Watchtower region.
+  value: 450
+  level_requirement: 5
+  hero_class_restriction: ranger
+  defense_bonus: 7
+  magic_defense_bonus: 4
+  health_bonus: 15
+  armor_type: leather
+  elemental_resistances:
+    ice: 0.9
+  equipment_slot: armor
+- key: watchtower_ranger_5_accessory
+  model: Accessory
+  name: Watchtower Hunter Mark
+  description: Ranger trinket from the Watchtower region.
+  value: 375
+  level_requirement: 5
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 1
+  magic_defense_bonus: 0
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: mire_wizard_6_weapon
+  model: Weapon
+  name: Mire Channeling Staff
+  description: Wizard weapon attuned to the Mire region.
+  value: 720
+  level_requirement: 6
+  hero_class_restriction: wizard
+  attack_bonus: 8
+  accuracy_bonus: 2
+  element: ice
+  weapon_type: staff
+  equipment_slot: weapon
+- key: mire_wizard_6_armor
+  model: Armor
+  name: Mire Spellweave Robes
+  description: Wizard protection woven for the Mire region.
+  value: 648
+  level_requirement: 6
+  hero_class_restriction: wizard
+  defense_bonus: 4
+  magic_defense_bonus: 9
+  health_bonus: 12
+  armor_type: robe
+  elemental_resistances:
+    ice: 0.89
+  equipment_slot: armor
+- key: mire_wizard_6_accessory
+  model: Accessory
+  name: Mire Focus Crystal
+  description: Wizard trinket from the Mire region.
+  value: 540
+  level_requirement: 6
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 5
+  magic_defense_bonus: 2
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: mire_ranger_6_weapon
+  model: Weapon
+  name: Mire Longbow
+  description: Ranger weapon attuned to the Mire region.
+  value: 720
+  level_requirement: 6
+  hero_class_restriction: ranger
+  attack_bonus: 16
+  accuracy_bonus: 4
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: mire_ranger_6_armor
+  model: Armor
+  name: Mire Trailwarden Leathers
+  description: Ranger protection woven for the Mire region.
+  value: 648
+  level_requirement: 6
+  hero_class_restriction: ranger
+  defense_bonus: 8
+  magic_defense_bonus: 5
+  health_bonus: 18
+  armor_type: leather
+  elemental_resistances:
+    ice: 0.89
+  equipment_slot: armor
+- key: mire_ranger_6_accessory
+  model: Accessory
+  name: Mire Hunter Mark
+  description: Ranger trinket from the Mire region.
+  value: 540
+  level_requirement: 6
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 1
+  magic_defense_bonus: 1
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: frost_wizard_7_weapon
+  model: Weapon
+  name: Frost Channeling Staff
+  description: Wizard weapon attuned to the Frost region.
+  value: 980
+  level_requirement: 7
+  hero_class_restriction: wizard
+  attack_bonus: 9
+  accuracy_bonus: 2
+  element: lightning
+  weapon_type: staff
+  equipment_slot: weapon
+- key: frost_wizard_7_armor
+  model: Armor
+  name: Frost Spellweave Robes
+  description: Wizard protection woven for the Frost region.
+  value: 882
+  level_requirement: 7
+  hero_class_restriction: wizard
+  defense_bonus: 4
+  magic_defense_bonus: 10
+  health_bonus: 14
+  armor_type: robe
+  elemental_resistances:
+    lightning: 0.88
+  equipment_slot: armor
+- key: frost_wizard_7_accessory
+  model: Accessory
+  name: Frost Focus Crystal
+  description: Wizard trinket from the Frost region.
+  value: 735
+  level_requirement: 7
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 5
+  magic_defense_bonus: 2
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: frost_ranger_7_weapon
+  model: Weapon
+  name: Frost Longbow
+  description: Ranger weapon attuned to the Frost region.
+  value: 980
+  level_requirement: 7
+  hero_class_restriction: ranger
+  attack_bonus: 18
+  accuracy_bonus: 4
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: frost_ranger_7_armor
+  model: Armor
+  name: Frost Trailwarden Leathers
+  description: Ranger protection woven for the Frost region.
+  value: 882
+  level_requirement: 7
+  hero_class_restriction: ranger
+  defense_bonus: 9
+  magic_defense_bonus: 5
+  health_bonus: 21
+  armor_type: leather
+  elemental_resistances:
+    lightning: 0.88
+  equipment_slot: armor
+- key: frost_ranger_7_accessory
+  model: Accessory
+  name: Frost Hunter Mark
+  description: Ranger trinket from the Frost region.
+  value: 735
+  level_requirement: 7
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 1
+  magic_defense_bonus: 1
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: cinder_wizard_8_weapon
+  model: Weapon
+  name: Cinder Channeling Staff
+  description: Wizard weapon attuned to the Cinder region.
+  value: 1280
+  level_requirement: 8
+  hero_class_restriction: wizard
+  attack_bonus: 10
+  accuracy_bonus: 2
+  element: lightning
+  weapon_type: staff
+  equipment_slot: weapon
+- key: cinder_wizard_8_armor
+  model: Armor
+  name: Cinder Spellweave Robes
+  description: Wizard protection woven for the Cinder region.
+  value: 1152
+  level_requirement: 8
+  hero_class_restriction: wizard
+  defense_bonus: 5
+  magic_defense_bonus: 11
+  health_bonus: 16
+  armor_type: robe
+  elemental_resistances:
+    lightning: 0.87
+  equipment_slot: armor
+- key: cinder_wizard_8_accessory
+  model: Accessory
+  name: Cinder Focus Crystal
+  description: Wizard trinket from the Cinder region.
+  value: 960
+  level_requirement: 8
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 6
+  magic_defense_bonus: 3
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: cinder_ranger_8_weapon
+  model: Weapon
+  name: Cinder Longbow
+  description: Ranger weapon attuned to the Cinder region.
+  value: 1280
+  level_requirement: 8
+  hero_class_restriction: ranger
+  attack_bonus: 20
+  accuracy_bonus: 4
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: cinder_ranger_8_armor
+  model: Armor
+  name: Cinder Trailwarden Leathers
+  description: Ranger protection woven for the Cinder region.
+  value: 1152
+  level_requirement: 8
+  hero_class_restriction: ranger
+  defense_bonus: 10
+  magic_defense_bonus: 6
+  health_bonus: 24
+  armor_type: leather
+  elemental_resistances:
+    lightning: 0.87
+  equipment_slot: armor
+- key: cinder_ranger_8_accessory
+  model: Accessory
+  name: Cinder Hunter Mark
+  description: Ranger trinket from the Cinder region.
+  value: 960
+  level_requirement: 8
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 1
+  magic_defense_bonus: 1
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: obsidian_wizard_9_weapon
+  model: Weapon
+  name: Obsidian Channeling Staff
+  description: Wizard weapon attuned to the Obsidian region.
+  value: 1620
+  level_requirement: 9
+  hero_class_restriction: wizard
+  attack_bonus: 11
+  accuracy_bonus: 2
+  element: lightning
+  weapon_type: staff
+  equipment_slot: weapon
+- key: obsidian_wizard_9_armor
+  model: Armor
+  name: Obsidian Spellweave Robes
+  description: Wizard protection woven for the Obsidian region.
+  value: 1458
+  level_requirement: 9
+  hero_class_restriction: wizard
+  defense_bonus: 5
+  magic_defense_bonus: 12
+  health_bonus: 18
+  armor_type: robe
+  elemental_resistances:
+    lightning: 0.86
+  equipment_slot: armor
+- key: obsidian_wizard_9_accessory
+  model: Accessory
+  name: Obsidian Focus Crystal
+  description: Wizard trinket from the Obsidian region.
+  value: 1215
+  level_requirement: 9
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 6
+  magic_defense_bonus: 3
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: obsidian_ranger_9_weapon
+  model: Weapon
+  name: Obsidian Longbow
+  description: Ranger weapon attuned to the Obsidian region.
+  value: 1620
+  level_requirement: 9
+  hero_class_restriction: ranger
+  attack_bonus: 22
+  accuracy_bonus: 5
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: obsidian_ranger_9_armor
+  model: Armor
+  name: Obsidian Trailwarden Leathers
+  description: Ranger protection woven for the Obsidian region.
+  value: 1458
+  level_requirement: 9
+  hero_class_restriction: ranger
+  defense_bonus: 11
+  magic_defense_bonus: 6
+  health_bonus: 27
+  armor_type: leather
+  elemental_resistances:
+    lightning: 0.86
+  equipment_slot: armor
+- key: obsidian_ranger_9_accessory
+  model: Accessory
+  name: Obsidian Hunter Mark
+  description: Ranger trinket from the Obsidian region.
+  value: 1215
+  level_requirement: 9
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 1
+  magic_defense_bonus: 1
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: starfall_wizard_10_weapon
+  model: Weapon
+  name: Starfall Channeling Staff
+  description: Wizard weapon attuned to the Starfall region.
+  value: 2000
+  level_requirement: 10
+  hero_class_restriction: wizard
+  attack_bonus: 12
+  accuracy_bonus: 3
+  element: earth
+  weapon_type: staff
+  equipment_slot: weapon
+- key: starfall_wizard_10_armor
+  model: Armor
+  name: Starfall Spellweave Robes
+  description: Wizard protection woven for the Starfall region.
+  value: 1800
+  level_requirement: 10
+  hero_class_restriction: wizard
+  defense_bonus: 6
+  magic_defense_bonus: 13
+  health_bonus: 20
+  armor_type: robe
+  elemental_resistances:
+    earth: 0.85
+  equipment_slot: armor
+- key: starfall_wizard_10_accessory
+  model: Accessory
+  name: Starfall Focus Crystal
+  description: Wizard trinket from the Starfall region.
+  value: 1500
+  level_requirement: 10
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 7
+  magic_defense_bonus: 3
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: starfall_ranger_10_weapon
+  model: Weapon
+  name: Starfall Longbow
+  description: Ranger weapon attuned to the Starfall region.
+  value: 2000
+  level_requirement: 10
+  hero_class_restriction: ranger
+  attack_bonus: 24
+  accuracy_bonus: 5
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: starfall_ranger_10_armor
+  model: Armor
+  name: Starfall Trailwarden Leathers
+  description: Ranger protection woven for the Starfall region.
+  value: 1800
+  level_requirement: 10
+  hero_class_restriction: ranger
+  defense_bonus: 12
+  magic_defense_bonus: 7
+  health_bonus: 30
+  armor_type: leather
+  elemental_resistances:
+    earth: 0.85
+  equipment_slot: armor
+- key: starfall_ranger_10_accessory
+  model: Accessory
+  name: Starfall Hunter Mark
+  description: Ranger trinket from the Starfall region.
+  value: 1500
+  level_requirement: 10
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 2
+  magic_defense_bonus: 1
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: graveward_wizard_11_weapon
+  model: Weapon
+  name: Graveward Channeling Staff
+  description: Wizard weapon attuned to the Graveward region.
+  value: 2420
+  level_requirement: 11
+  hero_class_restriction: wizard
+  attack_bonus: 13
+  accuracy_bonus: 3
+  element: earth
+  weapon_type: staff
+  equipment_slot: weapon
+- key: graveward_wizard_11_armor
+  model: Armor
+  name: Graveward Spellweave Robes
+  description: Wizard protection woven for the Graveward region.
+  value: 2178
+  level_requirement: 11
+  hero_class_restriction: wizard
+  defense_bonus: 6
+  magic_defense_bonus: 14
+  health_bonus: 22
+  armor_type: robe
+  elemental_resistances:
+    earth: 0.84
+  equipment_slot: armor
+- key: graveward_wizard_11_accessory
+  model: Accessory
+  name: Graveward Focus Crystal
+  description: Wizard trinket from the Graveward region.
+  value: 1815
+  level_requirement: 11
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 7
+  magic_defense_bonus: 3
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: graveward_ranger_11_weapon
+  model: Weapon
+  name: Graveward Longbow
+  description: Ranger weapon attuned to the Graveward region.
+  value: 2420
+  level_requirement: 11
+  hero_class_restriction: ranger
+  attack_bonus: 26
+  accuracy_bonus: 5
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: graveward_ranger_11_armor
+  model: Armor
+  name: Graveward Trailwarden Leathers
+  description: Ranger protection woven for the Graveward region.
+  value: 2178
+  level_requirement: 11
+  hero_class_restriction: ranger
+  defense_bonus: 13
+  magic_defense_bonus: 7
+  health_bonus: 33
+  armor_type: leather
+  elemental_resistances:
+    earth: 0.84
+  equipment_slot: armor
+- key: graveward_ranger_11_accessory
+  model: Accessory
+  name: Graveward Hunter Mark
+  description: Ranger trinket from the Graveward region.
+  value: 1815
+  level_requirement: 11
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 2
+  magic_defense_bonus: 1
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: prism_wizard_12_weapon
+  model: Weapon
+  name: Prism Channeling Staff
+  description: Wizard weapon attuned to the Prism region.
+  value: 2880
+  level_requirement: 12
+  hero_class_restriction: wizard
+  attack_bonus: 14
+  accuracy_bonus: 3
+  element: earth
+  weapon_type: staff
+  equipment_slot: weapon
+- key: prism_wizard_12_armor
+  model: Armor
+  name: Prism Spellweave Robes
+  description: Wizard protection woven for the Prism region.
+  value: 2592
+  level_requirement: 12
+  hero_class_restriction: wizard
+  defense_bonus: 7
+  magic_defense_bonus: 15
+  health_bonus: 24
+  armor_type: robe
+  elemental_resistances:
+    earth: 0.83
+  equipment_slot: armor
+- key: prism_wizard_12_accessory
+  model: Accessory
+  name: Prism Focus Crystal
+  description: Wizard trinket from the Prism region.
+  value: 2160
+  level_requirement: 12
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 8
+  magic_defense_bonus: 4
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: prism_ranger_12_weapon
+  model: Weapon
+  name: Prism Longbow
+  description: Ranger weapon attuned to the Prism region.
+  value: 2880
+  level_requirement: 12
+  hero_class_restriction: ranger
+  attack_bonus: 28
+  accuracy_bonus: 6
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: prism_ranger_12_armor
+  model: Armor
+  name: Prism Trailwarden Leathers
+  description: Ranger protection woven for the Prism region.
+  value: 2592
+  level_requirement: 12
+  hero_class_restriction: ranger
+  defense_bonus: 14
+  magic_defense_bonus: 8
+  health_bonus: 36
+  armor_type: leather
+  elemental_resistances:
+    earth: 0.83
+  equipment_slot: armor
+- key: prism_ranger_12_accessory
+  model: Accessory
+  name: Prism Hunter Mark
+  description: Ranger trinket from the Prism region.
+  value: 2160
+  level_requirement: 12
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 4
+  magic_bonus: 2
+  magic_defense_bonus: 2
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: clockwork_wizard_13_weapon
+  model: Weapon
+  name: Clockwork Channeling Staff
+  description: Wizard weapon attuned to the Clockwork region.
+  value: 3380
+  level_requirement: 13
+  hero_class_restriction: wizard
+  attack_bonus: 15
+  accuracy_bonus: 3
+  element: wind
+  weapon_type: staff
+  equipment_slot: weapon
+- key: clockwork_wizard_13_armor
+  model: Armor
+  name: Clockwork Spellweave Robes
+  description: Wizard protection woven for the Clockwork region.
+  value: 3042
+  level_requirement: 13
+  hero_class_restriction: wizard
+  defense_bonus: 7
+  magic_defense_bonus: 16
+  health_bonus: 26
+  armor_type: robe
+  elemental_resistances:
+    wind: 0.82
+  equipment_slot: armor
+- key: clockwork_wizard_13_accessory
+  model: Accessory
+  name: Clockwork Focus Crystal
+  description: Wizard trinket from the Clockwork region.
+  value: 2535
+  level_requirement: 13
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 8
+  magic_defense_bonus: 4
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: clockwork_ranger_13_weapon
+  model: Weapon
+  name: Clockwork Longbow
+  description: Ranger weapon attuned to the Clockwork region.
+  value: 3380
+  level_requirement: 13
+  hero_class_restriction: ranger
+  attack_bonus: 30
+  accuracy_bonus: 6
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: clockwork_ranger_13_armor
+  model: Armor
+  name: Clockwork Trailwarden Leathers
+  description: Ranger protection woven for the Clockwork region.
+  value: 3042
+  level_requirement: 13
+  hero_class_restriction: ranger
+  defense_bonus: 15
+  magic_defense_bonus: 8
+  health_bonus: 39
+  armor_type: leather
+  elemental_resistances:
+    wind: 0.82
+  equipment_slot: armor
+- key: clockwork_ranger_13_accessory
+  model: Accessory
+  name: Clockwork Hunter Mark
+  description: Ranger trinket from the Clockwork region.
+  value: 2535
+  level_requirement: 13
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 4
+  magic_bonus: 2
+  magic_defense_bonus: 2
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: rift_wizard_14_weapon
+  model: Weapon
+  name: Rift Channeling Staff
+  description: Wizard weapon attuned to the Rift region.
+  value: 3920
+  level_requirement: 14
+  hero_class_restriction: wizard
+  attack_bonus: 16
+  accuracy_bonus: 3
+  element: wind
+  weapon_type: staff
+  equipment_slot: weapon
+- key: rift_wizard_14_armor
+  model: Armor
+  name: Rift Spellweave Robes
+  description: Wizard protection woven for the Rift region.
+  value: 3528
+  level_requirement: 14
+  hero_class_restriction: wizard
+  defense_bonus: 8
+  magic_defense_bonus: 17
+  health_bonus: 28
+  armor_type: robe
+  elemental_resistances:
+    wind: 0.81
+  equipment_slot: armor
+- key: rift_wizard_14_accessory
+  model: Accessory
+  name: Rift Focus Crystal
+  description: Wizard trinket from the Rift region.
+  value: 2940
+  level_requirement: 14
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 9
+  magic_defense_bonus: 4
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: rift_ranger_14_weapon
+  model: Weapon
+  name: Rift Longbow
+  description: Ranger weapon attuned to the Rift region.
+  value: 3920
+  level_requirement: 14
+  hero_class_restriction: ranger
+  attack_bonus: 32
+  accuracy_bonus: 6
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: rift_ranger_14_armor
+  model: Armor
+  name: Rift Trailwarden Leathers
+  description: Ranger protection woven for the Rift region.
+  value: 3528
+  level_requirement: 14
+  hero_class_restriction: ranger
+  defense_bonus: 16
+  magic_defense_bonus: 9
+  health_bonus: 42
+  armor_type: leather
+  elemental_resistances:
+    wind: 0.81
+  equipment_slot: armor
+- key: rift_ranger_14_accessory
+  model: Accessory
+  name: Rift Hunter Mark
+  description: Ranger trinket from the Rift region.
+  value: 2940
+  level_requirement: 14
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 4
+  magic_bonus: 2
+  magic_defense_bonus: 2
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: pale_oath_wizard_15_weapon
+  model: Weapon
+  name: Pale Oath Channeling Staff
+  description: Wizard weapon attuned to the Pale Oath region.
+  value: 4500
+  level_requirement: 15
+  hero_class_restriction: wizard
+  attack_bonus: 17
+  accuracy_bonus: 4
+  element: wind
+  weapon_type: staff
+  equipment_slot: weapon
+- key: pale_oath_wizard_15_armor
+  model: Armor
+  name: Pale Oath Spellweave Robes
+  description: Wizard protection woven for the Pale Oath region.
+  value: 4050
+  level_requirement: 15
+  hero_class_restriction: wizard
+  defense_bonus: 8
+  magic_defense_bonus: 18
+  health_bonus: 30
+  armor_type: robe
+  elemental_resistances:
+    wind: 0.8
+  equipment_slot: armor
+- key: pale_oath_wizard_15_accessory
+  model: Accessory
+  name: Pale Oath Focus Crystal
+  description: Wizard trinket from the Pale Oath region.
+  value: 3375
+  level_requirement: 15
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 9
+  magic_defense_bonus: 4
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: pale_oath_ranger_15_weapon
+  model: Weapon
+  name: Pale Oath Longbow
+  description: Ranger weapon attuned to the Pale Oath region.
+  value: 4500
+  level_requirement: 15
+  hero_class_restriction: ranger
+  attack_bonus: 34
+  accuracy_bonus: 7
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: pale_oath_ranger_15_armor
+  model: Armor
+  name: Pale Oath Trailwarden Leathers
+  description: Ranger protection woven for the Pale Oath region.
+  value: 4050
+  level_requirement: 15
+  hero_class_restriction: ranger
+  defense_bonus: 17
+  magic_defense_bonus: 9
+  health_bonus: 45
+  armor_type: leather
+  elemental_resistances:
+    wind: 0.8
+  equipment_slot: armor
+- key: pale_oath_ranger_15_accessory
+  model: Accessory
+  name: Pale Oath Hunter Mark
+  description: Ranger trinket from the Pale Oath region.
+  value: 3375
+  level_requirement: 15
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 4
+  magic_bonus: 3
+  magic_defense_bonus: 2
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: storm_wizard_16_weapon
+  model: Weapon
+  name: Storm Channeling Staff
+  description: Wizard weapon attuned to the Storm region.
+  value: 5120
+  level_requirement: 16
+  hero_class_restriction: wizard
+  attack_bonus: 18
+  accuracy_bonus: 4
+  element: holy
+  weapon_type: staff
+  equipment_slot: weapon
+- key: storm_wizard_16_armor
+  model: Armor
+  name: Storm Spellweave Robes
+  description: Wizard protection woven for the Storm region.
+  value: 4608
+  level_requirement: 16
+  hero_class_restriction: wizard
+  defense_bonus: 9
+  magic_defense_bonus: 19
+  health_bonus: 32
+  armor_type: robe
+  elemental_resistances:
+    holy: 0.79
+  equipment_slot: armor
+- key: storm_wizard_16_accessory
+  model: Accessory
+  name: Storm Focus Crystal
+  description: Wizard trinket from the Storm region.
+  value: 3840
+  level_requirement: 16
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 10
+  magic_defense_bonus: 5
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: storm_ranger_16_weapon
+  model: Weapon
+  name: Storm Longbow
+  description: Ranger weapon attuned to the Storm region.
+  value: 5120
+  level_requirement: 16
+  hero_class_restriction: ranger
+  attack_bonus: 36
+  accuracy_bonus: 7
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: storm_ranger_16_armor
+  model: Armor
+  name: Storm Trailwarden Leathers
+  description: Ranger protection woven for the Storm region.
+  value: 4608
+  level_requirement: 16
+  hero_class_restriction: ranger
+  defense_bonus: 18
+  magic_defense_bonus: 10
+  health_bonus: 48
+  armor_type: leather
+  elemental_resistances:
+    holy: 0.79
+  equipment_slot: armor
+- key: storm_ranger_16_accessory
+  model: Accessory
+  name: Storm Hunter Mark
+  description: Ranger trinket from the Storm region.
+  value: 3840
+  level_requirement: 16
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 5
+  magic_bonus: 3
+  magic_defense_bonus: 2
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: eclipse_wizard_17_weapon
+  model: Weapon
+  name: Eclipse Channeling Staff
+  description: Wizard weapon attuned to the Eclipse region.
+  value: 5780
+  level_requirement: 17
+  hero_class_restriction: wizard
+  attack_bonus: 19
+  accuracy_bonus: 4
+  element: holy
+  weapon_type: staff
+  equipment_slot: weapon
+- key: eclipse_wizard_17_armor
+  model: Armor
+  name: Eclipse Spellweave Robes
+  description: Wizard protection woven for the Eclipse region.
+  value: 5202
+  level_requirement: 17
+  hero_class_restriction: wizard
+  defense_bonus: 9
+  magic_defense_bonus: 20
+  health_bonus: 34
+  armor_type: robe
+  elemental_resistances:
+    holy: 0.78
+  equipment_slot: armor
+- key: eclipse_wizard_17_accessory
+  model: Accessory
+  name: Eclipse Focus Crystal
+  description: Wizard trinket from the Eclipse region.
+  value: 4335
+  level_requirement: 17
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 10
+  magic_defense_bonus: 5
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: eclipse_ranger_17_weapon
+  model: Weapon
+  name: Eclipse Longbow
+  description: Ranger weapon attuned to the Eclipse region.
+  value: 5780
+  level_requirement: 17
+  hero_class_restriction: ranger
+  attack_bonus: 38
+  accuracy_bonus: 7
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: eclipse_ranger_17_armor
+  model: Armor
+  name: Eclipse Trailwarden Leathers
+  description: Ranger protection woven for the Eclipse region.
+  value: 5202
+  level_requirement: 17
+  hero_class_restriction: ranger
+  defense_bonus: 19
+  magic_defense_bonus: 10
+  health_bonus: 51
+  armor_type: leather
+  elemental_resistances:
+    holy: 0.78
+  equipment_slot: armor
+- key: eclipse_ranger_17_accessory
+  model: Accessory
+  name: Eclipse Hunter Mark
+  description: Ranger trinket from the Eclipse region.
+  value: 4335
+  level_requirement: 17
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 5
+  magic_bonus: 3
+  magic_defense_bonus: 2
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: abyss_wizard_18_weapon
+  model: Weapon
+  name: Abyss Channeling Staff
+  description: Wizard weapon attuned to the Abyss region.
+  value: 6480
+  level_requirement: 18
+  hero_class_restriction: wizard
+  attack_bonus: 20
+  accuracy_bonus: 4
+  element: holy
+  weapon_type: staff
+  equipment_slot: weapon
+- key: abyss_wizard_18_armor
+  model: Armor
+  name: Abyss Spellweave Robes
+  description: Wizard protection woven for the Abyss region.
+  value: 5832
+  level_requirement: 18
+  hero_class_restriction: wizard
+  defense_bonus: 10
+  magic_defense_bonus: 21
+  health_bonus: 36
+  armor_type: robe
+  elemental_resistances:
+    holy: 0.77
+  equipment_slot: armor
+- key: abyss_wizard_18_accessory
+  model: Accessory
+  name: Abyss Focus Crystal
+  description: Wizard trinket from the Abyss region.
+  value: 4860
+  level_requirement: 18
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 11
+  magic_defense_bonus: 5
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: abyss_ranger_18_weapon
+  model: Weapon
+  name: Abyss Longbow
+  description: Ranger weapon attuned to the Abyss region.
+  value: 6480
+  level_requirement: 18
+  hero_class_restriction: ranger
+  attack_bonus: 40
+  accuracy_bonus: 8
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: abyss_ranger_18_armor
+  model: Armor
+  name: Abyss Trailwarden Leathers
+  description: Ranger protection woven for the Abyss region.
+  value: 5832
+  level_requirement: 18
+  hero_class_restriction: ranger
+  defense_bonus: 20
+  magic_defense_bonus: 11
+  health_bonus: 54
+  armor_type: leather
+  elemental_resistances:
+    holy: 0.77
+  equipment_slot: armor
+- key: abyss_ranger_18_accessory
+  model: Accessory
+  name: Abyss Hunter Mark
+  description: Ranger trinket from the Abyss region.
+  value: 4860
+  level_requirement: 18
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 5
+  magic_bonus: 3
+  magic_defense_bonus: 3
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: seraphic_wizard_19_weapon
+  model: Weapon
+  name: Seraphic Channeling Staff
+  description: Wizard weapon attuned to the Seraphic region.
+  value: 7220
+  level_requirement: 19
+  hero_class_restriction: wizard
+  attack_bonus: 21
+  accuracy_bonus: 4
+  element: dark
+  weapon_type: staff
+  equipment_slot: weapon
+- key: seraphic_wizard_19_armor
+  model: Armor
+  name: Seraphic Spellweave Robes
+  description: Wizard protection woven for the Seraphic region.
+  value: 6498
+  level_requirement: 19
+  hero_class_restriction: wizard
+  defense_bonus: 10
+  magic_defense_bonus: 22
+  health_bonus: 38
+  armor_type: robe
+  elemental_resistances:
+    dark: 0.76
+  equipment_slot: armor
+- key: seraphic_wizard_19_accessory
+  model: Accessory
+  name: Seraphic Focus Crystal
+  description: Wizard trinket from the Seraphic region.
+  value: 5415
+  level_requirement: 19
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 11
+  magic_defense_bonus: 5
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: seraphic_ranger_19_weapon
+  model: Weapon
+  name: Seraphic Longbow
+  description: Ranger weapon attuned to the Seraphic region.
+  value: 7220
+  level_requirement: 19
+  hero_class_restriction: ranger
+  attack_bonus: 42
+  accuracy_bonus: 8
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: seraphic_ranger_19_armor
+  model: Armor
+  name: Seraphic Trailwarden Leathers
+  description: Ranger protection woven for the Seraphic region.
+  value: 6498
+  level_requirement: 19
+  hero_class_restriction: ranger
+  defense_bonus: 21
+  magic_defense_bonus: 11
+  health_bonus: 57
+  armor_type: leather
+  elemental_resistances:
+    dark: 0.76
+  equipment_slot: armor
+- key: seraphic_ranger_19_accessory
+  model: Accessory
+  name: Seraphic Hunter Mark
+  description: Ranger trinket from the Seraphic region.
+  value: 5415
+  level_requirement: 19
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 5
+  magic_bonus: 3
+  magic_defense_bonus: 3
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: world_end_wizard_20_weapon
+  model: Weapon
+  name: World-End Channeling Staff
+  description: Wizard weapon attuned to the World-End region.
+  value: 8000
+  level_requirement: 20
+  hero_class_restriction: wizard
+  attack_bonus: 22
+  accuracy_bonus: 5
+  element: dark
+  weapon_type: staff
+  equipment_slot: weapon
+- key: world_end_wizard_20_armor
+  model: Armor
+  name: World-End Spellweave Robes
+  description: Wizard protection woven for the World-End region.
+  value: 7200
+  level_requirement: 20
+  hero_class_restriction: wizard
+  defense_bonus: 11
+  magic_defense_bonus: 23
+  health_bonus: 40
+  armor_type: robe
+  elemental_resistances:
+    dark: 0.75
+  equipment_slot: armor
+- key: world_end_wizard_20_accessory
+  model: Accessory
+  name: World-End Focus Crystal
+  description: Wizard trinket from the World-End region.
+  value: 6000
+  level_requirement: 20
+  hero_class_restriction: wizard
+  defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 12
+  magic_defense_bonus: 6
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: focus
+  equipment_slot: accessory
+- key: world_end_ranger_20_weapon
+  model: Weapon
+  name: World-End Longbow
+  description: Ranger weapon attuned to the World-End region.
+  value: 8000
+  level_requirement: 20
+  hero_class_restriction: ranger
+  attack_bonus: 44
+  accuracy_bonus: 8
+  element: null
+  weapon_type: bow
+  equipment_slot: weapon
+- key: world_end_ranger_20_armor
+  model: Armor
+  name: World-End Trailwarden Leathers
+  description: Ranger protection woven for the World-End region.
+  value: 7200
+  level_requirement: 20
+  hero_class_restriction: ranger
+  defense_bonus: 22
+  magic_defense_bonus: 12
+  health_bonus: 60
+  armor_type: leather
+  elemental_resistances:
+    dark: 0.75
+  equipment_slot: armor
+- key: world_end_ranger_20_accessory
+  model: Accessory
+  name: World-End Hunter Mark
+  description: Ranger trinket from the World-End region.
+  value: 6000
+  level_requirement: 20
+  hero_class_restriction: ranger
+  defense_bonus: 0
+  speed_bonus: 6
+  magic_bonus: 4
+  magic_defense_bonus: 3
+  critical_bonus: 5
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: charm
+  equipment_slot: accessory
+- key: universal_ward_1
+  model: Accessory
+  name: Briarwood Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 15
+  level_requirement: 1
+  hero_class_restriction: null
+  defense_bonus: 1
+  magic_defense_bonus: 1
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_1
+  model: Accessory
+  name: Briarwood Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 15
+  level_requirement: 1
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 1
+  magic_bonus: 1
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+- key: universal_ward_4
+  model: Accessory
+  name: Quarry Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 240
+  level_requirement: 4
+  hero_class_restriction: null
+  defense_bonus: 2
+  magic_defense_bonus: 2
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_4
+  model: Accessory
+  name: Quarry Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 240
+  level_requirement: 4
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 2
+  magic_bonus: 1
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+- key: universal_ward_8
+  model: Accessory
+  name: Cinder Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 960
+  level_requirement: 8
+  hero_class_restriction: null
+  defense_bonus: 3
+  magic_defense_bonus: 3
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_8
+  model: Accessory
+  name: Cinder Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 960
+  level_requirement: 8
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 3
+  magic_bonus: 2
+  critical_bonus: 1
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+- key: universal_ward_12
+  model: Accessory
+  name: Prism Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 2160
+  level_requirement: 12
+  hero_class_restriction: null
+  defense_bonus: 4
+  magic_defense_bonus: 5
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_12
+  model: Accessory
+  name: Prism Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 2160
+  level_requirement: 12
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 5
+  magic_bonus: 3
+  critical_bonus: 2
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+- key: universal_ward_16
+  model: Accessory
+  name: Storm Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 3840
+  level_requirement: 16
+  hero_class_restriction: null
+  defense_bonus: 5
+  magic_defense_bonus: 6
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_16
+  model: Accessory
+  name: Storm Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 3840
+  level_requirement: 16
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 6
+  magic_bonus: 4
+  critical_bonus: 3
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+- key: universal_ward_20
+  model: Accessory
+  name: World-End Wardstone
+  description: Unrestricted accessory for any class; favors survival.
+  value: 6000
+  level_requirement: 20
+  hero_class_restriction: null
+  defense_bonus: 6
+  magic_defense_bonus: 7
+  speed_bonus: 0
+  magic_bonus: 0
+  critical_bonus: 0
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: amulet
+  equipment_slot: accessory
+- key: universal_momentum_20
+  model: Accessory
+  name: World-End Wayfinder
+  description: Unrestricted accessory for any class; favors speed and precision.
+  value: 6000
+  level_requirement: 20
+  hero_class_restriction: null
+  defense_bonus: 0
+  magic_defense_bonus: 0
+  speed_bonus: 7
+  magic_bonus: 5
+  critical_bonus: 4
+  status_immunities: []
+  passive_effects: {}
+  accessory_type: compass
+  equipment_slot: accessory
+monsters:
+- key: briar_rat
+  name: Briar Rat
+  level: 1
+  max_health: 91
+  current_health: 91
+  max_mana: 0
+  current_mana: 0
+  attack: 12
+  defense: 8
+  magic: 3
+  magic_defense: 5
+  speed: 9
+  accuracy: 90
+  evasion: 0
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: tank
+  experience_reward: 29
+- key: thorn_poacher
+  name: Thorn Poacher
+  level: 1
+  max_health: 66
+  current_health: 66
+  max_mana: 0
+  current_mana: 0
+  attack: 10
+  defense: 5
+  magic: 3
+  magic_defense: 5
+  speed: 12
+  accuracy: 90
+  evasion: 3
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 29
+- key: rootling
+  name: Rootling
+  level: 2
+  max_health: 107
+  current_health: 107
+  max_mana: 0
+  current_mana: 0
+  attack: 15
+  defense: 10
+  magic: 4
+  magic_defense: 7
+  speed: 11
+  accuracy: 91
+  evasion: 1
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 38
+- key: moss_acolyte
+  name: Moss Acolyte
+  level: 2
+  max_health: 82
+  current_health: 82
+  max_mana: 23
+  current_mana: 23
+  attack: 13
+  defense: 7
+  magic: 11
+  magic_defense: 7
+  speed: 14
+  accuracy: 91
+  evasion: 4
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 38
+- key: bog_leech
+  name: Bog Leech
+  level: 3
+  max_health: 123
+  current_health: 123
+  max_mana: 0
+  current_mana: 0
+  attack: 18
+  defense: 12
+  magic: 5
+  magic_defense: 9
+  speed: 13
+  accuracy: 91
+  evasion: 1
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 47
+- key: drowned_scout
+  name: Drowned Scout
+  level: 3
+  max_health: 98
+  current_health: 98
+  max_mana: 0
+  current_mana: 0
+  attack: 16
+  defense: 9
+  magic: 5
+  magic_defense: 9
+  speed: 16
+  accuracy: 91
+  evasion: 4
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 47
+- key: the_drowned_captain
+  name: The Drowned Captain
+  level: 3
+  max_health: 196
+  current_health: 196
+  max_mana: 43
+  current_mana: 43
+  attack: 22
+  defense: 15
+  magic: 17
+  magic_defense: 15
+  speed: 14
+  accuracy: 98
+  evasion: 1
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: miniboss
+  monster_class: warrior
+  experience_reward: 150
+- key: quarry_brute
+  name: Quarry Brute
+  level: 4
+  max_health: 139
+  current_health: 139
+  max_mana: 0
+  current_mana: 0
+  attack: 21
+  defense: 14
+  magic: 6
+  magic_defense: 11
+  speed: 15
+  accuracy: 92
+  evasion: 2
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 56
+- key: ash_slinger
+  name: Ash Slinger
+  level: 4
+  max_health: 114
+  current_health: 114
+  max_mana: 31
+  current_mana: 31
+  attack: 19
+  defense: 11
+  magic: 17
+  magic_defense: 11
+  speed: 18
+  accuracy: 92
+  evasion: 5
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 56
+- key: keep_deserter
+  name: Keep Deserter
+  level: 5
+  max_health: 155
+  current_health: 155
+  max_mana: 0
+  current_mana: 0
+  attack: 24
+  defense: 16
+  magic: 7
+  magic_defense: 13
+  speed: 17
+  accuracy: 92
+  evasion: 2
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 65
+- key: watchtower_arbalist
+  name: Watchtower Arbalist
+  level: 5
+  max_health: 130
+  current_health: 130
+  max_mana: 0
+  current_mana: 0
+  attack: 22
+  defense: 13
+  magic: 7
+  magic_defense: 13
+  speed: 20
+  accuracy: 92
+  evasion: 5
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 65
+- key: the_thorn_castellan
+  name: The Thorn Castellan
+  level: 5
+  max_health: 390
+  current_health: 390
+  max_mana: 55
+  current_mana: 55
+  attack: 30
+  defense: 21
+  magic: 23
+  magic_defense: 21
+  speed: 18
+  accuracy: 98
+  evasion: 2
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: boss
+  monster_class: tank
+  experience_reward: 325
+- key: fen_stalker
+  name: Fen Stalker
+  level: 6
+  max_health: 171
+  current_health: 171
+  max_mana: 0
+  current_mana: 0
+  attack: 27
+  defense: 18
+  magic: 8
+  magic_defense: 15
+  speed: 19
+  accuracy: 93
+  evasion: 3
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: rogue
+  experience_reward: 74
+- key: mire_hexer
+  name: Mire Hexer
+  level: 6
+  max_health: 146
+  current_health: 146
+  max_mana: 39
+  current_mana: 39
+  attack: 25
+  defense: 15
+  magic: 23
+  magic_defense: 15
+  speed: 22
+  accuracy: 93
+  evasion: 6
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 74
+- key: rime_wolf
+  name: Rime Wolf
+  level: 7
+  max_health: 187
+  current_health: 187
+  max_mana: 0
+  current_mana: 0
+  attack: 30
+  defense: 20
+  magic: 9
+  magic_defense: 17
+  speed: 21
+  accuracy: 93
+  evasion: 3
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 83
+- key: frostbound_seer
+  name: Frostbound Seer
+  level: 7
+  max_health: 162
+  current_health: 162
+  max_mana: 0
+  current_mana: 0
+  attack: 28
+  defense: 17
+  magic: 9
+  magic_defense: 17
+  speed: 24
+  accuracy: 93
+  evasion: 6
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 83
+- key: the_white_maw
+  name: The White Maw
+  level: 7
+  max_health: 324
+  current_health: 324
+  max_mana: 67
+  current_mana: 67
+  attack: 38
+  defense: 27
+  magic: 29
+  magic_defense: 27
+  speed: 22
+  accuracy: 98
+  evasion: 3
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: miniboss
+  monster_class: warrior
+  experience_reward: 270
+- key: ember_imp
+  name: Ember Imp
+  level: 8
+  max_health: 203
+  current_health: 203
+  max_mana: 0
+  current_mana: 0
+  attack: 33
+  defense: 22
+  magic: 10
+  magic_defense: 19
+  speed: 23
+  accuracy: 94
+  evasion: 4
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 92
+- key: cinder_guardian
+  name: Cinder Guardian
+  level: 8
+  max_health: 178
+  current_health: 178
+  max_mana: 47
+  current_mana: 47
+  attack: 31
+  defense: 19
+  magic: 29
+  magic_defense: 19
+  speed: 26
+  accuracy: 94
+  evasion: 7
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 92
+- key: veil_assassin
+  name: Veil Assassin
+  level: 9
+  max_health: 219
+  current_health: 219
+  max_mana: 0
+  current_mana: 0
+  attack: 36
+  defense: 24
+  magic: 11
+  magic_defense: 21
+  speed: 25
+  accuracy: 94
+  evasion: 4
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: rogue
+  experience_reward: 101
+- key: obsidian_cantor
+  name: Obsidian Cantor
+  level: 9
+  max_health: 194
+  current_health: 194
+  max_mana: 0
+  current_mana: 0
+  attack: 34
+  defense: 21
+  magic: 11
+  magic_defense: 21
+  speed: 28
+  accuracy: 94
+  evasion: 7
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 101
+- key: astral_wisp
+  name: Astral Wisp
+  level: 10
+  max_health: 235
+  current_health: 235
+  max_mana: 0
+  current_mana: 0
+  attack: 39
+  defense: 26
+  magic: 12
+  magic_defense: 23
+  speed: 27
+  accuracy: 95
+  evasion: 5
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: tank
+  experience_reward: 110
+- key: starfall_sentinel
+  name: Starfall Sentinel
+  level: 10
+  max_health: 210
+  current_health: 210
+  max_mana: 55
+  current_mana: 55
+  attack: 37
+  defense: 23
+  magic: 35
+  magic_defense: 23
+  speed: 30
+  accuracy: 95
+  evasion: 8
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 110
+- key: abbot_of_the_black_star
+  name: Abbot of the Black Star
+  level: 10
+  max_health: 630
+  current_health: 630
+  max_mana: 85
+  current_mana: 85
+  attack: 50
+  defense: 36
+  magic: 38
+  magic_defense: 36
+  speed: 28
+  accuracy: 98
+  evasion: 5
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: boss
+  monster_class: tank
+  experience_reward: 550
+- key: iron_revenant
+  name: Iron Revenant
+  level: 11
+  max_health: 251
+  current_health: 251
+  max_mana: 0
+  current_mana: 0
+  attack: 42
+  defense: 28
+  magic: 13
+  magic_defense: 25
+  speed: 29
+  accuracy: 95
+  evasion: 5
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 119
+- key: grave_cantor
+  name: Grave Cantor
+  level: 11
+  max_health: 226
+  current_health: 226
+  max_mana: 0
+  current_mana: 0
+  attack: 40
+  defense: 25
+  magic: 13
+  magic_defense: 25
+  speed: 32
+  accuracy: 95
+  evasion: 8
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 119
+- key: glass_basilisk
+  name: Glass Basilisk
+  level: 12
+  max_health: 267
+  current_health: 267
+  max_mana: 0
+  current_mana: 0
+  attack: 45
+  defense: 30
+  magic: 14
+  magic_defense: 27
+  speed: 31
+  accuracy: 96
+  evasion: 6
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 128
+- key: shard_witch
+  name: Shard Witch
+  level: 12
+  max_health: 242
+  current_health: 242
+  max_mana: 63
+  current_mana: 63
+  attack: 43
+  defense: 27
+  magic: 41
+  magic_defense: 27
+  speed: 34
+  accuracy: 96
+  evasion: 9
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 128
+- key: the_crystal_matriarch
+  name: The Crystal Matriarch
+  level: 12
+  max_health: 484
+  current_health: 484
+  max_mana: 97
+  current_mana: 97
+  attack: 58
+  defense: 42
+  magic: 44
+  magic_defense: 42
+  speed: 32
+  accuracy: 98
+  evasion: 6
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: miniboss
+  monster_class: warrior
+  experience_reward: 420
+- key: clockwork_hound
+  name: Clockwork Hound
+  level: 13
+  max_health: 283
+  current_health: 283
+  max_mana: 0
+  current_mana: 0
+  attack: 48
+  defense: 32
+  magic: 15
+  magic_defense: 29
+  speed: 33
+  accuracy: 96
+  evasion: 6
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: tank
+  experience_reward: 137
+- key: gearwright
+  name: Gearwright
+  level: 13
+  max_health: 258
+  current_health: 258
+  max_mana: 0
+  current_mana: 0
+  attack: 46
+  defense: 29
+  magic: 15
+  magic_defense: 29
+  speed: 36
+  accuracy: 96
+  evasion: 9
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 137
+- key: void_prowler
+  name: Void Prowler
+  level: 14
+  max_health: 299
+  current_health: 299
+  max_mana: 0
+  current_mana: 0
+  attack: 51
+  defense: 34
+  magic: 16
+  magic_defense: 31
+  speed: 35
+  accuracy: 97
+  evasion: 7
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 146
+- key: rift_channeler
+  name: Rift Channeler
+  level: 14
+  max_health: 274
+  current_health: 274
+  max_mana: 71
+  current_mana: 71
+  attack: 49
+  defense: 31
+  magic: 47
+  magic_defense: 31
+  speed: 38
+  accuracy: 97
+  evasion: 10
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 146
+- key: pale_knight
+  name: Pale Knight
+  level: 15
+  max_health: 315
+  current_health: 315
+  max_mana: 0
+  current_mana: 0
+  attack: 54
+  defense: 36
+  magic: 17
+  magic_defense: 33
+  speed: 37
+  accuracy: 97
+  evasion: 7
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 155
+- key: bone_oracle
+  name: Bone Oracle
+  level: 15
+  max_health: 290
+  current_health: 290
+  max_mana: 0
+  current_mana: 0
+  attack: 52
+  defense: 33
+  magic: 17
+  magic_defense: 33
+  speed: 40
+  accuracy: 97
+  evasion: 10
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 155
+- key: the_hollow_sovereign
+  name: The Hollow Sovereign
+  level: 15
+  max_health: 870
+  current_health: 870
+  max_mana: 115
+  current_mana: 115
+  attack: 70
+  defense: 51
+  magic: 53
+  magic_defense: 51
+  speed: 38
+  accuracy: 98
+  evasion: 7
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: boss
+  monster_class: tank
+  experience_reward: 775
+- key: storm_drake
+  name: Storm Drake
+  level: 16
+  max_health: 331
+  current_health: 331
+  max_mana: 0
+  current_mana: 0
+  attack: 57
+  defense: 38
+  magic: 18
+  magic_defense: 35
+  speed: 39
+  accuracy: 98
+  evasion: 8
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 164
+- key: thunder_adept
+  name: Thunder Adept
+  level: 16
+  max_health: 306
+  current_health: 306
+  max_mana: 79
+  current_mana: 79
+  attack: 55
+  defense: 35
+  magic: 53
+  magic_defense: 35
+  speed: 42
+  accuracy: 98
+  evasion: 11
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 164
+- key: sunless_hunter
+  name: Sunless Hunter
+  level: 17
+  max_health: 347
+  current_health: 347
+  max_mana: 0
+  current_mana: 0
+  attack: 60
+  defense: 40
+  magic: 19
+  magic_defense: 37
+  speed: 41
+  accuracy: 98
+  evasion: 8
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: rogue
+  experience_reward: 173
+- key: eclipse_priest
+  name: Eclipse Priest
+  level: 17
+  max_health: 322
+  current_health: 322
+  max_mana: 0
+  current_mana: 0
+  attack: 58
+  defense: 37
+  magic: 19
+  magic_defense: 37
+  speed: 44
+  accuracy: 98
+  evasion: 11
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 173
+- key: the_eclipse_herald
+  name: The Eclipse Herald
+  level: 17
+  max_health: 644
+  current_health: 644
+  max_mana: 127
+  current_mana: 127
+  attack: 78
+  defense: 57
+  magic: 59
+  magic_defense: 57
+  speed: 42
+  accuracy: 98
+  evasion: 8
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: miniboss
+  monster_class: warrior
+  experience_reward: 570
+- key: abyssal_marauder
+  name: Abyssal Marauder
+  level: 18
+  max_health: 363
+  current_health: 363
+  max_mana: 0
+  current_mana: 0
+  attack: 63
+  defense: 42
+  magic: 20
+  magic_defense: 39
+  speed: 43
+  accuracy: 99
+  evasion: 9
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 182
+- key: dread_arcanist
+  name: Dread Arcanist
+  level: 18
+  max_health: 338
+  current_health: 338
+  max_mana: 87
+  current_mana: 87
+  attack: 61
+  defense: 39
+  magic: 59
+  magic_defense: 39
+  speed: 46
+  accuracy: 99
+  evasion: 12
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 182
+- key: celestial_exile
+  name: Celestial Exile
+  level: 19
+  max_health: 379
+  current_health: 379
+  max_mana: 0
+  current_mana: 0
+  attack: 66
+  defense: 44
+  magic: 21
+  magic_defense: 41
+  speed: 45
+  accuracy: 99
+  evasion: 9
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: warrior
+  experience_reward: 191
+- key: fallen_seraph
+  name: Fallen Seraph
+  level: 19
+  max_health: 354
+  current_health: 354
+  max_mana: 0
+  current_mana: 0
+  attack: 64
+  defense: 41
+  magic: 21
+  magic_defense: 41
+  speed: 48
+  accuracy: 99
+  evasion: 12
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: archer
+  experience_reward: 191
+- key: entropy_warden
+  name: Entropy Warden
+  level: 20
+  max_health: 395
+  current_health: 395
+  max_mana: 0
+  current_mana: 0
+  attack: 69
+  defense: 46
+  magic: 22
+  magic_defense: 43
+  speed: 47
+  accuracy: 100
+  evasion: 10
+  critical_chance: 5
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 200
+- key: last_archivist
+  name: Last Archivist
+  level: 20
+  max_health: 370
+  current_health: 370
+  max_mana: 95
+  current_mana: 95
+  attack: 67
+  defense: 43
+  magic: 65
+  magic_defense: 43
+  speed: 50
+  accuracy: 100
+  evasion: 13
+  critical_chance: 7
+  critical_damage: 1.5
+  threat_level: common
+  monster_class: mage
+  experience_reward: 200
+- key: the_unmaking_king
+  name: The Unmaking King
+  level: 20
+  max_health: 1110
+  current_health: 1110
+  max_mana: 145
+  current_mana: 145
+  attack: 90
+  defense: 66
+  magic: 68
+  magic_defense: 66
+  speed: 48
+  accuracy: 98
+  evasion: 10
+  critical_chance: 8
+  critical_damage: 1.6
+  threat_level: boss
+  monster_class: tank
+  experience_reward: 1000
+monster_loot:
+- monster: briar_rat
+  item: healing_draught_1
+  drop_chance: 22.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: rustleaf_blade
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: healing_draught_1
+  drop_chance: 22.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: padded_jerkin
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: healing_draught_2
+  drop_chance: 23.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briar_spear
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: healing_draught_2
+  drop_chance: 23.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: barkhide_vest
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: healing_draught_3
+  drop_chance: 23.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: marsh_cleaver
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: healing_draught_3
+  drop_chance: 23.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: bogwalker_coat
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: reed_talisman
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: healing_draught_4
+  drop_chance: 24.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: stonebreaker
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: healing_draught_4
+  drop_chance: 24.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_mail
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: healing_draught_5
+  drop_chance: 24.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchman_sabre
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: healing_draught_5
+  drop_chance: 24.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchguard_plate
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: sentinel_badge
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: healing_draught_6
+  drop_chance: 25.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: fenfang_dagger
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: healing_draught_6
+  drop_chance: 25.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mireweave_robes
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: healing_draught_7
+  drop_chance: 25.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: rime_pike
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: healing_draught_7
+  drop_chance: 25.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frostglass_mantle
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: snoweye_ring
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: healing_draught_8
+  drop_chance: 26.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_axe
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: healing_draught_8
+  drop_chance: 26.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: emberforged_hauberk
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: healing_draught_9
+  drop_chance: 26.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_edge
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: healing_draught_9
+  drop_chance: 26.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_vestments
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: healing_draught_10
+  drop_chance: 27.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starlit_rapier
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: healing_draught_10
+  drop_chance: 27.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_cuirass
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: astral_compass
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: healing_draught_11
+  drop_chance: 27.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: gravebrand
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: healing_draught_11
+  drop_chance: 27.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_mail
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: healing_draught_12
+  drop_chance: 28.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: shard_lance
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: healing_draught_12
+  drop_chance: 28.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: crystal_carapace
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_loop
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: healing_draught_13
+  drop_chance: 28.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_saber
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: healing_draught_13
+  drop_chance: 28.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: gearplate_harness
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: healing_draught_14
+  drop_chance: 29.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_cutter
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: healing_draught_14
+  drop_chance: 29.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: voidwoven_shroud
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: healing_draught_15
+  drop_chance: 29.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oathblade
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: healing_draught_15
+  drop_chance: 29.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_knight_plate
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: oathkeeper_seal
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: healing_draught_16
+  drop_chance: 30.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: stormcaller
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: healing_draught_16
+  drop_chance: 30.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: stormscale_armor
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: healing_draught_17
+  drop_chance: 30.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_fang
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: healing_draught_17
+  drop_chance: 30.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_cloak
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_sigil
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: healing_draught_18
+  drop_chance: 31.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_splitter
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: healing_draught_18
+  drop_chance: 31.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyssal_bulwark
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: healing_draught_19
+  drop_chance: 31.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_judgment
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: healing_draught_19
+  drop_chance: 31.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_aegis
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: healing_draught_20
+  drop_chance: 32.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_ender
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: healing_draught_20
+  drop_chance: 32.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: last_bastion
+  drop_chance: 5.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: hourglass_of_ends
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: thorn_poacher
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: rootling
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: moss_acolyte
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: bog_leech
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: drowned_scout
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: the_drowned_captain
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 6
+  max_quantity: 12
+- monster: quarry_brute
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: ash_slinger
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: keep_deserter
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: watchtower_arbalist
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: the_thorn_castellan
+  item: copper_coin
+  drop_chance: 100.0
+  min_quantity: 18
+  max_quantity: 30
+- monster: fen_stalker
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: mire_hexer
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: rime_wolf
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: frostbound_seer
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: the_white_maw
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 9
+- monster: ember_imp
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: cinder_guardian
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: veil_assassin
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: obsidian_cantor
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: astral_wisp
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: starfall_sentinel
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: abbot_of_the_black_star
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 18
+  max_quantity: 30
+- monster: iron_revenant
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: grave_cantor
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: glass_basilisk
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: shard_witch
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: the_crystal_matriarch
+  item: silver_coin
+  drop_chance: 100.0
+  min_quantity: 12
+  max_quantity: 18
+- monster: clockwork_hound
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: gearwright
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: void_prowler
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: rift_channeler
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 1
+  max_quantity: 3
+- monster: pale_knight
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: bone_oracle
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: the_hollow_sovereign
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 12
+  max_quantity: 24
+- monster: storm_drake
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: thunder_adept
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 2
+  max_quantity: 4
+- monster: sunless_hunter
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: eclipse_priest
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: the_eclipse_herald
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 9
+  max_quantity: 15
+- monster: abyssal_marauder
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: dread_arcanist
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 3
+  max_quantity: 5
+- monster: celestial_exile
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: fallen_seraph
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: entropy_warden
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: last_archivist
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 4
+  max_quantity: 6
+- monster: the_unmaking_king
+  item: gold_coin
+  drop_chance: 100.0
+  min_quantity: 24
+  max_quantity: 36
+- monster: briar_rat
+  item: briarwood_wizard_1_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: briarwood_wizard_1_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: briarwood_wizard_1_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: briarwood_ranger_1_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: briarwood_ranger_1_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: briarwood_ranger_1_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: universal_ward_1
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: briar_rat
+  item: universal_momentum_1
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_wizard_1_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_wizard_1_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_wizard_1_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_ranger_1_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_ranger_1_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: briarwood_ranger_1_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: universal_ward_1
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thorn_poacher
+  item: universal_momentum_1
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_wizard_2_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_wizard_2_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_wizard_2_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_ranger_2_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_ranger_2_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rootling
+  item: briarwood_ranger_2_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_wizard_2_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_wizard_2_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_wizard_2_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_ranger_2_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_ranger_2_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: moss_acolyte
+  item: briarwood_ranger_2_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_wizard_3_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_wizard_3_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_wizard_3_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_ranger_3_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_ranger_3_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bog_leech
+  item: drowned_fen_ranger_3_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_wizard_3_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_wizard_3_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_wizard_3_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_ranger_3_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_ranger_3_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: drowned_scout
+  item: drowned_fen_ranger_3_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_wizard_3_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_wizard_3_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_wizard_3_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_ranger_3_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_ranger_3_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_drowned_captain
+  item: drowned_fen_ranger_3_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_wizard_4_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_wizard_4_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_wizard_4_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_ranger_4_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_ranger_4_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: quarry_ranger_4_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: universal_ward_4
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: quarry_brute
+  item: universal_momentum_4
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_wizard_4_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_wizard_4_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_wizard_4_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_ranger_4_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_ranger_4_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: quarry_ranger_4_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: universal_ward_4
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ash_slinger
+  item: universal_momentum_4
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_wizard_5_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_wizard_5_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_wizard_5_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_ranger_5_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_ranger_5_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: keep_deserter
+  item: watchtower_ranger_5_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_wizard_5_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_wizard_5_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_wizard_5_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_ranger_5_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_ranger_5_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: watchtower_arbalist
+  item: watchtower_ranger_5_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_wizard_5_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_wizard_5_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_wizard_5_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_ranger_5_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_ranger_5_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_thorn_castellan
+  item: watchtower_ranger_5_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_wizard_6_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_wizard_6_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_wizard_6_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_ranger_6_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_ranger_6_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fen_stalker
+  item: mire_ranger_6_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_wizard_6_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_wizard_6_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_wizard_6_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_ranger_6_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_ranger_6_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: mire_hexer
+  item: mire_ranger_6_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_wizard_7_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_wizard_7_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_wizard_7_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_ranger_7_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_ranger_7_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rime_wolf
+  item: frost_ranger_7_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_wizard_7_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_wizard_7_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_wizard_7_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_ranger_7_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_ranger_7_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: frostbound_seer
+  item: frost_ranger_7_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_wizard_7_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_wizard_7_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_wizard_7_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_ranger_7_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_ranger_7_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_white_maw
+  item: frost_ranger_7_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_wizard_8_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_wizard_8_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_wizard_8_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_ranger_8_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_ranger_8_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: cinder_ranger_8_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: universal_ward_8
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: ember_imp
+  item: universal_momentum_8
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_wizard_8_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_wizard_8_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_wizard_8_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_ranger_8_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_ranger_8_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: cinder_ranger_8_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: universal_ward_8
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: cinder_guardian
+  item: universal_momentum_8
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_wizard_9_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_wizard_9_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_wizard_9_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_ranger_9_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_ranger_9_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: veil_assassin
+  item: obsidian_ranger_9_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_wizard_9_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_wizard_9_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_wizard_9_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_ranger_9_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_ranger_9_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: obsidian_cantor
+  item: obsidian_ranger_9_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_wizard_10_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_wizard_10_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_wizard_10_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_ranger_10_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_ranger_10_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: astral_wisp
+  item: starfall_ranger_10_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_wizard_10_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_wizard_10_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_wizard_10_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_ranger_10_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_ranger_10_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: starfall_sentinel
+  item: starfall_ranger_10_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_wizard_10_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_wizard_10_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_wizard_10_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_ranger_10_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_ranger_10_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abbot_of_the_black_star
+  item: starfall_ranger_10_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_wizard_11_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_wizard_11_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_wizard_11_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_ranger_11_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_ranger_11_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: iron_revenant
+  item: graveward_ranger_11_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_wizard_11_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_wizard_11_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_wizard_11_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_ranger_11_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_ranger_11_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: grave_cantor
+  item: graveward_ranger_11_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_wizard_12_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_wizard_12_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_wizard_12_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_ranger_12_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_ranger_12_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: prism_ranger_12_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: universal_ward_12
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: glass_basilisk
+  item: universal_momentum_12
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_wizard_12_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_wizard_12_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_wizard_12_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_ranger_12_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_ranger_12_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: prism_ranger_12_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: universal_ward_12
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: shard_witch
+  item: universal_momentum_12
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_wizard_12_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_wizard_12_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_wizard_12_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_ranger_12_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_ranger_12_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: prism_ranger_12_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: universal_ward_12
+  drop_chance: 10.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_crystal_matriarch
+  item: universal_momentum_12
+  drop_chance: 10.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_wizard_13_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_wizard_13_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_wizard_13_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_ranger_13_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_ranger_13_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: clockwork_hound
+  item: clockwork_ranger_13_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_wizard_13_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_wizard_13_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_wizard_13_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_ranger_13_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_ranger_13_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: gearwright
+  item: clockwork_ranger_13_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_wizard_14_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_wizard_14_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_wizard_14_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_ranger_14_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_ranger_14_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: void_prowler
+  item: rift_ranger_14_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_wizard_14_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_wizard_14_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_wizard_14_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_ranger_14_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_ranger_14_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: rift_channeler
+  item: rift_ranger_14_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_wizard_15_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_wizard_15_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_wizard_15_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_ranger_15_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_ranger_15_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: pale_knight
+  item: pale_oath_ranger_15_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_wizard_15_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_wizard_15_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_wizard_15_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_ranger_15_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_ranger_15_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: bone_oracle
+  item: pale_oath_ranger_15_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_wizard_15_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_wizard_15_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_wizard_15_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_ranger_15_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_ranger_15_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_hollow_sovereign
+  item: pale_oath_ranger_15_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_wizard_16_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_wizard_16_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_wizard_16_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_ranger_16_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_ranger_16_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: storm_ranger_16_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: universal_ward_16
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: storm_drake
+  item: universal_momentum_16
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_wizard_16_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_wizard_16_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_wizard_16_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_ranger_16_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_ranger_16_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: storm_ranger_16_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: universal_ward_16
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: thunder_adept
+  item: universal_momentum_16
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_wizard_17_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_wizard_17_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_wizard_17_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_ranger_17_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_ranger_17_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: sunless_hunter
+  item: eclipse_ranger_17_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_wizard_17_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_wizard_17_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_wizard_17_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_ranger_17_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_ranger_17_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: eclipse_priest
+  item: eclipse_ranger_17_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_wizard_17_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_wizard_17_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_wizard_17_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_ranger_17_weapon
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_ranger_17_armor
+  drop_chance: 7.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_eclipse_herald
+  item: eclipse_ranger_17_accessory
+  drop_chance: 8.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_wizard_18_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_wizard_18_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_wizard_18_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_ranger_18_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_ranger_18_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: abyssal_marauder
+  item: abyss_ranger_18_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_wizard_18_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_wizard_18_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_wizard_18_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_ranger_18_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_ranger_18_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: dread_arcanist
+  item: abyss_ranger_18_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_wizard_19_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_wizard_19_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_wizard_19_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_ranger_19_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_ranger_19_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: celestial_exile
+  item: seraphic_ranger_19_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_wizard_19_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_wizard_19_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_wizard_19_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_ranger_19_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_ranger_19_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: fallen_seraph
+  item: seraphic_ranger_19_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_wizard_20_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_wizard_20_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_wizard_20_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_ranger_20_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_ranger_20_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: world_end_ranger_20_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: universal_ward_20
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: entropy_warden
+  item: universal_momentum_20
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_wizard_20_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_wizard_20_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_wizard_20_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_ranger_20_weapon
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_ranger_20_armor
+  drop_chance: 3.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: world_end_ranger_20_accessory
+  drop_chance: 4.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: universal_ward_20
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: last_archivist
+  item: universal_momentum_20
+  drop_chance: 3.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_wizard_20_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_wizard_20_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_wizard_20_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_ranger_20_weapon
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_ranger_20_armor
+  drop_chance: 10.5
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: world_end_ranger_20_accessory
+  drop_chance: 12.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: universal_ward_20
+  drop_chance: 10.0
+  min_quantity: 1
+  max_quantity: 1
+- monster: the_unmaking_king
+  item: universal_momentum_20
+  drop_chance: 10.0
+  min_quantity: 1
+  max_quantity: 1
+encounters:
+- key: level_01_skirmish
+  name: 'Briarwood Verge: Skirmish'
+  kind: battle
+  recommended_level: 1
+  zone: Briarwood Verge
+  enemies:
+  - monster: briar_rat
+    quantity: 1
+    position_order: 0
+  - monster: thorn_poacher
+    quantity: 1
+    position_order: 1
+- key: level_01_assault
+  name: 'Briarwood Verge: Assault'
+  kind: battle
+  recommended_level: 1
+  zone: Briarwood Verge
+  enemies:
+  - monster: briar_rat
+    quantity: 1
+    position_order: 0
+  - monster: thorn_poacher
+    quantity: 2
+    position_order: 1
+- key: level_02_skirmish
+  name: 'Briarwood Verge: Skirmish'
+  kind: battle
+  recommended_level: 2
+  zone: Briarwood Verge
+  enemies:
+  - monster: rootling
+    quantity: 1
+    position_order: 0
+  - monster: moss_acolyte
+    quantity: 1
+    position_order: 1
+- key: level_02_assault
+  name: 'Briarwood Verge: Assault'
+  kind: battle
+  recommended_level: 2
+  zone: Briarwood Verge
+  enemies:
+  - monster: rootling
+    quantity: 1
+    position_order: 0
+  - monster: moss_acolyte
+    quantity: 2
+    position_order: 1
+- key: level_03_skirmish
+  name: 'Mossbound Ruins: Skirmish'
+  kind: battle
+  recommended_level: 3
+  zone: Mossbound Ruins
+  enemies:
+  - monster: bog_leech
+    quantity: 1
+    position_order: 0
+  - monster: drowned_scout
+    quantity: 1
+    position_order: 1
+- key: level_03_assault
+  name: 'Mossbound Ruins: Assault'
+  kind: battle
+  recommended_level: 3
+  zone: Mossbound Ruins
+  enemies:
+  - monster: bog_leech
+    quantity: 1
+    position_order: 0
+  - monster: drowned_scout
+    quantity: 2
+    position_order: 1
+- key: level_03_champion
+  name: Confront The Drowned Captain
+  kind: battle
+  recommended_level: 3
+  zone: Mossbound Ruins
+  enemies:
+  - monster: the_drowned_captain
+    quantity: 1
+    position_order: 0
+- key: level_04_skirmish
+  name: 'Mossbound Ruins: Skirmish'
+  kind: battle
+  recommended_level: 4
+  zone: Mossbound Ruins
+  enemies:
+  - monster: quarry_brute
+    quantity: 1
+    position_order: 0
+  - monster: ash_slinger
+    quantity: 1
+    position_order: 1
+- key: level_04_assault
+  name: 'Mossbound Ruins: Assault'
+  kind: battle
+  recommended_level: 4
+  zone: Mossbound Ruins
+  enemies:
+  - monster: quarry_brute
+    quantity: 1
+    position_order: 0
+  - monster: ash_slinger
+    quantity: 2
+    position_order: 1
+- key: level_05_skirmish
+  name: 'Sunken Causeway: Skirmish'
+  kind: battle
+  recommended_level: 5
+  zone: Sunken Causeway
+  enemies:
+  - monster: keep_deserter
+    quantity: 1
+    position_order: 0
+  - monster: watchtower_arbalist
+    quantity: 1
+    position_order: 1
+- key: level_05_assault
+  name: 'Sunken Causeway: Assault'
+  kind: battle
+  recommended_level: 5
+  zone: Sunken Causeway
+  enemies:
+  - monster: keep_deserter
+    quantity: 1
+    position_order: 0
+  - monster: watchtower_arbalist
+    quantity: 2
+    position_order: 1
+- key: level_05_champion
+  name: Confront The Thorn Castellan
+  kind: battle
+  recommended_level: 5
+  zone: Sunken Causeway
+  enemies:
+  - monster: the_thorn_castellan
+    quantity: 1
+    position_order: 0
+- key: level_06_skirmish
+  name: 'Sunken Causeway: Skirmish'
+  kind: battle
+  recommended_level: 6
+  zone: Sunken Causeway
+  enemies:
+  - monster: fen_stalker
+    quantity: 1
+    position_order: 0
+  - monster: mire_hexer
+    quantity: 1
+    position_order: 1
+- key: level_06_assault
+  name: 'Sunken Causeway: Assault'
+  kind: battle
+  recommended_level: 6
+  zone: Sunken Causeway
+  enemies:
+  - monster: fen_stalker
+    quantity: 1
+    position_order: 0
+  - monster: mire_hexer
+    quantity: 2
+    position_order: 1
+- key: level_07_skirmish
+  name: 'Ashen Quarry: Skirmish'
+  kind: battle
+  recommended_level: 7
+  zone: Ashen Quarry
+  enemies:
+  - monster: rime_wolf
+    quantity: 1
+    position_order: 0
+  - monster: frostbound_seer
+    quantity: 1
+    position_order: 1
+- key: level_07_assault
+  name: 'Ashen Quarry: Assault'
+  kind: battle
+  recommended_level: 7
+  zone: Ashen Quarry
+  enemies:
+  - monster: rime_wolf
+    quantity: 1
+    position_order: 0
+  - monster: frostbound_seer
+    quantity: 2
+    position_order: 1
+- key: level_07_champion
+  name: Confront The White Maw
+  kind: battle
+  recommended_level: 7
+  zone: Ashen Quarry
+  enemies:
+  - monster: the_white_maw
+    quantity: 1
+    position_order: 0
+- key: level_08_skirmish
+  name: 'Ashen Quarry: Skirmish'
+  kind: battle
+  recommended_level: 8
+  zone: Ashen Quarry
+  enemies:
+  - monster: ember_imp
+    quantity: 1
+    position_order: 0
+  - monster: cinder_guardian
+    quantity: 1
+    position_order: 1
+- key: level_08_assault
+  name: 'Ashen Quarry: Assault'
+  kind: battle
+  recommended_level: 8
+  zone: Ashen Quarry
+  enemies:
+  - monster: ember_imp
+    quantity: 1
+    position_order: 0
+  - monster: cinder_guardian
+    quantity: 2
+    position_order: 1
+- key: level_09_skirmish
+  name: 'Thornwatch Keep: Skirmish'
+  kind: battle
+  recommended_level: 9
+  zone: Thornwatch Keep
+  enemies:
+  - monster: veil_assassin
+    quantity: 1
+    position_order: 0
+  - monster: obsidian_cantor
+    quantity: 1
+    position_order: 1
+- key: level_09_assault
+  name: 'Thornwatch Keep: Assault'
+  kind: battle
+  recommended_level: 9
+  zone: Thornwatch Keep
+  enemies:
+  - monster: veil_assassin
+    quantity: 1
+    position_order: 0
+  - monster: obsidian_cantor
+    quantity: 2
+    position_order: 1
+- key: level_10_skirmish
+  name: 'Thornwatch Keep: Skirmish'
+  kind: battle
+  recommended_level: 10
+  zone: Thornwatch Keep
+  enemies:
+  - monster: astral_wisp
+    quantity: 1
+    position_order: 0
+  - monster: starfall_sentinel
+    quantity: 1
+    position_order: 1
+- key: level_10_assault
+  name: 'Thornwatch Keep: Assault'
+  kind: battle
+  recommended_level: 10
+  zone: Thornwatch Keep
+  enemies:
+  - monster: astral_wisp
+    quantity: 1
+    position_order: 0
+  - monster: starfall_sentinel
+    quantity: 2
+    position_order: 1
+- key: level_10_champion
+  name: Confront Abbot of the Black Star
+  kind: battle
+  recommended_level: 10
+  zone: Thornwatch Keep
+  enemies:
+  - monster: abbot_of_the_black_star
+    quantity: 1
+    position_order: 0
+- key: level_11_skirmish
+  name: 'Hollow Fen: Skirmish'
+  kind: battle
+  recommended_level: 11
+  zone: Hollow Fen
+  enemies:
+  - monster: iron_revenant
+    quantity: 1
+    position_order: 0
+  - monster: grave_cantor
+    quantity: 1
+    position_order: 1
+- key: level_11_assault
+  name: 'Hollow Fen: Assault'
+  kind: battle
+  recommended_level: 11
+  zone: Hollow Fen
+  enemies:
+  - monster: iron_revenant
+    quantity: 1
+    position_order: 0
+  - monster: grave_cantor
+    quantity: 2
+    position_order: 1
+- key: level_12_skirmish
+  name: 'Hollow Fen: Skirmish'
+  kind: battle
+  recommended_level: 12
+  zone: Hollow Fen
+  enemies:
+  - monster: glass_basilisk
+    quantity: 1
+    position_order: 0
+  - monster: shard_witch
+    quantity: 1
+    position_order: 1
+- key: level_12_assault
+  name: 'Hollow Fen: Assault'
+  kind: battle
+  recommended_level: 12
+  zone: Hollow Fen
+  enemies:
+  - monster: glass_basilisk
+    quantity: 1
+    position_order: 0
+  - monster: shard_witch
+    quantity: 2
+    position_order: 1
+- key: level_12_champion
+  name: Confront The Crystal Matriarch
+  kind: battle
+  recommended_level: 12
+  zone: Hollow Fen
+  enemies:
+  - monster: the_crystal_matriarch
+    quantity: 1
+    position_order: 0
+- key: level_13_skirmish
+  name: 'Frostglass Pass: Skirmish'
+  kind: battle
+  recommended_level: 13
+  zone: Frostglass Pass
+  enemies:
+  - monster: clockwork_hound
+    quantity: 1
+    position_order: 0
+  - monster: gearwright
+    quantity: 1
+    position_order: 1
+- key: level_13_assault
+  name: 'Frostglass Pass: Assault'
+  kind: battle
+  recommended_level: 13
+  zone: Frostglass Pass
+  enemies:
+  - monster: clockwork_hound
+    quantity: 1
+    position_order: 0
+  - monster: gearwright
+    quantity: 2
+    position_order: 1
+- key: level_14_skirmish
+  name: 'Frostglass Pass: Skirmish'
+  kind: battle
+  recommended_level: 14
+  zone: Frostglass Pass
+  enemies:
+  - monster: void_prowler
+    quantity: 1
+    position_order: 0
+  - monster: rift_channeler
+    quantity: 1
+    position_order: 1
+- key: level_14_assault
+  name: 'Frostglass Pass: Assault'
+  kind: battle
+  recommended_level: 14
+  zone: Frostglass Pass
+  enemies:
+  - monster: void_prowler
+    quantity: 1
+    position_order: 0
+  - monster: rift_channeler
+    quantity: 2
+    position_order: 1
+- key: level_15_skirmish
+  name: 'Cinder Warrens: Skirmish'
+  kind: battle
+  recommended_level: 15
+  zone: Cinder Warrens
+  enemies:
+  - monster: pale_knight
+    quantity: 1
+    position_order: 0
+  - monster: bone_oracle
+    quantity: 1
+    position_order: 1
+- key: level_15_assault
+  name: 'Cinder Warrens: Assault'
+  kind: battle
+  recommended_level: 15
+  zone: Cinder Warrens
+  enemies:
+  - monster: pale_knight
+    quantity: 1
+    position_order: 0
+  - monster: bone_oracle
+    quantity: 2
+    position_order: 1
+- key: level_15_champion
+  name: Confront The Hollow Sovereign
+  kind: battle
+  recommended_level: 15
+  zone: Cinder Warrens
+  enemies:
+  - monster: the_hollow_sovereign
+    quantity: 1
+    position_order: 0
+- key: level_16_skirmish
+  name: 'Cinder Warrens: Skirmish'
+  kind: battle
+  recommended_level: 16
+  zone: Cinder Warrens
+  enemies:
+  - monster: storm_drake
+    quantity: 1
+    position_order: 0
+  - monster: thunder_adept
+    quantity: 1
+    position_order: 1
+- key: level_16_assault
+  name: 'Cinder Warrens: Assault'
+  kind: battle
+  recommended_level: 16
+  zone: Cinder Warrens
+  enemies:
+  - monster: storm_drake
+    quantity: 1
+    position_order: 0
+  - monster: thunder_adept
+    quantity: 2
+    position_order: 1
+- key: level_17_skirmish
+  name: 'Obsidian Monastery: Skirmish'
+  kind: battle
+  recommended_level: 17
+  zone: Obsidian Monastery
+  enemies:
+  - monster: sunless_hunter
+    quantity: 1
+    position_order: 0
+  - monster: eclipse_priest
+    quantity: 1
+    position_order: 1
+- key: level_17_assault
+  name: 'Obsidian Monastery: Assault'
+  kind: battle
+  recommended_level: 17
+  zone: Obsidian Monastery
+  enemies:
+  - monster: sunless_hunter
+    quantity: 1
+    position_order: 0
+  - monster: eclipse_priest
+    quantity: 2
+    position_order: 1
+- key: level_17_champion
+  name: Confront The Eclipse Herald
+  kind: battle
+  recommended_level: 17
+  zone: Obsidian Monastery
+  enemies:
+  - monster: the_eclipse_herald
+    quantity: 1
+    position_order: 0
+- key: level_18_skirmish
+  name: 'Obsidian Monastery: Skirmish'
+  kind: battle
+  recommended_level: 18
+  zone: Obsidian Monastery
+  enemies:
+  - monster: abyssal_marauder
+    quantity: 1
+    position_order: 0
+  - monster: dread_arcanist
+    quantity: 1
+    position_order: 1
+- key: level_18_assault
+  name: 'Obsidian Monastery: Assault'
+  kind: battle
+  recommended_level: 18
+  zone: Obsidian Monastery
+  enemies:
+  - monster: abyssal_marauder
+    quantity: 1
+    position_order: 0
+  - monster: dread_arcanist
+    quantity: 2
+    position_order: 1
+- key: level_19_skirmish
+  name: 'Starfall Citadel: Skirmish'
+  kind: battle
+  recommended_level: 19
+  zone: Starfall Citadel
+  enemies:
+  - monster: celestial_exile
+    quantity: 1
+    position_order: 0
+  - monster: fallen_seraph
+    quantity: 1
+    position_order: 1
+- key: level_19_assault
+  name: 'Starfall Citadel: Assault'
+  kind: battle
+  recommended_level: 19
+  zone: Starfall Citadel
+  enemies:
+  - monster: celestial_exile
+    quantity: 1
+    position_order: 0
+  - monster: fallen_seraph
+    quantity: 2
+    position_order: 1
+- key: level_20_skirmish
+  name: 'Starfall Citadel: Skirmish'
+  kind: battle
+  recommended_level: 20
+  zone: Starfall Citadel
+  enemies:
+  - monster: entropy_warden
+    quantity: 1
+    position_order: 0
+  - monster: last_archivist
+    quantity: 1
+    position_order: 1
+- key: level_20_assault
+  name: 'Starfall Citadel: Assault'
+  kind: battle
+  recommended_level: 20
+  zone: Starfall Citadel
+  enemies:
+  - monster: entropy_warden
+    quantity: 1
+    position_order: 0
+  - monster: last_archivist
+    quantity: 2
+    position_order: 1
+- key: level_20_champion
+  name: Confront The Unmaking King
+  kind: battle
+  recommended_level: 20
+  zone: Starfall Citadel
+  enemies:
+  - monster: the_unmaking_king
+    quantity: 1
+    position_order: 0
+hero_classes:
+- key: warrior
+  name: Warrior
+  description: A mighty warrior with high physical power and endurance.
+  image: hero_classes/warrior.png
+  base_health: 120
+  base_mana: 30
+  base_attack: 15
+  base_defense: 12
+  base_magic: 5
+  base_magic_defense: 8
+  base_speed: 10
+  atk_gain_min: 2
+  atk_gain_max: 3
+  def_gain_min: 1
+  def_gain_max: 2
+  mag_gain_min: 0
+  mag_gain_max: 1
+  mdef_gain_min: 0
+  mdef_gain_max: 1
+  spd_gain_min: 1
+  spd_gain_max: 2
+  hp_gain_min: 8
+  hp_gain_max: 12
+  mp_gain_min: 0
+  mp_gain_max: 3
+  initial_equipment:
+    weapon: rustleaf_blade
+    armor: padded_jerkin
+    accessory: copper_charm
+- key: wizard
+  name: Wizard
+  description: A powerful spellcaster with mastery over arcane magic.
+  image: hero_classes/wizard.png
+  base_health: 80
+  base_mana: 100
+  base_attack: 6
+  base_defense: 8
+  base_magic: 16
+  base_magic_defense: 14
+  base_speed: 9
+  atk_gain_min: 0
+  atk_gain_max: 1
+  def_gain_min: 0
+  def_gain_max: 1
+  mag_gain_min: 2
+  mag_gain_max: 4
+  mdef_gain_min: 1
+  mdef_gain_max: 3
+  spd_gain_min: 0
+  spd_gain_max: 2
+  hp_gain_min: 3
+  hp_gain_max: 6
+  mp_gain_min: 5
+  mp_gain_max: 10
+  initial_equipment:
+    weapon: briarwood_wizard_1_weapon
+    armor: briarwood_wizard_1_armor
+    accessory: briarwood_wizard_1_accessory
+- key: ranger
+  name: Ranger
+  description: A swift and agile ranger, master of ranged combat.
+  image: hero_classes/ranger.png
+  base_health: 100
+  base_mana: 50
+  base_attack: 10
+  base_defense: 10
+  base_magic: 8
+  base_magic_defense: 10
+  base_speed: 14
+  atk_gain_min: 1
+  atk_gain_max: 2
+  def_gain_min: 1
+  def_gain_max: 2
+  mag_gain_min: 0
+  mag_gain_max: 2
+  mdef_gain_min: 1
+  mdef_gain_max: 2
+  spd_gain_min: 2
+  spd_gain_max: 3
+  hp_gain_min: 5
+  hp_gain_max: 8
+  mp_gain_min: 2
+  mp_gain_max: 5
+  initial_equipment:
+    weapon: briarwood_ranger_1_weapon
+    armor: briarwood_ranger_1_armor
+    accessory: briarwood_ranger_1_accessory

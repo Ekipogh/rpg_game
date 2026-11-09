@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 from hero.models import Hero, HeroClass
-from item.models import Inventory, Item, EquipmentSlots, Weapon, Armor, Accessory, Consumable
+from hero.creation import create_character
 
 
 class CharacterFormView(UnicornView):
@@ -66,142 +66,11 @@ class CharacterFormView(UnicornView):
         self.speed_total = self.speed + self.speed_mod
 
     def submit(self):
-        # For now just print, later you can save to DB
         self.validate_form()
         if not self.is_valid():
             return
-        print(f"Creating character: {self.name}, Class: {self.selected_class}")
         hero_class = HeroClass.objects.get(pk=self.selected_class)
-        inventory = Inventory.objects.create()
-        hero = Hero.objects.create(
-            name=self.name,
-            hero_class=hero_class,
-            attack=self.attack_total,
-            defense=self.defense_total,
-            magic=self.magic_total,
-            magic_defense=self.magic_defense_total,
-            speed=self.speed_total,
-            max_health=hero_class.base_health,
-            current_health=hero_class.base_health,
-            max_mana=hero_class.base_mana,
-            current_mana=hero_class.base_mana,
-            inventory=inventory
-        )
-        # add some starting items
-        sword = Weapon.objects.get_or_create(
-            name="Simple Sword",
-            defaults={
-                'value': 100,
-                'attack_bonus': 20,
-                'accuracy_bonus': 5,
-                'weapon_type': 'sword',
-                'equipment_slot': EquipmentSlots.WEAPON
-            }
-        )[0]
-        shield = OffHand.objects.get_or_create(
-            name="Wooden Shield",
-            defaults={
-                'value': 50,
-                'block': 5,
-                'shield_type': 'wooden',
-                'equipment_slot': EquipmentSlots.ACCESSORY
-            }
-        )[0]
-        armor = Armor.objects.get_or_create(
-            name="Leather Armor",
-            defaults={
-                'value': 75,
-                'defense_bonus': 10,
-                'health_bonus': 25,
-                'armor_type': 'leather',
-                'equipment_slot': EquipmentSlots.ARMOR
-            }
-        )[0]
-        bow = Weapon.objects.get_or_create(
-            name="Simple Bow",
-            defaults={
-                'value': 100,
-                'attack_bonus': 15,
-                'accuracy_bonus': 10,
-                'weapon_type': 'bow',
-                'equipment_slot': EquipmentSlots.WEAPON
-            }
-        )[0]
-        quiver = OffHand.objects.get_or_create(
-            name="Quiver of Arrows",
-            defaults={
-                'value': 30,
-                'block': 2,
-                'shield_type': 'quiver',
-                'equipment_slot': EquipmentSlots.ACCESSORY
-            }
-        )[0]
-        robe = Armor.objects.get_or_create(
-            name="Cloth Robe",
-            defaults={
-                'value': 25,
-                'defense_bonus': 5,
-                'health_bonus': 10,
-                'armor_type': 'cloth',
-                'equipment_slot': EquipmentSlots.ARMOR
-            }
-        )[0]
-        staff = Weapon.objects.get_or_create(
-            name="Wooden Staff",
-            defaults={
-                'value': 100,
-                'attack_bonus': 8,
-                'accuracy_bonus': 15,
-                'weapon_type': 'staff',
-                'equipment_slot': EquipmentSlots.WEAPON
-            }
-        )[0]
-        spellbook = OffHand.objects.get_or_create(
-            name="Beginner's Spellbook",
-            defaults={
-                'value': 25,
-                'block': 0,
-                'shield_type': 'tome',
-                'equipment_slot': EquipmentSlots.ACCESSORY
-            }
-        )[0]
-        healing_potion = Consumable.objects.get_or_create(
-            name="Minor Healing Potion",
-            defaults={
-                'value': 10,
-                'heal_amount': 20,
-                'mana_restore': 0,
-                'duration': 0
-            }
-        )[0]
-        mana_potion = Consumable.objects.get_or_create(
-            name="Minor Mana Potion",
-            defaults={
-                'value': 10,
-                'heal_amount': 0,
-                'mana_restore': 20,
-                'duration': 0
-            }
-        )[0]
-
-        if hero_class.name == "Warrior":
-            hero.add_to_inventory(sword)
-            hero.add_to_inventory(shield)
-            hero.add_to_inventory(armor)
-            hero.add_to_inventory(healing_potion, quantity=3)
-        elif hero_class.name == "Ranger":
-            hero.add_to_inventory(bow)
-            hero.add_to_inventory(quiver)
-            hero.add_to_inventory(armor)
-            hero.add_to_inventory(healing_potion, quantity=2)
-            hero.add_to_inventory(mana_potion, quantity=1)
-        elif hero_class.name == "Wizard":
-            hero.add_to_inventory(staff)
-            hero.add_to_inventory(spellbook)
-            hero.add_to_inventory(robe)
-            hero.add_to_inventory(mana_potion, quantity=3)
-            hero.add_to_inventory(healing_potion, quantity=1)
-        hero.save()
+        hero = create_character(self.name, hero_class)
         return redirect('select_hero', hero_id=hero.id)
 
     def validate_form(self):
