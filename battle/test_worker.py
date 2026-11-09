@@ -104,6 +104,29 @@ class WorkerTests(TestCase):
                 return status
         self.fail('Battle did not finish')
 
+    def test_regular_victory_advances_saved_progress_once(self):
+        battle = self.adopt()
+        self.assertEqual(self.fight(battle), 'FINISHED')
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.dungeon_run['regular_victories'], 1)
+        self.assertEqual(process_battle(battle.pk, self.token, 1000), 'FINISHED')
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.dungeon_run['regular_victories'], 1)
+
+    def test_miniboss_victory_unlocks_second_regular_stage(self):
+        self.composition.encounter_definition_key = 'ogre_guard'
+        self.composition.save()
+        run = self.hero.dungeon_run
+        run['current_encounter'] = Encounter.create('ogre_guard', 4).to_dict()
+        run.update(current_floor=4, regular_victories=3)
+        self.hero.dungeon_run = run
+        self.hero.save(update_fields=['dungeon_run'])
+        battle = self.adopt()
+        self.assertEqual(self.fight(battle), 'FINISHED')
+        self.hero.refresh_from_db()
+        self.assertTrue(self.hero.dungeon_run['miniboss_defeated'])
+        self.assertEqual(self.hero.dungeon_run['regular_victories'], 0)
+
     def test_adoption_setup_and_snapshot_equipment(self):
         equipment = Equipment.objects.create(hero=self.hero)
         weapon = Weapon.objects.create(name='Sword', attack_bonus=12, accuracy_bonus=5)

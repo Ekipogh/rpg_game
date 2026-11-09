@@ -3,34 +3,79 @@ from copy import deepcopy
 import random
 
 from django.db import transaction
-from django.db.models import F, Sum
+from django.db.models import F
 
 from .encounters import ENCOUNTER_DEFINITIONS, Encounter
 from .models import Hero
 
 
-def available_encounter_keys():
-    """Keep definitions for saved runs, but offer only playable battles."""
+# Victories, rather than rooms visited, unlock the next gate.
+REGULARS_PER_STAGE = 3
+
+
+def battle_requirements(run=None, hero_level=1):
+    run = run or {}
+    victories = run.get('regular_victories', 0)
+    miniboss = run.get('miniboss_defeated', False)
+    tier = ('boss' if miniboss else 'miniboss') if victories >= REGULARS_PER_STAGE else 'enemy'
+    progress = victories + (REGULARS_PER_STAGE + 1 if miniboss else 0)
+    target = max(1, hero_level) + progress // 2
+    group_limit = min(3, 2 + progress // 2)
+    return tier, target, group_limit
+
+
+def available_encounter_keys(hero_level=1, run=None):
+    """Filter complete configured groups; never change their authored monsters."""
     from battle.models import EncounterMonster
 
-    configured = set(EncounterMonster.objects.values('encounter_definition_key')
-                     .annotate(total=Sum('quantity')).filter(total__gte=1, total__lte=3)
-                     .values_list('encounter_definition_key', flat=True))
+    groups = {}
+    for entry in EncounterMonster.objects.select_related('monster').order_by('pk'):
+        groups.setdefault(entry.encounter_definition_key, []).append(entry)
+    tier, target, group_limit = battle_requirements(run, hero_level or 1)
+    configured = set()
+    for key, entries in groups.items():
+        definition = ENCOUNTER_DEFINITIONS.get(key)
+        if definition is None or definition.kind != 'battle':
+            continue
+        count = sum(entry.quantity for entry in entries)
+        if not 1 <= count <= 3:
+            continue
+        if hero_level is not None:
+            threats = [entry.monster.threat_level for entry in entries for _ in range(entry.quantity)]
+            expected = 'common' if tier == 'enemy' else tier
+            if definition.battle_tier != tier or threats.count(expected) < 1:
+                continue
+            if any(t != 'common' and t != expected for t in threats):
+                continue
+            if tier != 'enemy' and threats.count(expected) != 1:
+                continue
+            if count > group_limit or any(not max(1, target - 2) <= e.monster.level <= target + 1
+                                          for e in entries):
+                continue
+            if sum(e.monster.level * e.quantity for e in entries) > target * group_limit:
+                continue
+        configured.add(key)
+    # A gate cannot be bypassed by selecting a peaceful room when its fight exists.
+    if hero_level is not None and tier != 'enemy' and configured:
+        return tuple(key for key in ENCOUNTER_DEFINITIONS if key in configured)
     return tuple(key for key, definition in ENCOUNTER_DEFINITIONS.items()
                  if definition.kind != 'battle' or key in configured)
 
 
-def create_run():
+def create_run(hero_level=1):
     return {
         'current_floor': 1,
-        'current_encounter': Encounter.create(random.choice(available_encounter_keys()), 1).to_dict(),
+        'current_encounter': Encounter.create(random.choice(available_encounter_keys(hero_level)), 1).to_dict(),
         'phase': 'encounter', 'last_result': None,
         'path_left': None, 'path_right': None,
+        'hero_level': hero_level or 1, 'regular_victories': 0, 'miniboss_defeated': False,
     }
 
 
-def generate_paths(floor):
-    options = available_encounter_keys()
+def generate_paths(floor, hero_level=1, run=None):
+    if run is not None:
+        hero_level = run.get('hero_level', hero_level or 1)
+    options = available_encounter_keys(hero_level, run)
     return {side: Encounter.create(random.choice(options), floor).to_dict()
             for side in ('path_left', 'path_right')}
 
@@ -60,7 +105,7 @@ def resolve_encounter(run, health, max_health, experience):
         return {}, 1, experience
     run['last_result'] = result
     run['phase'] = 'choices'
-    run.update(generate_paths(floor + 1))
+    run.update(generate_paths(floor + 1, run=run))
     return run, health, experience
 
 
@@ -95,7 +140,7 @@ def enter_or_resume(hero_id):
     if hero.not_healed:
         return 'not_healed'
     with transaction.atomic():
-        updated = _snapshot(hero).update(dungeon_run=create_run(), is_in_combat=True,
+        updated = _snapshot(hero).update(dungeon_run=create_run(hero.level), is_in_combat=True,
                                          dungeon_revision=F('dungeon_revision') + 1)
         if updated:
             hero.refresh_from_db()
@@ -116,6 +161,8 @@ def apply_action(hero_id, action, expected_revision, choice=None):
     outcome = 'success'
     try:
         if action == 'resolve' and choice is None:
+            run = deepcopy(run)
+            run['hero_level'] = hero.level
             run, health, xp = resolve_encounter(run, health, hero.max_health, xp)
             if not run:
                 outcome = 'defeat'

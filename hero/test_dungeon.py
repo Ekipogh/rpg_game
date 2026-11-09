@@ -267,8 +267,8 @@ class DungeonTests(TestCase):
     def test_entry_conflict_does_not_overwrite_resource_changes(self):
         from . import dungeon
         original = dungeon.create_run
-        def conflicting():
-            run = original()
+        def conflicting(hero_level):
+            run = original(hero_level)
             Hero.objects.filter(pk=self.hero.pk).update(current_health=88)
             return run
         with patch('hero.dungeon.create_run', side_effect=conflicting):

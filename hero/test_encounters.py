@@ -92,3 +92,52 @@ class EncounterTests(TestCase):
         options = choice.call_args.args[0]
         self.assertEqual(set(options), set(available_encounter_keys()))
         self.assertEqual(len(options), len(set(options)))
+
+
+class FightFilteringTests(TestCase):
+    def group(self, key, level=1, quantity=1, threat='common'):
+        monster = Monster.objects.create(name=key, level=level, threat_level=threat)
+        EncounterMonster.objects.create(encounter_definition_key=key, monster=monster, quantity=quantity)
+        return key
+
+    def test_level_quantity_and_threat_filters(self):
+        regular = self.group('goblin_ambush')
+        strong = self.group('level_01_skirmish', level=20)
+        crowded = self.group('level_01_assault', quantity=3)
+        wrong = self.group('level_02_skirmish', threat='boss')
+        keys = available_encounter_keys(1)
+        self.assertIn(regular, keys)
+        for key in (strong, crowded, wrong):
+            self.assertNotIn(key, keys)
+        self.assertIn(strong, available_encounter_keys(20))
+        self.assertIn(crowded, available_encounter_keys(1, {'miniboss_defeated': True}))
+
+    def test_victory_gates_and_peaceful_rooms_do_not_advance_progress(self):
+        from .dungeon import resolve_encounter
+        regular = self.group('goblin_ambush')
+        mini = self.group('ogre_guard', level=2, threat='miniboss')
+        boss = self.group('dungeon_guardian', level=3, threat='boss')
+        run = create_run(1)
+        self.assertIn(regular, available_encounter_keys(1, run))
+        self.assertNotIn(mini, available_encounter_keys(1, run))
+        run['regular_victories'] = 3
+        self.assertEqual(available_encounter_keys(1, run), (mini,))
+        run.update(miniboss_defeated=True, regular_victories=0)
+        self.assertIn(regular, available_encounter_keys(1, run))
+        self.assertNotIn(boss, available_encounter_keys(1, run))
+        run['current_encounter'] = Encounter.create('wandering_healer', 1).to_dict()
+        updated, _, _ = resolve_encounter(run, 100, 100, 0)
+        self.assertEqual(updated['regular_victories'], 0)
+        run['regular_victories'] = 3
+        self.assertEqual(available_encounter_keys(1, run), (boss,))
+
+    def test_starting_groups_can_have_two_configured_monsters(self):
+        key = self.group('level_01_skirmish')
+        second = Monster.objects.create(name='Second rat', level=1)
+        EncounterMonster.objects.create(encounter_definition_key=key, monster=second,
+                                        quantity=1, position_order=1)
+        self.assertIn(key, available_encounter_keys(1))
+        with patch('hero.dungeon.random.choice', return_value=key):
+            run = create_run(1)
+        self.assertEqual(run['current_encounter']['definition_key'], key)
+        self.assertIn(key, available_encounter_keys(1, run))
