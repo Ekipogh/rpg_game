@@ -113,7 +113,6 @@ dmypy.json
 .pyre/
 
 # Django specific
-media/
 staticfiles/
 static/collected/
 static/dist/
