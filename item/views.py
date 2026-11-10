@@ -435,9 +435,6 @@ def inventory_view(request):
         equipped_slots = EquipmentSlot.objects.filter(equipment=equipment)
         equipped_items = {slot.slot: slot.item for slot in equipped_slots if slot.item}
 
-    # Get IDs of equipped items to filter them out of inventory display
-    equipped_item_ids = {item.id for item in equipped_items.values()}
-
     # Categorize items automatically using polymorphic types
     categories = {
         'weapons': [],
@@ -453,21 +450,23 @@ def inventory_view(request):
         item = inventory_item.item
         quantity = inventory_item.quantity
 
-        # Skip items that are currently equipped
-        if item.id in equipped_item_ids:
+        if quantity <= 0:
             continue
+        # Equipment is removed from stock when equipped, so any remaining
+        # quantity represents spare copies, even if the same type is equipped.
+        item.quantity = quantity
 
         # Categorize item by type
         if isinstance(item, Weapon):
-            categories['weapons'].append(item)
+            categories['weapons'].extend([item] * quantity)
         elif isinstance(item, Armor):
-            categories['armor'].append(item)
+            categories['armor'].extend([item] * quantity)
         elif isinstance(item, Accessory):
-            categories['accessories'].append(item)
+            categories['accessories'].extend([item] * quantity)
         elif isinstance(item, Consumable):
             categories['consumables'].append(item)
         else:
-            categories['other_items'].append(item)
+            categories['other_items'].extend([item] * quantity)
 
         item_count += quantity
         items_value += item.value * quantity

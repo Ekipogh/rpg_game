@@ -305,7 +305,7 @@
                                 <span>🧪</span>
                               </div>
                               <div>
-                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ consumable.name }}</h6>
+                                <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ consumable.name }} <span class="badge bg-secondary" data-stack-quantity="{{ consumable.quantity }}">&times; {{ consumable.quantity }}</span></h6>
                                 <small class="text-primary dark:!text-blue-400">{{ consumable.value|default:0 }} gold</small>
                               </div>
                             </div>
@@ -412,6 +412,13 @@
       // Helper function to get CSRF token
       function getCsrfToken() {
         return '{{ csrf_token }}'
+      }
+
+      async function refreshInventory() {
+        const response = await fetch(window.location.href)
+        if (!response.ok) throw new Error('Could not refresh inventory')
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html')
+        document.querySelector('.inventory-container').replaceWith(page.querySelector('.inventory-container'))
       }
 
       function viewItem(itemId) {
@@ -709,40 +716,7 @@
             return
           }
 
-          const resolvedSlot = data.slot_type || slotValue
-          if (!resolvedSlot) {
-            showToast('Equipped item, but no slot was provided.', 'info')
-            buttonEl.innerHTML = originalText
-            buttonEl.disabled = false
-            return
-          }
-
-          // Only update UI if the equipment actually changed
-          if (data.did_change) {
-            // Render the item in the equipment slot
-            renderEquippedSlot(resolvedSlot, {
-              id: itemId,
-              name: buttonEl.dataset.itemName || 'Equipped Item',
-              description: buttonEl.dataset.itemDescription || 'An equipped item.',
-              icon: buttonEl.dataset.itemIcon,
-              badgeClass: buttonEl.dataset.badgeClass
-            })
-
-            // Remove the equipped item from inventory list
-            const category = buttonEl.dataset.category
-            removeInventoryCard(buttonEl)
-            if (category) {
-              updateSectionCount(category, -1)
-            }
-
-            // Add previously equipped item back to inventory if there was one
-            if (data.unequipped_item && data.unequipped_item.id !== itemId) {
-              const added = addInventoryCard(data.unequipped_item)
-              if (added) {
-                updateSectionCount(data.unequipped_item.category || 'other', 1)
-              }
-            }
-          }
+          await refreshInventory()
 
           showToast(data.message || `Item ${itemId} equipped successfully!`, 'success')
         }).catch(error => {
@@ -769,15 +743,7 @@
             return
           }
 
-          renderEmptySlot(slotType)
-
-          // Add the unequipped item back to inventory list
-          if (data.unequipped_item) {
-            const added = addInventoryCard(data.unequipped_item)
-            if (added) {
-              updateSectionCount(data.unequipped_item.category || 'other', 1)
-            }
-          }
+          await refreshInventory()
 
           showToast(data.message || `${slotType} unequipped successfully!`, 'success')
         }).catch(error => {
@@ -806,6 +772,7 @@
             return
           }
 
+          await refreshInventory()
           showToast(data.message || `Used item ${itemId}.`, 'success')
         }).catch(error => {
           console.error('Error:', error)
