@@ -96,8 +96,8 @@
               <p>Used automatically when received.</p>
             {% elif item.item_type == 'consumable' %}
               <button class="btn btn-success dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" onclick="useItem({{ item.id }})">🧪 Use Item</button>
-            {% elif item.item_type == 'weapon' or item.item_type == 'armor' %}
-              <button class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
+            {% elif item.item_type == 'weapon' or item.item_type == 'armor' or item.item_type == 'accessory' %}
+              <button class="btn btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" {% if not can_equip %}disabled title="{{ equip_block_reason }}"{% endif %} onclick="equipItem({{ item.id }})">⚡ Equip Item</button>
             {% endif %}
             <a href="/inventory/" class="btn btn-outline-secondary dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700">🎒 Back to Inventory</a>
           </div>
@@ -377,7 +377,7 @@
           button.innerHTML = '⏳ Equipping...'
           button.disabled = true
 
-          fetch(`/item/${itemId}/equip/`, {
+          fetch(`/item/${itemId}/use/`, {
             method: 'POST',
             headers: {
               'X-CSRFToken': getCsrfToken(),

@@ -259,6 +259,57 @@ class ItemViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+    def test_equip_buttons_follow_hero_requirements(self):
+        import re
+
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        mage = HeroClass.objects.create(name='Mage')
+        accessory = Accessory.objects.create(name='Restricted Ring')
+        InventoryItem.objects.create(inventory=self.inventory, item=accessory)
+        for item in (self.weapon, self.armor, accessory):
+            for level, restriction, blocked in (
+                (1, None, False), (2, None, True), (1, mage, True),
+                (1, self.hero_class, False),
+            ):
+                with self.subTest(item=item.name, level=level, restriction=restriction):
+                    item.level_requirement = level
+                    item.hero_class_restriction = restriction
+                    item.save()
+                    response = self.client.get('/inventory/')
+                    button = re.search(
+                        rf'<button[^>]*equipItem\({item.pk}, this\)[^>]*>',
+                        response.content.decode(),
+                    ).group()
+                    self.assertEqual('disabled' in button, blocked)
+                    detail = self.client.get(f'/item/{item.pk}/')
+                    self.assertEqual(detail.context['can_equip'], not blocked)
+                    button = re.search(
+                        rf'<button[^>]*equipItem\({item.pk}\)[^>]*>',
+                        detail.content.decode(),
+                    ).group()
+                    self.assertEqual('disabled' in button, blocked)
+
+    def test_generic_and_unowned_items_cannot_be_equipped(self):
+        from item.views import serialize_inventory_item
+
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        InventoryItem.objects.create(inventory=self.inventory, item=self.other_item)
+        response = self.client.get('/inventory/')
+        self.assertFalse(response.context['other_items'][0].can_equip)
+        self.assertFalse(serialize_inventory_item(self.other_item, self.hero)['can_equip'])
+        self.assertTrue(serialize_inventory_item(self.weapon, self.hero)['can_equip'])
+        InventoryItem.objects.filter(item=self.weapon).delete()
+        self.assertFalse(self.client.get(f'/item/{self.weapon.pk}/').context['can_equip'])
+        session = self.client.session
+        session.pop('hero_id')
+        session.save()
+        self.assertFalse(self.client.get('/inventory/').context['weapons'][0].can_equip)
+
+
 class InventoryTemplateTests(TestCase):
     def setUp(self):
         """Set up test data for template tests"""
