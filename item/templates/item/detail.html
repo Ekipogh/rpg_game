@@ -1,4 +1,4 @@
-{% load static %}
+{% load static item_extras %}
 <!DOCTYPE html>
 <html lang="en" class="">
   <head>
@@ -75,7 +75,7 @@
               <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="badge text-bg-primary dark:bg-blue-600 dark:text-white fs-6">{{ item.item_type|default:'Item'|title }}</span>
                 {% if item.value %}
-                  <span class="badge text-bg-light border dark:!bg-gray-700 dark:!text-gray-300 dark:border-gray-600 fs-6">{{ item.value }} gold</span>
+                  <span class="badge text-bg-light border dark:!bg-gray-700 dark:!text-gray-300 dark:border-gray-600 fs-6">{{ item.value|currency_coins }}</span>
                 {% endif %}
                 {% if item.rarity %}
                   <span class="badge text-bg-success dark:bg-green-600 dark:text-white fs-6">{{ item.rarity|title }}</span>
@@ -199,7 +199,7 @@
                 {% if item.heal_amount > 0 or item.mana_restore > 0 or item.money_amount > 0 or item.duration > 0 %}
                   <div class="row g-3">
                     {% if item.money_amount > 0 %}
-                      <div class="col-12"><p>Adds {{ item.money_amount }} money{% if is_instant %} immediately when received{% else %} when consumed{% endif %}.</p></div>
+                      <div class="col-12"><p>Adds {{ item.money_amount|currency_coins }}{% if is_instant %} immediately when received{% else %} when consumed{% endif %}.</p></div>
                     {% endif %}
                     {% if item.heal_amount > 0 %}
                       <div class="col-12">
@@ -262,7 +262,7 @@
                     </tr>
                     <tr>
                       <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Market Value</td>
-                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">{{ item.value|default:0 }} gold pieces</td>
+                      <td class="fw-semibold text-gray-900 dark:text-white dark:!bg-gray-800">{{ item.value|currency_coins }}</td>
                     </tr>
                     <tr>
                       <td class="fw-semibold text-muted dark:!text-gray-400 dark:!bg-gray-800">Item Category</td>

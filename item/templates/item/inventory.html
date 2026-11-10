@@ -22,6 +22,28 @@
 
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <style>
+      .inventory-header .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .inventory-header h1 {
+        margin: 0;
+      }
+
+      .inventory-balance {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+      }
+
+      .inventory-balance .currency {
+        justify-content: flex-start;
+      }
+
       .equipment-slot {
         transition: all 0.3s ease;
         min-height: 200px;
@@ -84,7 +106,7 @@
         <div class="inventory-header">
           <div class="header-info">
             <h1 class="text-gray-900 dark:text-white">🎒 Inventory</h1>
-            <p class="header-subtitle text-muted dark:!text-gray-400">{{ total_items|default:0 }} items • {{ total_value|default:0 }} gold total</p>
+            {% if hero %}<p class="inventory-balance text-muted dark:!text-gray-400"><span>Money:</span> {{ hero.money|currency_coins }}</p>{% endif %}
           </div>
         </div>
 
@@ -172,7 +194,7 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ weapon.name }}</h6>
-                                <small class="text-primary dark:!text-blue-400">{{ weapon.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ weapon.value|currency_coins }}</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
@@ -216,7 +238,7 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ armor_piece.name }}</h6>
-                                <small class="text-primary dark:!text-blue-400">{{ armor_piece.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ armor_piece.value|currency_coins }}</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
@@ -260,7 +282,7 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ accessory.name }}</h6>
-                                <small class="text-primary dark:!text-blue-400">{{ accessory.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ accessory.value|currency_coins }}</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ accessory.description|default:'A valuable accessory.' }}</p>
@@ -306,7 +328,7 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ consumable.name }} <span class="badge bg-secondary" data-stack-quantity="{{ consumable.quantity }}">&times; {{ consumable.quantity }}</span></h6>
-                                <small class="text-primary dark:!text-blue-400">{{ consumable.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ consumable.value|currency_coins }}</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ consumable.description|default:'A consumable item with special effects.' }}</p>
@@ -360,7 +382,7 @@
                               </div>
                               <div>
                                 <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">{{ item.name }}</h6>
-                                <small class="text-primary dark:!text-blue-400">{{ item.value|default:0 }} gold</small>
+                                <small class="text-primary dark:!text-blue-400">{{ item.value|currency_coins }}</small>
                               </div>
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ item.description|default:'A mysterious item.' }}</p>
@@ -612,7 +634,7 @@
 
         const meta = iconMap[category] || iconMap.other
         const description = escapeHtml(item.description || '')
-        const value = Number.isFinite(item.value) ? item.value : 0
+        const value = item.currency_html
 
         let statsLine = ''
         if (category === 'weapon') {
@@ -660,7 +682,7 @@
                   </div>
                   <div>
                     <h6 class="mb-1 fw-semibold text-gray-900 dark:text-white">${escapeHtml(item.name)}</h6>
-                    <small class="text-primary dark:!text-blue-400">${value} gold</small>
+                    <small class="text-primary dark:!text-blue-400">${value}</small>
                   </div>
                 </div>
                 <p class="text-muted dark:!text-gray-400 small mb-2">${description || 'A mysterious item.'}</p>
