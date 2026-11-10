@@ -33,6 +33,7 @@ def available_encounter_keys(hero_level=1, run=None):
         groups.setdefault(entry.encounter_definition_key, []).append(entry)
     tier, target, group_limit = battle_requirements(run, hero_level or 1)
     configured = set()
+    lower_level_fallbacks = {}
     for key, entries in groups.items():
         definition = ENCOUNTER_DEFINITIONS.get(key)
         if definition is None or definition.kind != 'battle':
@@ -49,12 +50,20 @@ def available_encounter_keys(hero_level=1, run=None):
                 continue
             if tier != 'enemy' and threats.count(expected) != 1:
                 continue
-            if count > group_limit or any(not max(1, target - 2) <= e.monster.level <= target + 1
+            if count > group_limit or any(not 1 <= e.monster.level <= target + 1
                                           for e in entries):
                 continue
             if sum(e.monster.level * e.quantity for e in entries) > target * group_limit:
                 continue
+            if any(e.monster.level < max(1, target - 2) for e in entries):
+                lower_level_fallbacks[key] = sum(e.monster.level * e.quantity for e in entries) / count
+                continue
         configured.add(key)
+    # Sparse content must not strand a run. Relax only the lower level bound,
+    # keeping tier, threat, group size, upper level and total budget checks.
+    if not configured and lower_level_fallbacks:
+        closest = max(lower_level_fallbacks.values())
+        configured.update(key for key, level in lower_level_fallbacks.items() if level == closest)
     # A gate cannot be bypassed by selecting a peaceful room when its fight exists.
     if hero_level is not None and tier != 'enemy' and configured:
         return tuple(key for key in ENCOUNTER_DEFINITIONS if key in configured)
