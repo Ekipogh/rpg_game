@@ -89,3 +89,21 @@ Read-only GET requests do not create or advance battles.
 in `/etc/rpg_game/environment`. The [Ubuntu setup and deployment procedure](deployment_guide.md)
 installs this unit, migrates the shared database, and starts the worker alongside
 the web and healing services. Run one worker per SQLite database.
+
+## Ranged basic attacks
+
+`Weapon.attack_range_max` and `Monster.attack_range_max` configure physical
+basic attack range (1?8 lanes). The minimum range is 1, so ranged actors can
+still attack adjacent opponents. Bows and Archer monsters start with range 4;
+other weapons and unarmed heroes use range 1. Player range comes from the equipped
+weapon, independently of class. These values are editable in admin and YAML.
+The migrations configure existing bows and Archers and transfer any configured
+class range to that class's restricted weapons before removing the class field; importing the catalog also
+configures them. Restart web and battle worker processes after migrating.
+
+Approach stops once the target is in attack range; Hold prevents movement but
+continues automatic attacks against targets in range. Ranged shots can pass other
+combatants, including when selecting a target behind the front line. Accuracy,
+evasion, defense, critical hits, and attack speed use the existing physical
+attack formulas. No ammunition is consumed. Already saved `melee-v1` battles
+continue with their original snapshots; new battles use `ranged-v1`.

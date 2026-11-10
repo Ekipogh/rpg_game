@@ -48,7 +48,7 @@
     const a = actorName(event.actor_id), b = actorName(event.target_id), p = event.payload || {};
     switch (event.event_type) {
       case 'move': return `${a} moves from lane ${p.from_lane} to ${p.to_lane}.`;
-      case 'attack': return `${a} attacks ${b}.`;
+      case 'attack': return `${a} ${p.ranged ? 'shoots' : 'attacks'} ${b}.`;
       case 'miss': return `${a} misses ${b}.`;
       case 'critical': return `${a} lands a critical hit.`;
       case 'damage': return `${b} takes ${p.applied} damage (${p.health} HP remaining).`;
@@ -101,7 +101,7 @@
       card.style.gridRow = '1';
       card.children[0].textContent = actor.name;
       card.children[1].textContent = `${actor.health}/${actor.max_health} HP`;
-      card.children[2].textContent = `${actor.mana}/${actor.max_mana} MP`;
+      card.children[2].textContent = `${actor.mana}/${actor.max_mana} MP ? Range ${actor.attack_range_min ?? 1}?${actor.attack_range_max ?? 1}`;
       if (actor.team === 'enemy') {
         card.type = 'button'; card.dataset.enemy = actor.combatant_id;
         card.setAttribute('aria-label', `Target ${actor.name}, lane ${actor.lane}, ${actor.health} health`);
@@ -116,7 +116,7 @@
       find('health').value = hero.health; find('health').max = hero.max_health;
       find('mana').value = hero.mana; find('mana').max = Math.max(1, hero.max_mana);
       text('target', `Target: ${hero.current_target_id ? actorName(hero.current_target_id) : 'none'}`);
-      text('intention', hero.movement_policy === 'hold' ? 'Holding position.' : 'Approaching your target until within melee range.');
+      text('intention', hero.movement_policy === 'hold' ? 'Holding position.' : 'Approaching your target until within attack range.');
       const remaining = Math.max(0, (hero.next_attack_at_ms ?? data.simulation_time_ms) - data.simulation_time_ms);
       find('attack').value = hero.next_attack_at_ms === null ? 0 : 1 - remaining / hero.attack_interval_ms;
       text('attack-text', hero.next_attack_at_ms === null ? 'Stopped' : `${(remaining / 1000).toFixed(2)}s`);

@@ -1,5 +1,6 @@
 import enum
 from django.db import models, transaction
+from django.core.validators import MinValueValidator, MaxValueValidator
 from polymorphic.models import PolymorphicModel
 
 
@@ -49,6 +50,10 @@ class Item(PolymorphicModel):
 class Weapon(Item):
     """Weapon equipment (BATTLE_SYSTEM.md: +ATK, +ACC, Optional element)"""
 
+    attack_range_max = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(8)]
+    )
+
     attack_bonus = models.IntegerField(default=0)  # +ATK
     accuracy_bonus = models.IntegerField(default=0)  # +ACC
     element = models.CharField(
@@ -72,12 +77,18 @@ class Weapon(Item):
         default=EquipmentSlots.WEAPON.value,
     )
 
+    class Meta:
+        constraints = [models.CheckConstraint(
+            condition=models.Q(attack_range_max__gte=1, attack_range_max__lte=8),
+            name="weapon_valid_attack_range",
+        )]
+
     @property
     def item_type(self):
         return ItemTypes.WEAPON.value
 
     def get_stats(self):
-        stats = f"ATK +{self.attack_bonus}, ACC +{self.accuracy_bonus}"
+        stats = f"ATK +{self.attack_bonus}, ACC +{self.accuracy_bonus}, Range 1?{self.attack_range_max}"
         if self.element:
             stats += f", Element: {self.element.capitalize()}"
         return stats

@@ -1,4 +1,4 @@
-"""Deterministic melee engine. No persistence or wall-clock dependencies.
+"""Deterministic combat engine. No persistence or wall-clock dependencies.
 
 Version identifiers cover scheduling, formulas, serialization, and RNG behavior.
 Commit AdvanceResult state, events, and command receipts as one persistence unit.
@@ -13,7 +13,7 @@ import types
 from typing import Literal
 
 SCHEMA_VERSION = 1
-RULES_VERSION = "melee-v1"
+RULES_VERSION = "ranged-v1"
 RNG_VERSION = "sha256-counter-v1"
 
 Team = Literal["hero", "enemy"]
@@ -212,7 +212,7 @@ def validate_snapshot(snapshot: BattleSnapshot):
     # Also enforce annotated shapes for callers constructing dataclasses directly.
     _decode(BattleSnapshot, asdict(snapshot))
     if (snapshot.schema_version != SCHEMA_VERSION or
-            snapshot.rules_version != RULES_VERSION or snapshot.rng_version != RNG_VERSION):
+            snapshot.rules_version not in ("melee-v1", RULES_VERSION) or snapshot.rng_version != RNG_VERSION):
         raise ValueError("Unsupported snapshot version")
     for name in ("battle_id", "encounter_id", "encounter_definition_key", "initial_rng_seed"):
         if not getattr(snapshot, name).strip():
@@ -242,8 +242,12 @@ def validate_snapshot(snapshot: BattleSnapshot):
                     raise ValueError("speed must be an integer")
             else:
                 _integer(value, field.name, 1 if field.name == "max_health" else 0)
-        if (actor.attack_range_min, actor.attack_range_max) != (1, 1):
-            raise ValueError("Only melee range 1 is supported")
+        _integer(actor.attack_range_min, "attack_range_min", 1)
+        _integer(actor.attack_range_max, "attack_range_max", actor.attack_range_min)
+        if actor.attack_range_max >= snapshot.rules.lane_count:
+            raise ValueError("Attack range exceeds battlefield")
+        if snapshot.rules_version == "melee-v1" and (actor.attack_range_min, actor.attack_range_max) != (1, 1):
+            raise ValueError("Legacy battles only support melee range 1")
         if actor.initial_movement_policy not in ("approach", "hold"):
             raise ValueError("Unsupported movement policy")
         _integer(actor.initial_health, "initial_health", 1)
@@ -421,9 +425,12 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                                   kind, actor, target, payload))
 
     def reachable(actor, target):
-        return (target.health > 0 and definitions[actor.combatant_id].team != definitions[target.combatant_id].team
-                and not any(c.health and min(actor.lane, target.lane) < c.lane < max(actor.lane, target.lane)
-                            for c in actors))
+        if target.health <= 0 or definitions[actor.combatant_id].team == definitions[target.combatant_id].team:
+            return False
+        # Ranged shots can pass other combatants; melee cannot bypass a front line.
+        return definitions[actor.combatant_id].attack_range_max > 1 or not any(
+            c.health and min(actor.lane, target.lane) < c.lane < max(actor.lane, target.lane)
+            for c in actors)
 
     def target_for(actor):
         if not actor.health:
@@ -508,8 +515,11 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 continue
             actor.next_movement_at_ms = timestamp + snapshot.rules.movement_interval_ms
             target = target_for(actor)
-            if target and actor.movement_policy == "approach" and abs(actor.lane - target.lane) > 1:
-                lane = actor.lane + (1 if target.lane > actor.lane else -1)
+            definition = definitions[actor.combatant_id]
+            distance = abs(actor.lane - target.lane) if target else 0
+            if target and actor.movement_policy == "approach" and not definition.attack_range_min <= distance <= definition.attack_range_max:
+                direction = 1 if target.lane > actor.lane else -1
+                lane = actor.lane + (direction if distance > definition.attack_range_max else -direction)
                 if 0 <= lane < snapshot.rules.lane_count and not any(c.health and c.lane == lane for c in actors):
                     old_lane, actor.lane = actor.lane, lane
                     emit("move", actor.combatant_id, from_lane=old_lane, to_lane=lane)
@@ -519,10 +529,11 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
             definition = definitions[actor.combatant_id]
             actor.next_attack_at_ms = timestamp + attack_interval_ms(definition.stats, snapshot.rules)
             target = target_for(actor)
-            if target is None or abs(actor.lane - target.lane) != 1:
+            if target is None or not definition.attack_range_min <= abs(actor.lane - target.lane) <= definition.attack_range_max:
                 continue
             attack, defense = definition.stats, definitions[target.combatant_id].stats
-            emit("attack", actor.combatant_id, target.combatant_id)
+            emit("attack", actor.combatant_id, target.combatant_id,
+                 **({"ranged": True} if definition.attack_range_max > 1 else {}))
             if random_integer(state.rng, 0, 9999) >= max(5, min(100, attack.accuracy - defense.evasion)) * 100:
                 emit("miss", actor.combatant_id, target.combatant_id)
                 continue

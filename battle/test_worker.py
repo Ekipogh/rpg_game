@@ -4,7 +4,7 @@ from datetime import timedelta
 import json
 from unittest.mock import patch
 
-from django.db import connection
+from django.db import connection, IntegrityError, transaction
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
@@ -32,6 +32,32 @@ class WorkerTests(TestCase):
         self.composition = EncounterMonster.objects.create(encounter_definition_key='goblin_ambush', monster=self.monster)
         self.token = 'owner'
         self.assertTrue(acquire_lease(self.token))
+
+    def test_invalid_attack_ranges_are_rejected_by_database(self):
+        for obj in (Weapon.objects.create(name='Test bow'), self.monster):
+            for value in (0, 9):
+                with self.subTest(model=type(obj).__name__, value=value):
+                    with self.assertRaises(IntegrityError), transaction.atomic():
+                        type(obj).objects.filter(pk=obj.pk).update(attack_range_max=value)
+
+    def test_snapshot_uses_equipped_weapon_and_monster_ranges(self):
+        equipment = Equipment.objects.create(hero=self.hero)
+        bow = Weapon.objects.create(name='Bow', attack_range_max=4)
+        slot = EquipmentSlot.objects.create(equipment=equipment, slot='weapon', item=bow)
+        self.monster.attack_range_max = 5
+        self.monster.save()
+        battle = self.adopt()
+        self.assertEqual([c.attack_range_max for c in build_snapshot(battle, self.hero).combatants], [4, 5])
+        # A weapon swap changes range without changing the hero's class.
+        slot.item = Weapon.objects.create(name='Sword', attack_range_max=1)
+        slot.save()
+        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
+        slot.item = None
+        slot.save()
+        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
+        # Carrying a bow outside the weapon slot does not grant its range.
+        EquipmentSlot.objects.create(equipment=equipment, slot='accessory', item=bow)
+        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
 
     def adopt(self):
         discover_battles(self.token)

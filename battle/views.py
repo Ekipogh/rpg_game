@@ -60,6 +60,8 @@ def state_view(request, battle_id):
                 continue
             stats = definition['stats']
             actors.append({**actor, 'name': definition['name'], 'team': definition['team'],
+                'attack_range_min': definition['attack_range_min'],
+                'attack_range_max': definition['attack_range_max'],
                 'max_health': stats['max_health'], 'max_mana': stats['max_mana'],
                 'attack_interval_ms': attack_interval_ms(CombatStats(**stats), BattleRules(**snapshot['rules']))})
         lease = BattleWorkerLease.objects.filter(name=LEASE_NAME).first()

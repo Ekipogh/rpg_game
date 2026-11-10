@@ -16,7 +16,7 @@ from django.utils import timezone
 from hero.dungeon import _snapshot, generate_paths
 from hero.encounters import ENCOUNTER_DEFINITIONS, Encounter
 from hero.models import Hero
-from item.models import EquipmentSlot, Item, Instant
+from item.models import EquipmentSlot, Item, Instant, Weapon
 from item.services import receive_item
 from .engine import (
     BattleCommandInput, BattleRules, BattleSnapshot, CombatStats,
@@ -181,10 +181,13 @@ def build_snapshot(battle, hero):
                    .select_related("monster").prefetch_related("monster__loot"))
     if not entries or not 1 <= sum(e.quantity for e in entries) <= 3:
         raise ValueError(f"Configure one to three monsters for {encounter.definition_key}")
-    equipment = [slot.item for slot in EquipmentSlot.objects.filter(equipment__hero=hero)
-                 .prefetch_related("item") if slot.item is not None]
+    slots = list(EquipmentSlot.objects.filter(equipment__hero=hero).prefetch_related("item"))
+    equipment = [slot.item for slot in slots if slot.item is not None]
+    weapon = next((slot.item for slot in slots
+                   if slot.slot == "weapon" and isinstance(slot.item, Weapon)), None)
+    attack_range_max = weapon.attack_range_max if weapon else 1
     actors = [CombatantSnapshot("hero", "hero", "hero", hero.pk, hero.name,
-        _stats(hero, equipment), 1, 1, hero.current_health, hero.current_mana, 0, "approach", None)]
+        _stats(hero, equipment), 1, attack_range_max, hero.current_health, hero.current_mana, 0, "approach", None)]
     for entry in entries:
         monster = entry.monster
         rewards = RewardSnapshot(monster.experience_reward, tuple(
@@ -193,7 +196,7 @@ def build_snapshot(battle, hero):
         for _ in range(entry.quantity):
             index = len(actors) - 1
             actors.append(CombatantSnapshot(f"enemy:{index}", "enemy", "monster", monster.pk,
-                monster.name, _stats(monster), 1, 1, monster.max_health, monster.max_mana,
+                monster.name, _stats(monster), 1, monster.attack_range_max, monster.max_health, monster.max_mana,
                 8 - index, "approach", rewards))
     return BattleSnapshot(SCHEMA_VERSION, RULES_VERSION, RNG_VERSION, str(battle.pk),
         str(battle.encounter_id), encounter.definition_key, encounter.floor, str(encounter.battle_tier),

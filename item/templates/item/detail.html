@@ -28,6 +28,19 @@
         height: 90px;
         font-size: 3rem;
       }
+      .weapon-stats {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(7rem, 1fr));
+        gap: 0.75rem;
+        overflow-x: auto;
+      }
+      .weapon-stats .card-body {
+        padding: 0.75rem 0.5rem;
+        overflow-wrap: anywhere;
+      }
+      .weapon-stats h3 {
+        font-size: 1.25rem;
+      }
       .weapon-icon {
         background: linear-gradient(135deg, #dc3545, #c82333);
       }
@@ -114,8 +127,8 @@
                 <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapon Statistics</h5>
               </div>
               <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-lg-3">
+                <div class="weapon-stats">
+                  <div class="weapon-stat">
                     <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Attack Bonus</small>
@@ -123,7 +136,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="weapon-stat">
                     <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Accuracy Bonus</small>
@@ -131,7 +144,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="weapon-stat">
                     <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Weapon Class</small>
@@ -139,11 +152,19 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="weapon-stat">
                     <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
                       <div class="card-body">
                         <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Element</small>
                         <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.element|default:'None'|title }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="weapon-stat">
+                    <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                      <div class="card-body">
+                        <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Range</small>
+                        <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ item.attack_range_max|default:'Melee'|title  }}</h3>
                       </div>
                     </div>
                   </div>
