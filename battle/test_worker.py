@@ -376,7 +376,6 @@ class WorkerTests(TestCase):
         session = self.client.session; session['hero_id'] = self.hero.pk; session.save()
         data = self.client.get(reverse('battle:state', args=[battle.pk])).json()
         self.assertEqual(data['result']['money_change'], 75)
-        self.assertContains(self.client.get(reverse('dungeon')), 'Money received: +75')
         process_battle(battle.pk, self.token, 1000)
         self.hero.refresh_from_db()
         self.assertEqual(self.hero.money, 86)

@@ -137,7 +137,7 @@
       const result = data.result;
       const loot = result?.loot?.length ? `Loot received: ${result.loot.map(drop => `${drop.name} × ${drop.quantity}`).join(', ')}.` : 'No loot received.';
       const money = result?.money_change ? ` +${result.money_change} money.` : '';
-      text('result', data.outcome === 'VICTORY' ? `Victory! +${result?.experience || 0} XP.${money} ${loot}` : 'Defeat. You returned home with 1 HP; previously earned rewards are retained.');
+      text('result', data.outcome === 'VICTORY' ? `Victory! +${result?.experience || 0} XP. ${loot}` : 'Defeat. You returned home with 1 HP; previously earned rewards are retained.');
       const link = find('continue'); link.hidden = false; link.href = data.next_url;
       link.textContent = data.next_url.includes('dungeon') ? 'Choose your next path' : 'Return home';
     }
