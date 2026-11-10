@@ -1,7 +1,11 @@
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.contrib.staticfiles import finders
+from django.core.management import call_command
+from tempfile import TemporaryDirectory
+from pathlib import Path
 from django.urls import reverse
 
-from game.currency import format_currency
+from game.currency import format_currency, render_currency
 from hero.models import Hero, HeroClass
 from item.models import Inventory, InventoryItem, Item
 from item.views import serialize_inventory_item
@@ -17,6 +21,20 @@ class CurrencyTests(SimpleTestCase):
         ):
             with self.subTest(amount=amount):
                 self.assertEqual(format_currency(amount), expected)
+
+
+    @override_settings(STATIC_URL="/assets/", MEDIA_URL="/uploads/")
+    def test_coin_artwork_is_collected_and_uses_static_urls(self):
+        html = render_currency(126)
+        with TemporaryDirectory() as directory:
+            with override_settings(STATIC_ROOT=directory):
+                call_command("collectstatic", interactive=False, verbosity=0)
+            for coin in ("Gold", "Silver", "Cupper"):
+                asset = f"coin/Coin_{coin}_0.png"
+                self.assertIn(f'/assets/{asset}', html)
+                self.assertEqual((Path(directory) / asset).read_bytes(),
+                                 Path(finders.find(asset)).read_bytes())
+        self.assertNotIn("/uploads/", html)
 
 
 class CurrencyDisplayTests(TestCase):
@@ -35,7 +53,7 @@ class CurrencyDisplayTests(TestCase):
                 response = self.client.get(reverse(page))
                 self.assertContains(response, 'aria-label="1 gold 2 silver 6 copper"')
                 for coin in ("Gold", "Silver", "Cupper"):
-                    self.assertContains(response, f"/media/coin/Coin_{coin}_0.png")
+                    self.assertContains(response, f"/static/coin/Coin_{coin}_0.png")
         response = self.client.get(reverse("inventory"))
         self.assertContains(response, "6 copper")
         self.assertContains(self.client.get(f"/item/{item.pk}/"), "6 copper")
