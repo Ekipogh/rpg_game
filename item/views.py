@@ -13,6 +13,19 @@ from item.models import (
 
 # Create your views here.
 
+def equip_block_reason(item, hero):
+    """Explain why the selected hero cannot equip this item."""
+    if not isinstance(item, (Weapon, Armor, Accessory)):
+        return 'This item cannot be equipped.'
+    if hero is None:
+        return 'Select a hero to equip this item.'
+    if item.hero_class_restriction_id and item.hero_class_restriction_id != hero.hero_class_id:
+        return f'Only {item.hero_class_restriction.name} can equip this item.'
+    if item.level_requirement > hero.level:
+        return f'Level {item.level_requirement} required.'
+    return ''
+
+
 def item_detail(request, item_id):
     """
     Single view that displays different information based on item type.
@@ -83,6 +96,12 @@ def item_detail(request, item_id):
     item_info['rarity_color'] = get_rarity_color(item.value)
     item_info['formatted_value'] = format_currency(item.value)
 
+    hero = Hero.objects.filter(pk=request.session.get('hero_id')).first()
+    reason = equip_block_reason(item, hero)
+    if not reason and (not hero.inventory_id or not InventoryItem.objects.filter(
+            inventory_id=hero.inventory_id, item=item, quantity__gt=0).exists()):
+        reason = 'Item not found in inventory.'
+    item_info.update(can_equip=not reason, equip_block_reason=reason)
     return render(request, 'item/detail.html', item_info)
 
 
@@ -134,7 +153,7 @@ def add_inventory_item(inventory: Inventory, item: Item) -> None:
         inventory_item.save(update_fields=['quantity'])
 
 
-def serialize_inventory_item(item: Item) -> dict:
+def serialize_inventory_item(item: Item, hero=None) -> dict:
     """Serialize item to JSON format for API responses"""
     # Determine category based on item type
     category_map = {
@@ -147,6 +166,8 @@ def serialize_inventory_item(item: Item) -> dict:
 
     # Base payload common to all items
     payload = {
+        'can_equip': not equip_block_reason(item, hero),
+        'equip_block_reason': equip_block_reason(item, hero),
         'id': item.id,
         'name': item.name,
         'description': item.description or '',
@@ -270,7 +291,7 @@ def use_item_api(request, item_id):
             'item_type': item.__class__.__name__,
             'did_change': did_change,
             'remaining_quantity': remaining_quantity,
-            'unequipped_item': serialize_inventory_item(unequipped_item) if unequipped_item else None,
+            'unequipped_item': serialize_inventory_item(unequipped_item, hero) if unequipped_item else None,
             'hero_health': hero.current_health,
             'hero_max_health': hero.max_health,
         })
@@ -454,6 +475,8 @@ def inventory_view(request):
         # Equipment is removed from stock when equipped, so any remaining
         # quantity represents spare copies, even if the same type is equipped.
         item.quantity = quantity
+        item.equip_block_reason = equip_block_reason(item, hero)
+        item.can_equip = not item.equip_block_reason
 
         # Categorize item by type
         if isinstance(item, Weapon):
@@ -512,7 +535,7 @@ def unequip_item_api(request, slot_type):
                 'success': True,
                 'message': f'Unequipped {unequipped_item.name} from {slot_type} slot',
                 'slot_type': slot_type,
-                'unequipped_item': serialize_inventory_item(unequipped_item),
+                'unequipped_item': serialize_inventory_item(unequipped_item, hero),
             })
         else:
             return JsonResponse({'error': f'No item equipped in {slot_type} slot'}, status=400)

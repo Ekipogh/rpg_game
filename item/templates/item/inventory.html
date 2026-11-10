@@ -197,12 +197,15 @@
                                 <small class="text-primary dark:!text-blue-400">{{ weapon.value|currency_coins }}</small>
                               </div>
                             </div>
+                            <div class="d-flex gap-2">
+                              <small class="text-muted dark:!text-gray-300">Class: {{ weapon.hero_class_restriction|default:'Any' }}</small>
+                            </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
                             <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="weapon" data-slot="{{ weapon.equipment_slot|default:'weapon' }}" data-item-name="{{ weapon.name|escape }}" data-item-description="{{ weapon.description|default:'A reliable weapon for combat.'|escape }}" data-item-icon="⚔️" data-badge-class="bg-danger" onclick="event.stopPropagation(); equipItem({{ weapon.id }}, this)">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="weapon" data-slot="{{ weapon.equipment_slot|default:'weapon' }}" data-item-name="{{ weapon.name|escape }}" data-item-description="{{ weapon.description|default:'A reliable weapon for combat.'|escape }}" data-item-icon="⚔️" data-badge-class="bg-danger" {% if not weapon.can_equip %}disabled title="{{ weapon.equip_block_reason }}"{% endif %} onclick="event.stopPropagation(); equipItem({{ weapon.id }}, this)">
                                 ⚔️ Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ weapon.id }})">
@@ -241,12 +244,15 @@
                                 <small class="text-primary dark:!text-blue-400">{{ armor_piece.value|currency_coins }}</small>
                               </div>
                             </div>
+                            <div class="d-flex gap-2">
+                              <small class="text-muted dark:!text-gray-300">Class: {{ armor_piece.hero_class_restriction|default:'Any' }}</small>
+                            </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ armor_piece.description|default:'Protective gear for adventurers.' }}</p>
                             <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">DEF +{{ armor_piece.defense_bonus|default:0 }}, HP +{{ armor_piece.health_bonus|default:0 }} • {{ armor_piece.armor_type|default:'leather'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="armor" data-slot="{{ armor_piece.equipment_slot|default:'armor' }}" data-item-name="{{ armor_piece.name|escape }}" data-item-description="{{ armor_piece.description|default:'Protective gear for adventurers.'|escape }}" data-item-icon="🛡️" data-badge-class="bg-info" onclick="event.stopPropagation(); equipItem({{ armor_piece.id }}, this)">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="armor" data-slot="{{ armor_piece.equipment_slot|default:'armor' }}" data-item-name="{{ armor_piece.name|escape }}" data-item-description="{{ armor_piece.description|default:'Protective gear for adventurers.'|escape }}" data-item-icon="🛡️" data-badge-class="bg-info" {% if not armor_piece.can_equip %}disabled title="{{ armor_piece.equip_block_reason }}"{% endif %} onclick="event.stopPropagation(); equipItem({{ armor_piece.id }}, this)">
                                 🛡️ Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ armor_piece.id }})">
@@ -285,6 +291,9 @@
                                 <small class="text-primary dark:!text-blue-400">{{ accessory.value|currency_coins }}</small>
                               </div>
                             </div>
+                            <div class="d-flex gap-2">
+                              <small class="text-muted dark:!text-gray-300">Class: {{ accessory.hero_class_restriction|default:'Any' }}</small>
+                            </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ accessory.description|default:'A valuable accessory.' }}</p>
                             <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
                               <small class="text-muted dark:!text-gray-300">
@@ -292,7 +301,7 @@
                               </small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="accessory" data-slot="{{ accessory.equipment_slot|default:'accessory' }}" data-item-name="{{ accessory.name|escape }}" data-item-description="{{ accessory.description|default:'A valuable accessory.'|escape }}" data-item-icon="💍" data-badge-class="bg-warning" onclick="event.stopPropagation(); equipItem({{ accessory.id }}, this)">
+                              <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="accessory" data-slot="{{ accessory.equipment_slot|default:'accessory' }}" data-item-name="{{ accessory.name|escape }}" data-item-description="{{ accessory.description|default:'A valuable accessory.'|escape }}" data-item-icon="💍" data-badge-class="bg-warning" {% if not accessory.can_equip %}disabled title="{{ accessory.equip_block_reason }}"{% endif %} onclick="event.stopPropagation(); equipItem({{ accessory.id }}, this)">
                                 💍 Equip
                               </button>
                               <button class="btn btn-outline-secondary btn-sm dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-700" onclick="event.stopPropagation(); viewItem({{ accessory.id }})">
@@ -390,7 +399,7 @@
                               <small class="text-muted dark:!text-gray-300">General Item</small>
                             </div>
                             <div class="d-flex gap-2">
-                              <button class="btn btn-primary btn-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="other" data-slot="{{ item.equipment_slot|default:'' }}" data-item-name="{{ item.name|escape }}" data-item-description="{{ item.description|default:'A mysterious item.'|escape }}" data-item-icon="📦" data-badge-class="bg-secondary" onclick="event.stopPropagation(); equipItem({{ item.id }}, this)">
+                              <button class="btn btn-primary btn-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="other" data-slot="{{ item.equipment_slot|default:'' }}" data-item-name="{{ item.name|escape }}" data-item-description="{{ item.description|default:'A mysterious item.'|escape }}" data-item-icon="📦" data-badge-class="bg-secondary" {% if not item.can_equip %}disabled title="{{ item.equip_block_reason }}"{% endif %} onclick="event.stopPropagation(); equipItem({{ item.id }}, this)">
                                 ⚔️ Equip
                               </button>
                               <button class="btn btn-success btn-sm dark:bg-green-600 dark:hover:bg-green-700 dark:border-green-600 dark:text-white" data-category="other" onclick="event.stopPropagation(); useItem({{ item.id }}, this)">
@@ -599,7 +608,7 @@
       }
 
       function removeInventoryCard(buttonEl) {
-        if (!buttonEl) return
+        if (!buttonEl || buttonEl.disabled) return
         const columnEl = buttonEl.closest('.col-lg-4, .col-md-6')
         if (columnEl) {
           columnEl.remove()
@@ -662,7 +671,7 @@
 
         const equipButton = category === 'consumable'
           ? ''
-          : `<button class="btn btn-primary btn-sm ${category === 'other' ? '' : 'flex-fill'} dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="${category}" data-slot="${escapeHtml(item.equipment_slot || '')}" data-item-name="${escapeHtml(item.name)}" data-item-description="${description || ''}" data-item-icon="${meta.icon}" data-badge-class="${meta.badgeClass}" onclick="event.stopPropagation(); equipItem(${item.id}, this)">
+          : `<button class="btn btn-primary btn-sm ${category === 'other' ? '' : 'flex-fill'} dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="${category}" data-slot="${escapeHtml(item.equipment_slot || '')}" data-item-name="${escapeHtml(item.name)}" data-item-description="${description || ''}" data-item-icon="${meta.icon}" data-badge-class="${meta.badgeClass}" ${item.can_equip ? '' : `disabled title="${escapeHtml(item.equip_block_reason || 'This item cannot be equipped.')}"`} onclick="event.stopPropagation(); equipItem(${item.id}, this)">
               ${meta.icon} Equip
             </button>`
 
@@ -716,7 +725,7 @@
       }
 
       function equipItem(itemId, buttonEl) {
-        if (!buttonEl) return
+        if (!buttonEl || buttonEl.disabled) return
         const slotValue = buttonEl.dataset.slot || ''
 
         buttonEl.disabled = true

@@ -181,6 +181,7 @@ class Consumable(Item):
     def use(self, hero):
         """Apply the consumable effect to the hero"""
         from .services import apply_consumable_effects
+
         effects = apply_consumable_effects(hero, self)
 
         # Remove item from inventory
@@ -190,8 +191,10 @@ class Consumable(Item):
 
     @staticmethod
     def _effect_message(effects):
-        message = f"Restored {effects['health_change']} HP and {effects['mana_change']} MP."
-        if effects['money_change']:
+        message = (
+            f"Restored {effects['health_change']} HP and {effects['mana_change']} MP."
+        )
+        if effects["money_change"]:
             message += f" Gained {effects['money_change']} money."
         return message
 
@@ -203,11 +206,12 @@ class Instant(Consumable):
         # Neutral default for receipt-only items (e.g. money purses), while
         # preserving explicitly configured healing and values loaded from DB.
         if not args:
-            kwargs.setdefault('heal_amount', 0)
+            kwargs.setdefault("heal_amount", 0)
         super().__init__(*args, **kwargs)
 
     def use(self, hero, quantity=1):
         from .services import apply_consumable_effects
+
         return self._effect_message(apply_consumable_effects(hero, self, quantity))
 
 
