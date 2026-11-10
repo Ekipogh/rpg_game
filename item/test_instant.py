@@ -79,7 +79,7 @@ class InstantItemTests(TestCase):
         self.assertEqual(self.hero.money, 7)
         response = self.client.get(reverse('item_detail', args=[self.purse.pk]))
         self.assertContains(response, 'Used automatically when received.')
-        self.assertContains(response, 'Adds 25 money')
+        self.assertContains(response, 'Adds <span class="currency" aria-label="2 silver 5 copper"><span class="currency-denomination"><img class="currency-coin" src="/media/coin/Coin_Silver_0.png" alt="" width="24" height="24">2 silver')
         self.assertNotContains(response, '>🧪 Use Item</button>')
 
     def test_normal_money_consumable_requires_stock_and_consumes_once(self):
