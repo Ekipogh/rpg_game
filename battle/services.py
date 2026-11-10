@@ -216,7 +216,13 @@ def _resolve(battle, hero, snapshot, state):
                                  for drop in outcome.loot]),
         }
         run["phase"] = "choices"
-        run.update(generate_paths(run["current_floor"] + 1))
+        run["hero_level"] = hero.level
+        if encounter.battle_tier == "miniboss":
+            run["miniboss_defeated"] = True
+            run["regular_victories"] = 0
+        elif encounter.battle_tier == "enemy":
+            run["regular_victories"] = run.get("regular_victories", 0) + 1
+        run.update(generate_paths(run["current_floor"] + 1, run=run))
     if not _snapshot(hero).update(current_health=max(1, hero_state.health),
             current_mana=hero_state.mana, experience=F("experience") + outcome.experience,
             dungeon_run=run, is_in_combat=bool(run),
