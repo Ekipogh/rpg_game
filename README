@@ -8,3 +8,4 @@ Prepare an Ubuntu 26.04 machine with an existing TeamCity agent:
 Optional public/backend ports: append `9090 12000` (defaults: `8080 8000`).
 
 Images provided by [batareya](https://batareya.itch.io/500-free-pixel-art-fantasy-character-pack)
+Coins https://proactivebox.itch.io/coins-asset-pack-16x16-pixel-art

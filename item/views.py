@@ -5,6 +5,7 @@ from django.db.models import F
 from typing import Optional, Tuple
 
 from hero.models import Hero
+from game.currency import format_currency, render_currency
 from item.models import (
     Inventory, InventoryItem, Item, Weapon, Armor,
     Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory, Instant
@@ -97,11 +98,6 @@ def get_rarity_color(value):
         return 'text-secondary'  # Gray for common
 
 
-def format_currency(value):
-    """Format currency with gold symbol"""
-    return f"{value:,} 🪙"
-
-
 def get_or_create_inventory(hero: Hero) -> Inventory:
     """Get or create an inventory for the given hero"""
     if hasattr(hero, 'inventory') and hero.inventory:
@@ -155,6 +151,8 @@ def serialize_inventory_item(item: Item) -> dict:
         'name': item.name,
         'description': item.description or '',
         'value': item.value,
+        'formatted_value': format_currency(item.value),
+        'currency_html': render_currency(item.value),
         'category': category,
         'item_type': item.item_type,
         'equipment_slot': getattr(item, 'equipment_slot', ''),
@@ -419,6 +417,7 @@ def inventory_view(request):
     # Get hero from session
     hero_id = request.session.get('hero_id')
     equipped_items = {}
+    hero = None
 
     if not hero_id:
         inventory_items = []
@@ -475,6 +474,7 @@ def inventory_view(request):
         **categories,
         'total_items': item_count,
         'total_value': items_value,
+        'hero': hero,
         'equipped_items': equipped_items,
         'equipment_slots': list(EquipmentSlots),
     }

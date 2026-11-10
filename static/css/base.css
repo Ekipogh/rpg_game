@@ -47,3 +47,29 @@ body {
     color: #d1d5db;
     opacity: 1;
 }
+
+
+.currency {
+    display: inline-flex;
+    vertical-align: middle;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem 0.75rem;
+}
+
+.currency-denomination {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.currency-coin {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
