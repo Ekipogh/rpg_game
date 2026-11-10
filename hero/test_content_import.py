@@ -12,7 +12,7 @@ from battle.models import EncounterMonster
 from hero.encounters import Encounter
 from hero.models import Hero, HeroClass, HeroClassEquipment, Monster, MonsterLoot
 from hero.creation import create_character
-from item.models import Item, Instant
+from item.models import Item, Instant, Weapon
 
 
 class ContentImportTests(TestCase):
@@ -23,6 +23,9 @@ class ContentImportTests(TestCase):
         self.run_import()
         self.assertEqual(set(HeroClass.objects.values_list('name', flat=True)), {'Warrior', 'Ranger', 'Wizard'})
         self.assertEqual(HeroClass.objects.get(name='Wizard').mag_gain_max, 4)
+        self.assertTrue(Weapon.objects.filter(weapon_type='bow').exists())
+        self.assertFalse(Weapon.objects.filter(weapon_type='bow').exclude(attack_range_max=4).exists())
+        self.assertFalse(Monster.objects.filter(monster_class='archer').exclude(attack_range_max=4).exists())
         self.assertEqual(HeroClassEquipment.objects.count(), 9)
         self.assertEqual(Item.objects.count(), 235)
         self.assertEqual(Monster.objects.count(), 48)

@@ -1336,6 +1336,7 @@ items:
   accuracy_bonus: 2
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: briarwood_ranger_1_armor
   model: Armor
@@ -1418,6 +1419,7 @@ items:
   accuracy_bonus: 2
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: briarwood_ranger_2_armor
   model: Armor
@@ -1500,6 +1502,7 @@ items:
   accuracy_bonus: 3
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: drowned_fen_ranger_3_armor
   model: Armor
@@ -1582,6 +1585,7 @@ items:
   accuracy_bonus: 3
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: quarry_ranger_4_armor
   model: Armor
@@ -1665,6 +1669,7 @@ items:
   accuracy_bonus: 3
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: watchtower_ranger_5_armor
   model: Armor
@@ -1749,6 +1754,7 @@ items:
   accuracy_bonus: 4
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: mire_ranger_6_armor
   model: Armor
@@ -1833,6 +1839,7 @@ items:
   accuracy_bonus: 4
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: frost_ranger_7_armor
   model: Armor
@@ -1917,6 +1924,7 @@ items:
   accuracy_bonus: 4
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: cinder_ranger_8_armor
   model: Armor
@@ -2001,6 +2009,7 @@ items:
   accuracy_bonus: 5
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: obsidian_ranger_9_armor
   model: Armor
@@ -2085,6 +2094,7 @@ items:
   accuracy_bonus: 5
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: starfall_ranger_10_armor
   model: Armor
@@ -2169,6 +2179,7 @@ items:
   accuracy_bonus: 5
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: graveward_ranger_11_armor
   model: Armor
@@ -2253,6 +2264,7 @@ items:
   accuracy_bonus: 6
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: prism_ranger_12_armor
   model: Armor
@@ -2337,6 +2349,7 @@ items:
   accuracy_bonus: 6
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: clockwork_ranger_13_armor
   model: Armor
@@ -2421,6 +2434,7 @@ items:
   accuracy_bonus: 6
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: rift_ranger_14_armor
   model: Armor
@@ -2505,6 +2519,7 @@ items:
   accuracy_bonus: 7
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: pale_oath_ranger_15_armor
   model: Armor
@@ -2589,6 +2604,7 @@ items:
   accuracy_bonus: 7
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: storm_ranger_16_armor
   model: Armor
@@ -2673,6 +2689,7 @@ items:
   accuracy_bonus: 7
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: eclipse_ranger_17_armor
   model: Armor
@@ -2757,6 +2774,7 @@ items:
   accuracy_bonus: 8
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: abyss_ranger_18_armor
   model: Armor
@@ -2841,6 +2859,7 @@ items:
   accuracy_bonus: 8
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: seraphic_ranger_19_armor
   model: Armor
@@ -2925,6 +2944,7 @@ items:
   accuracy_bonus: 8
   element: null
   weapon_type: bow
+  attack_range_max: 4
   equipment_slot: weapon
 - key: world_end_ranger_20_armor
   model: Armor
@@ -3186,6 +3206,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 29
 - key: rootling
   name: Rootling
@@ -3205,6 +3226,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 38
 - key: moss_acolyte
   name: Moss Acolyte
@@ -3262,6 +3284,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 47
 - key: the_drowned_captain
   name: The Drowned Captain
@@ -3357,6 +3380,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 65
 - key: the_thorn_castellan
   name: The Thorn Castellan
@@ -3452,6 +3476,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 83
 - key: the_white_maw
   name: The White Maw
@@ -3547,6 +3572,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 101
 - key: astral_wisp
   name: Astral Wisp
@@ -3642,6 +3668,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 119
 - key: glass_basilisk
   name: Glass Basilisk
@@ -3737,6 +3764,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 137
 - key: void_prowler
   name: Void Prowler
@@ -3813,6 +3841,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 155
 - key: the_hollow_sovereign
   name: The Hollow Sovereign
@@ -3908,6 +3937,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 173
 - key: the_eclipse_herald
   name: The Eclipse Herald
@@ -4003,6 +4033,7 @@ monsters:
   critical_damage: 1.5
   threat_level: common
   monster_class: archer
+  attack_range_max: 4
   experience_reward: 191
 - key: entropy_warden
   name: Entropy Warden

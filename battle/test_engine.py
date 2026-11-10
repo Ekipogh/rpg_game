@@ -8,7 +8,7 @@ from unittest.mock import patch
 from .engine import (
     AdvanceResult, BattleCommandInput, BattleRules, BattleSnapshot,
     CombatStats, CombatantSnapshot, LootEntry, RewardSnapshot, RngState,
-    SimulationLimitReached, advance, attack_interval_ms, create_battle,
+    RULES_VERSION, SimulationLimitReached, advance, attack_interval_ms, create_battle,
     random_integer, snapshot_from_json, snapshot_to_json, state_from_json,
     state_to_json, validate_state,
 )
@@ -23,7 +23,7 @@ def fixture(*, adjacent=False, enemies=1, hero_stats=None, enemy_stats=None,
         'Enemy', enemy_stats or stats, 1, 1, (enemy_stats or stats).max_health,
         50, i+1 if adjacent else 8-i, 'approach', RewardSnapshot(7, loot))
         for i in range(enemies))
-    return BattleSnapshot(1, 'melee-v1', 'sha256-counter-v1', 'battle', 'encounter',
+    return BattleSnapshot(1, RULES_VERSION, 'sha256-counter-v1', 'battle', 'encounter',
         'goblin_ambush', 1, 'enemy', BattleRules(9, 1000, limit, 334, 2000, 20),
         (hero,) + opponents, 'seed')
 
@@ -75,12 +75,55 @@ class CombatTests(TestCase):
             with self.assertRaises(ValueError):
                 validate_state(snapshot, replace(base, **{field: value}))
 
-    def test_deferred_policies_and_ranged_rejected(self):
+    def test_invalid_policies_and_ranges_rejected(self):
         snapshot = fixture()
         for actor in (replace(snapshot.combatants[0], initial_movement_policy='retreat'),
-                      replace(snapshot.combatants[0], attack_range_max=3)):
+                      replace(snapshot.combatants[0], attack_range_max=9),
+                      replace(snapshot.combatants[0], attack_range_min=0),
+                      replace(snapshot.combatants[0], attack_range_min=2)):
             with self.assertRaises(ValueError):
                 create_battle(replace(snapshot, combatants=(actor, snapshot.combatants[1])))
+
+    def test_ranged_hero_and_enemy_attack_at_distance_and_stop(self):
+        base = fixture()
+        for ranged_id in ('hero', 'enemy:0'):
+            with self.subTest(ranged_id=ranged_id):
+                actors = tuple(replace(c, attack_range_max=4) if c.combatant_id == ranged_id
+                               else replace(c, initial_movement_policy='hold') for c in base.combatants)
+                snapshot = replace(base, combatants=actors)
+                result = advance(snapshot, create_battle(snapshot), 5000)
+                self.assertEqual(abs(result.state.combatants['hero'].lane - result.state.combatants['enemy:0'].lane), 4)
+                attacks = [e for e in result.events if e.event_type == 'attack']
+                self.assertTrue(attacks)
+                self.assertTrue(all(e.actor_id == ranged_id and e.payload['ranged'] for e in attacks))
+
+    def test_ranged_can_select_and_hit_enemy_behind_front_line(self):
+        base = fixture(enemies=2, policy='hold')
+        actors = tuple(replace(c, attack_range_max=8) if c.team == 'hero'
+                       else replace(c, initial_movement_policy='hold') for c in base.combatants)
+        snapshot = replace(base, combatants=actors)
+        command = BattleCommandInput(1, 0, 'select_target', {'target_id': 'enemy:0'})
+        result = advance(snapshot, create_battle(snapshot), 1000, (command,))
+        self.assertTrue(result.command_results[0].accepted)
+        self.assertEqual(result.state.combatants['enemy:0'].health, 90)
+        self.assertEqual(result.state.combatants['enemy:1'].health, 100)
+
+    def test_ranged_checkpoint_resume_is_deterministic(self):
+        base = fixture()
+        snapshot = replace(base, combatants=(replace(base.combatants[0], attack_range_max=4), base.combatants[1]))
+        first = advance(snapshot, create_battle(snapshot), 2500)
+        restored = state_from_json(snapshot, state_to_json(snapshot, first.state))
+        second = advance(snapshot, restored, 6000)
+        full = advance(snapshot, create_battle(snapshot), 6000)
+        self.assertEqual(second.state, full.state)
+        self.assertEqual(first.events + second.events, full.events)
+
+    def test_legacy_melee_snapshots_remain_supported(self):
+        snapshot = replace(fixture(), rules_version='melee-v1')
+        self.assertEqual(snapshot_from_json(snapshot_to_json(snapshot)), snapshot)
+        self.assertTrue(advance(snapshot, create_battle(snapshot), 5000).events)
+        with self.assertRaises(ValueError):
+            create_battle(replace(snapshot, combatants=(replace(snapshot.combatants[0], attack_range_max=4), snapshot.combatants[1])))
 
     def test_approach_stops_at_melee(self):
         snapshot = fixture()

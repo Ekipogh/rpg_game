@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from item.models import EquipmentSlots, Inventory, InventoryItem
 
@@ -336,6 +337,10 @@ class HeroClassEquipment(models.Model):
 
 
 class Monster(models.Model):
+    attack_range_max = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(8)]
+    )
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     level = models.IntegerField(default=1)
@@ -382,6 +387,10 @@ class Monster(models.Model):
             models.CheckConstraint(
                 condition=models.Q(experience_reward__gte=0),
                 name="monster_experience_nonnegative",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(attack_range_max__gte=1, attack_range_max__lte=8),
+                name="monster_valid_attack_range",
             ),
         ]
 
