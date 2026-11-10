@@ -14,7 +14,6 @@
         {% if result %}
         <div class="alert alert-info" role="status">
           <p>{{ result.title }}: HP {{ result.health_change }}, XP +{{ result.experience_change }}.</p>
-          {% if result.money_change %}<p>Money received: +{{ result.money_change }}.</p>{% endif %}
           {% if result.loot %}
           <p class="mb-1">Loot received:</p>
           <ul>
