@@ -110,6 +110,44 @@ class ItemViewTests(TestCase):
         self.assertEqual(response.context['total_items'], 7)
         self.assertEqual(response.context['total_value'], 345)
 
+    def test_duplicate_equipment_survives_equip_swap_and_unequip(self):
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        self.hero.add_to_inventory(self.weapon, 2)
+        response = self.client.get('/inventory/')
+        self.assertEqual(response.context['weapons'], [self.weapon] * 3)
+
+        response = self.client.post(f'/item/{self.weapon.pk}/use/')
+        self.assertTrue(response.json()['did_change'])
+        response = self.client.get('/inventory/')
+        self.assertEqual(response.context['weapons'], [self.weapon] * 2)
+        self.assertEqual(response.context['equipped_items']['weapon'], self.weapon)
+        self.assertEqual(response.context['total_items'], 3)
+        self.assertEqual(response.context['total_value'], 280)
+
+        other = Weapon.objects.create(name='Second sword')
+        self.hero.add_to_inventory(other)
+        self.assertTrue(self.client.post(f'/item/{other.pk}/use/').json()['success'])
+        self.assertEqual(InventoryItem.objects.get(inventory=self.inventory, item=self.weapon).quantity, 3)
+        self.assertTrue(self.client.post('/item/unequip/weapon/').json()['success'])
+        self.assertEqual(InventoryItem.objects.get(inventory=self.inventory, item=other).quantity, 1)
+
+    def test_consumable_stack_decreases_one_at_a_time(self):
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        self.hero.add_to_inventory(self.consumable, 2)
+        self.hero.add_to_inventory(self.consumable)
+        for remaining in (3, 2, 1):
+            response = self.client.get('/inventory/')
+            self.assertEqual(response.context['consumables'], [self.consumable])
+            self.assertContains(response, f'data-stack-quantity="{remaining}"')
+            self.assertTrue(self.client.post(f'/item/{self.consumable.pk}/use/').json()['success'])
+        self.assertFalse(InventoryItem.objects.filter(inventory=self.inventory, item=self.consumable).exists())
+        self.assertEqual(self.client.get('/inventory/').context['consumables'], [])
+        self.assertEqual(self.client.post(f'/item/{self.consumable.pk}/use/').status_code, 400)
+
     def test_item_detail_weapon(self):
         """Test item detail view for weapon"""
         response = self.client.get(f'/item/{self.weapon.id}/')

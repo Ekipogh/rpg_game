@@ -176,8 +176,9 @@ class ButtonBehaviorTests(TestCase):
             # Find the consumable section
             potion_start = content.find('Behavior Test Potion')
             if potion_start != -1:
-                # Look for the button in a reasonable range after the name
-                potion_section = content[potion_start:potion_start + 1100]
+                # Bound by the section, so badges and stats can grow freely.
+                potion_end = content.index("<!-- Other Items Section -->", potion_start)
+                potion_section = content[potion_start:potion_end]
                 self.assertIn('useItem(', potion_section)
 
     def test_item_cards_are_clickable(self):
