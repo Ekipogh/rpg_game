@@ -116,7 +116,12 @@
       find('health').value = hero.health; find('health').max = hero.max_health;
       find('mana').value = hero.mana; find('mana').max = Math.max(1, hero.max_mana);
       text('target', `Target: ${hero.current_target_id ? actorName(hero.current_target_id) : 'none'}`);
-      text('intention', hero.movement_policy === 'hold' ? 'Holding position.' : 'Approaching your target until within attack range.');
+      const intentions = {
+        hold: 'Holding position.',
+        maintain_range: 'Maintaining maximum attack range.',
+        approach: 'Approaching your target until within attack range.'
+      };
+      text('intention', intentions[hero.movement_policy] || 'Movement policy unavailable.');
       const remaining = Math.max(0, (hero.next_attack_at_ms ?? data.simulation_time_ms) - data.simulation_time_ms);
       find('attack').value = hero.next_attack_at_ms === null ? 0 : 1 - remaining / hero.attack_interval_ms;
       text('attack-text', hero.next_attack_at_ms === null ? 'Stopped' : `${(remaining / 1000).toFixed(2)}s`);
