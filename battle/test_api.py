@@ -104,6 +104,16 @@ class BattleApiTests(TestCase):
             self.assertEqual(self.client.post(self.commands_url, data=body, content_type='application/json').status_code, 400)
         self.assertEqual(BattleCommand.objects.count(), 0)
 
+    def test_maintain_range_command_is_accepted(self):
+        response = self.post(payload={'policy': 'maintain_range'})
+        self.assertEqual(response.status_code, 202)
+        self.start_worker()
+        data = self.client.get(self.state_url).json()
+        self.assertEqual(data['combatants'][0]['movement_policy'],
+                         'maintain_range')
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.movement_policy, 'maintain_range')
+
     def test_csrf_and_http_methods(self):
         secure = Client(enforce_csrf_checks=True)
         session = secure.session; session['hero_id'] = self.hero.pk; session.save()
@@ -191,6 +201,8 @@ class BattleApiTests(TestCase):
     def test_ui_movement_card_and_get_does_not_create_missing_battle(self):
         response = self.client.get(reverse('dungeon_fight'))
         self.assertContains(response, 'Movement policy')
+        self.assertContains(response, 'data-policy="maintain_range"')
+        self.assertContains(response, '>Maintain Range<')
         self.assertContains(response, self.state_url)
         self.assertNotContains(response, '>Dungeon run<')
         self.assertNotContains(response, 'value="resolve"')

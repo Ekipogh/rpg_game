@@ -65,8 +65,9 @@ def submit_command(battle_id, hero_id, command_id, command_type, payload):
         hero = Hero.objects.get(pk=hero_id)
         _encounter(hero, battle)
         if command_type == "set_movement_policy":
-            if set(payload) != {"policy"} or payload["policy"] not in ("approach", "hold"):
-                raise ValueError("Choose Approach or Hold")
+            if set(payload) != {"policy"} or payload["policy"] not in (
+                    "approach", "maintain_range", "hold"):
+                raise ValueError("Choose Approach, Maintain Range, or Hold")
         elif command_type == "select_target":
             if set(payload) != {"target_id"} or type(payload["target_id"]) is not str:
                 raise ValueError("Specify a target")
@@ -186,8 +187,11 @@ def build_snapshot(battle, hero):
     weapon = next((slot.item for slot in slots
                    if slot.slot == "weapon" and isinstance(slot.item, Weapon)), None)
     attack_range_max = weapon.attack_range_max if weapon else 1
+    movement_policy = hero.movement_policy or (
+        "maintain_range" if attack_range_max > 1 else "approach")
     actors = [CombatantSnapshot("hero", "hero", "hero", hero.pk, hero.name,
-        _stats(hero, equipment), 1, attack_range_max, hero.current_health, hero.current_mana, 0, "approach", None)]
+        _stats(hero, equipment), 1, attack_range_max, hero.current_health,
+        hero.current_mana, 0, movement_policy, None)]
     for entry in entries:
         monster = entry.monster
         rewards = RewardSnapshot(monster.experience_reward, tuple(
@@ -319,6 +323,7 @@ def process_battle(battle_id, token, elapsed_ms):
             simulation_time_ms=e.simulation_time_ms, event_type=e.event_type,
             actor_id=e.actor_id, target_id=e.target_id, payload=e.payload) for e in result.events])
         by_sequence = {command.sequence: command for command in queued}
+        accepted_movement_policy = None
         for receipt in result.command_results:
             command = by_sequence[receipt.sequence]
             command.status = "ACCEPTED" if receipt.accepted else "REJECTED"
@@ -326,6 +331,8 @@ def process_battle(battle_id, token, elapsed_ms):
             command.execute_at_ms = inputs[0].execute_at_ms
             command.processed_at = now
             command.save(update_fields=["status", "reject_reason", "execute_at_ms", "processed_at"])
+            if receipt.accepted and command.command_type == "set_movement_policy":
+                accepted_movement_policy = command.payload["policy"]
         battle.checkpoint = json.loads(state_to_json(snapshot, state))
         battle.last_event_sequence = state.last_event_sequence
         battle.last_processed_command_sequence = state.last_processed_command_sequence
@@ -350,6 +357,9 @@ def process_battle(battle_id, token, elapsed_ms):
                 battle.error_code = "simulation_limit"
                 battle.error_message = "Battle exceeded ten minutes of simulation"
                 battle.next_due_at = None
+        if accepted_movement_policy is not None:
+            Hero.objects.filter(pk=hero.pk).update(
+                movement_policy=accepted_movement_policy)
         battle.revision += 1
         battle.full_clean()
         fence(token)

@@ -6,6 +6,12 @@ from item.models import EquipmentSlots, Inventory, InventoryItem
 
 
 class Hero(models.Model):
+    MOVEMENT_POLICY_CHOICES = [
+        ("approach", "Approach"),
+        ("maintain_range", "Maintain Range"),
+        ("hold", "Hold"),
+    ]
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     level = models.IntegerField(default=1)
@@ -28,6 +34,11 @@ class Hero(models.Model):
     evasion = models.IntegerField(default=0)  # EVA
     critical_chance = models.IntegerField(default=5)  # CRIT (percentage)
     critical_damage = models.FloatField(default=1.5)  # CRITDMG (multiplier)
+
+    movement_policy = models.CharField(
+        max_length=20, choices=MOVEMENT_POLICY_CHOICES, null=True, blank=True,
+        help_text="Saved battle movement preference; blank uses the equipped weapon default.",
+    )
 
     is_in_combat = models.BooleanField(default=False)
 

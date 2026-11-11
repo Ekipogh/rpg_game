@@ -52,13 +52,13 @@ report includes money gained, and the combat log records immediate item use. Aut
 The worker applies queued `BattleCommand` rows in sequence order at the next
 processed simulation boundary. The command UUID is the idempotency key; commands
 use `select_target` (`{"target_id": "enemy:0"}`) or `set_movement_policy`
-(`{"policy": "approach"}` / `{"policy": "hold"}`). The session-authorized `POST /battle/<id>/commands/` endpoint validates CSRF,
+(`{"policy": "approach"}`, `{"policy": "maintain_range"}`, or `{"policy": "hold"}`). The session-authorized `POST /battle/<id>/commands/` endpoint validates CSRF,
 allocates sequences transactionally, deduplicates UUID retries, and limits the
 pending queue to 100 requests. The fight page polls
 `GET /battle/<id>/state/?after_seq=N` every 500 ms while visible.
 `GET /battle/<id>/events/?after_seq=N&limit=100` paginates logs; `before_seq=N`
 loads older events. Responses exclude RNG seeds and reward probability tables.
-Approach/Hold controls live in the Movement policy card; clicking an enemy
+Approach/Maintain Range/Hold controls live in the Movement policy card; clicking an enemy
 selects a target. Terminal results link to path choices or home. Admin pages
 provide read-only battle inspection and editable encounter compositions.
 
@@ -107,3 +107,13 @@ combatants, including when selecting a target behind the front line. Accuracy,
 evasion, defense, critical hits, and attack speed use the existing physical
 attack formulas. No ammunition is consumed. Already saved `melee-v1` battles
 continue with their original snapshots; new battles use `ranged-v1`.
+
+Maintain Range moves toward a target beyond maximum attack range and away from a
+target inside maximum range. It stops at the weapon's maximum range. If the next
+lane is occupied or outside the battlefield, the actor stays in place until a
+later movement opportunity.
+
+The worker saves an accepted player movement policy on the hero, so later battles
+reuse it. Until the player chooses a policy, melee weapons and unarmed heroes
+default to Approach, while weapons with range greater than one default to Maintain
+Range. Changing weapons does not replace an explicit saved preference.

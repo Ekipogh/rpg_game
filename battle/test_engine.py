@@ -144,6 +144,47 @@ class CombatTests(TestCase):
         self.assertEqual(result.state.combatants['hero'].lane, 0)
         self.assertTrue(all(0 <= c.lane <= 8 for c in result.state.combatants.values()))
 
+    def test_maintain_range_closes_and_stops_at_maximum_range(self):
+        base = fixture(policy='maintain_range')
+        hero = replace(base.combatants[0], attack_range_max=4)
+        enemy = replace(base.combatants[1], initial_movement_policy='hold')
+        snapshot = replace(base, combatants=(hero, enemy))
+        result = advance(snapshot, create_battle(snapshot), 5000)
+        self.assertEqual(result.state.combatants['hero'].lane, 4)
+        self.assertEqual(result.state.combatants['enemy:0'].lane, 8)
+        hero_moves = [e for e in result.events
+                      if e.event_type == 'move' and e.actor_id == 'hero']
+        self.assertEqual([e.payload['to_lane'] for e in hero_moves], [1, 2, 3, 4])
+
+    def test_maintain_range_withdraws_to_maximum_range(self):
+        base = fixture(policy='maintain_range')
+        hero = replace(base.combatants[0], attack_range_max=4, initial_lane=4)
+        enemy = replace(base.combatants[1], initial_lane=6, initial_movement_policy='hold')
+        snapshot = replace(base, combatants=(hero, enemy))
+        result = advance(snapshot, create_battle(snapshot), 3000)
+        self.assertEqual(result.state.combatants['hero'].lane, 2)
+        self.assertEqual(abs(result.state.combatants['hero'].lane -
+                             result.state.combatants['enemy:0'].lane), 4)
+
+    def test_maintain_range_stays_when_withdrawal_is_outside_battlefield(self):
+        base = fixture(policy='maintain_range')
+        hero = replace(base.combatants[0], attack_range_max=4)
+        enemy = replace(base.combatants[1], initial_lane=2, initial_movement_policy='hold')
+        snapshot = replace(base, combatants=(hero, enemy))
+        result = advance(snapshot, create_battle(snapshot), 2000)
+        self.assertEqual(result.state.combatants['hero'].lane, 0)
+        self.assertFalse(any(e.event_type == 'move' and e.actor_id == 'hero'
+                             for e in result.events))
+
+    def test_maintain_range_command_is_accepted(self):
+        snapshot = fixture()
+        command = BattleCommandInput(
+            1, 0, 'set_movement_policy', {'policy': 'maintain_range'})
+        result = advance(snapshot, create_battle(snapshot), 0, (command,))
+        self.assertTrue(result.command_results[0].accepted)
+        self.assertEqual(result.state.combatants['hero'].movement_policy,
+                         'maintain_range')
+
     def test_blocked_manual_target_rejected(self):
         snapshot = fixture(enemies=2)
         cmd = BattleCommandInput(1, 0, 'select_target', {'target_id': 'enemy:0'})

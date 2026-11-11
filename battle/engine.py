@@ -17,7 +17,7 @@ RULES_VERSION = "ranged-v1"
 RNG_VERSION = "sha256-counter-v1"
 
 Team = Literal["hero", "enemy"]
-MovementPolicy = Literal["approach", "hold"]
+MovementPolicy = Literal["approach", "maintain_range", "hold"]
 
 """ Snapshot Section """
 
@@ -248,7 +248,7 @@ def validate_snapshot(snapshot: BattleSnapshot):
             raise ValueError("Attack range exceeds battlefield")
         if snapshot.rules_version == "melee-v1" and (actor.attack_range_min, actor.attack_range_max) != (1, 1):
             raise ValueError("Legacy battles only support melee range 1")
-        if actor.initial_movement_policy not in ("approach", "hold"):
+        if actor.initial_movement_policy not in ("approach", "maintain_range", "hold"):
             raise ValueError("Unsupported movement policy")
         _integer(actor.initial_health, "initial_health", 1)
         _integer(actor.initial_mana, "initial_mana")
@@ -296,7 +296,8 @@ def validate_state(snapshot: BattleSnapshot, state: BattleState):
     lanes = set()
     for key, actor in state.combatants.items():
         definition = definitions[key]
-        if key != actor.combatant_id or actor.movement_policy not in ("approach", "hold"):
+        if key != actor.combatant_id or actor.movement_policy not in (
+                "approach", "maintain_range", "hold"):
             raise ValueError("Invalid combatant identity or policy")
         for name, maximum in (("health", definition.stats.max_health),
                               ("mana", definition.stats.max_mana),
@@ -485,7 +486,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 hero.selected_target_id = key
         elif command.command_type == "set_movement_policy" and set(command.payload) == {"policy"}:
             policy = command.payload["policy"]
-            if policy not in ("approach", "hold"):
+            if policy not in ("approach", "maintain_range", "hold"):
                 reason = "unsupported_policy"
             else:
                 hero.movement_policy = policy
@@ -517,9 +518,17 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
             target = target_for(actor)
             definition = definitions[actor.combatant_id]
             distance = abs(actor.lane - target.lane) if target else 0
-            if target and actor.movement_policy == "approach" and not definition.attack_range_min <= distance <= definition.attack_range_max:
+            should_approach = (
+                actor.movement_policy in ("approach", "maintain_range")
+                and distance > definition.attack_range_max
+            )
+            should_withdraw = (
+                actor.movement_policy == "maintain_range"
+                and distance < definition.attack_range_max
+            )
+            if target and (should_approach or should_withdraw):
                 direction = 1 if target.lane > actor.lane else -1
-                lane = actor.lane + (direction if distance > definition.attack_range_max else -direction)
+                lane = actor.lane + (direction if should_approach else -direction)
                 if 0 <= lane < snapshot.rules.lane_count and not any(c.health and c.lane == lane for c in actors):
                     old_lane, actor.lane = actor.lane, lane
                     emit("move", actor.combatant_id, from_lane=old_lane, to_lane=lane)

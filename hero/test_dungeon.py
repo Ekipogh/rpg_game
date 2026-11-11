@@ -240,6 +240,7 @@ class DungeonTests(TestCase):
         self.assertNotContains(response, 'name="action" value="resolve"')
         self.assertContains(response, 'Movement policy')
         self.assertContains(response, 'data-policy="approach"')
+        self.assertContains(response, 'data-policy="maintain_range"')
         self.assertContains(response, 'data-policy="hold"')
         self.assertNotContains(response, '>Dungeon run<')
         self.assertContains(response, 'js/fight.js')

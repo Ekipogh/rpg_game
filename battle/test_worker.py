@@ -47,17 +47,33 @@ class WorkerTests(TestCase):
         self.monster.attack_range_max = 5
         self.monster.save()
         battle = self.adopt()
-        self.assertEqual([c.attack_range_max for c in build_snapshot(battle, self.hero).combatants], [4, 5])
+        snapshot = build_snapshot(battle, self.hero)
+        self.assertEqual([c.attack_range_max for c in snapshot.combatants], [4, 5])
+        self.assertEqual(snapshot.combatants[0].initial_movement_policy,
+                         'maintain_range')
         # A weapon swap changes range without changing the hero's class.
         slot.item = Weapon.objects.create(name='Sword', attack_range_max=1)
         slot.save()
-        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
+        snapshot = build_snapshot(battle, self.hero)
+        self.assertEqual(snapshot.combatants[0].attack_range_max, 1)
+        self.assertEqual(snapshot.combatants[0].initial_movement_policy, 'approach')
         slot.item = None
         slot.save()
-        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
+        snapshot = build_snapshot(battle, self.hero)
+        self.assertEqual(snapshot.combatants[0].attack_range_max, 1)
+        self.assertEqual(snapshot.combatants[0].initial_movement_policy, 'approach')
         # Carrying a bow outside the weapon slot does not grant its range.
         EquipmentSlot.objects.create(equipment=equipment, slot='accessory', item=bow)
         self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
+
+    def test_saved_policy_overrides_weapon_default(self):
+        equipment = Equipment.objects.create(hero=self.hero)
+        bow = Weapon.objects.create(name='Preference Bow', attack_range_max=4)
+        EquipmentSlot.objects.create(equipment=equipment, slot='weapon', item=bow)
+        self.hero.movement_policy = 'hold'
+        self.hero.save(update_fields=['movement_policy'])
+        snapshot = build_snapshot(self.adopt(), self.hero)
+        self.assertEqual(snapshot.combatants[0].initial_movement_policy, 'hold')
 
     def adopt(self):
         discover_battles(self.token)
@@ -228,6 +244,8 @@ class WorkerTests(TestCase):
         battle.refresh_from_db()
         self.assertEqual(battle.checkpoint['combatants']['hero']['movement_policy'], 'hold')
         self.assertEqual(battle.last_processed_command_sequence, 3)
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.movement_policy, 'hold')
 
     def test_duplicate_worker_and_expired_token_fenced(self):
         self.assertFalse(acquire_lease('other'))
