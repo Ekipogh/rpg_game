@@ -66,10 +66,44 @@
     p.textContent = `${(event.simulation_time_ms / 1000).toFixed(1)}s · ${describe(event)}`;
     return p;
   }
+  function projectile(event) {
+    if (event.event_type !== 'attack' || event.payload?.presentation_kind !== 'projectile' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Resolve positions without interpreting IDs as selectors. No simulation waits on animation.
+    const cards = Array.from(find('combatants').children);
+    const source = cards.find(card => card.dataset.combatant === event.actor_id);
+    const target = cards.find(card => card.dataset.combatant === event.target_id);
+    const bounds = find('combatants').getBoundingClientRect();
+    const position = (card, id) => {
+      if (card) return card.getBoundingClientRect();
+      // A lethal hit's target has already been removed by authoritative rendering.
+      const actor = latest?.combatants.find(actor => actor.combatant_id === id);
+      if (!actor) return null;
+      return {x: bounds.x + bounds.width * (actor.lane + 0.5) / 9,
+        y: bounds.y + bounds.height / 2, width: 0, height: 0};
+    };
+    const a = position(source, event.actor_id), b = position(target, event.target_id);
+    if (!a || !b) return;
+    const colors = {fire: '#ff8c32', ice: '#9de7ff', lightning: '#ffff40', earth: '#a87544',
+      wind: '#68d391', holy: '#ffd700', dark: '#b779ed'};
+    const orb = document.createElement('span');
+    orb.setAttribute('aria-hidden', 'true');
+    Object.assign(orb.style, {position: 'fixed', pointerEvents: 'none', zIndex: '1000',
+      left: `${a.x + a.width / 2}px`, top: `${a.y + a.height / 2}px`,
+      width: '12px', height: '12px', borderRadius: '50%',
+      background: colors[event.payload.element] || '#d6bcfa', boxShadow: '0 0 12px currentColor'});
+    document.body.append(orb);
+    const animation = orb.animate([
+      {transform: 'translate(-50%, -50%)', opacity: 1},
+      {transform: `translate(${b.x + b.width / 2 - a.x - a.width / 2}px, ${b.y + b.height / 2 - a.y - a.height / 2}px)`, opacity: 0.3}
+    ], {duration: 350, easing: 'ease-out'});
+    animation.onfinish = animation.oncancel = () => orb.remove();
+  }
   function append(events) {
     const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 35;
     for (const event of events) {
       if (event.sequence <= sequence) continue;
+      projectile(event);
       log.append(logNode(event)); sequence = event.sequence;
     }
     while (log.children.length > 500) log.firstElementChild.remove();

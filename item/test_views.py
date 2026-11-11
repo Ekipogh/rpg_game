@@ -230,7 +230,7 @@ class ItemViewTests(TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(data['action_type'], 'equipped')
         self.assertEqual(data['item_type'], 'Weapon')
-        self.assertIn('Attack power increased', data['message'])
+        self.assertIn('ATK +', data['message'])
 
     def test_equip_armor_api(self):
         """Test equipping armor via API"""

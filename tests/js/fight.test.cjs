@@ -51,3 +51,38 @@ test('an initially hidden encounter waits until visible before retrying', () => 
   page.listeners.visibilitychange();
   assert.equal(page.timers.size, 1);
 });
+
+
+test('elemental projectiles are cosmetic, respect reduced motion, and clean up', () => {
+  const functionSource = source.slice(source.indexOf('  function projectile(event)'), source.indexOf('  function append(events)'));
+  let reduced = false, appended = 0, removed = 0, frames;
+  const cards = ['hero', 'enemy:0'].map((id, index) => ({dataset: {combatant: id},
+    getBoundingClientRect: () => ({x: index * 100, y: 0, width: 20, height: 20})}));
+  const orb = {style: {}, setAttribute() {}, remove() { removed++; },
+    animate(value) { frames = value; return this.animation = {}; }};
+  const context = {window: {matchMedia: () => ({matches: reduced})},
+    find: () => ({children: cards, getBoundingClientRect: () => ({x: 0, y: 0, width: 900, height: 100})}),
+    latest: {combatants: [{combatant_id: 'enemy:0', lane: 8}]},
+    document: {createElement: () => orb, body: {append() { appended++; }}}};
+  vm.createContext(context);
+  vm.runInContext(functionSource + '; this.projectile = projectile;', context);
+  const event = {event_type: 'attack', actor_id: 'hero', target_id: 'enemy:0',
+    payload: {presentation_kind: 'projectile', element: 'fire'}};
+  context.projectile(event);
+  assert.equal(appended, 1);
+  assert.equal(orb.style.background, '#ff8c32');
+  assert.equal(frames.length, 2);
+  orb.animation.onfinish();
+  assert.equal(removed, 1);
+  reduced = true;
+  context.projectile(event);
+  assert.equal(appended, 1);
+  reduced = false;
+  cards.pop(); // A lethal hit still animates to the authoritative target lane.
+  context.projectile(event);
+  assert.equal(appended, 2);
+  orb.animation.oncancel();
+  assert.equal(removed, 2);
+  context.projectile({...event, payload: {ranged: true}});
+  assert.equal(appended, 2);
+});

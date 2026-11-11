@@ -10,10 +10,10 @@ import hashlib
 import json
 from typing import get_type_hints, get_origin, get_args
 import types
-from typing import Literal
+from typing import Literal, Union
 
 SCHEMA_VERSION = 1
-RULES_VERSION = "ranged-v1"
+RULES_VERSION = "magic-v1"
 RNG_VERSION = "sha256-counter-v1"
 
 Team = Literal["hero", "enemy"]
@@ -72,6 +72,9 @@ class CombatantSnapshot:
     initial_movement_policy: MovementPolicy
 
     rewards: RewardSnapshot | None  # Enemies only
+    damage_kind: Literal["physical", "magical"] = "physical"
+    projectile_element: Literal["fire", "ice", "lightning", "earth", "wind", "holy", "dark"] | None = None
+    presentation_kind: Literal["melee", "projectile"] = "melee"
 
 
 @dataclass(frozen=True)
@@ -212,7 +215,7 @@ def validate_snapshot(snapshot: BattleSnapshot):
     # Also enforce annotated shapes for callers constructing dataclasses directly.
     _decode(BattleSnapshot, asdict(snapshot))
     if (snapshot.schema_version != SCHEMA_VERSION or
-            snapshot.rules_version not in ("melee-v1", RULES_VERSION) or snapshot.rng_version != RNG_VERSION):
+            snapshot.rules_version not in ("melee-v1", "ranged-v1", RULES_VERSION) or snapshot.rng_version != RNG_VERSION):
         raise ValueError("Unsupported snapshot version")
     for name in ("battle_id", "encounter_id", "encounter_definition_key", "initial_rng_seed"):
         if not getattr(snapshot, name).strip():
@@ -242,6 +245,10 @@ def validate_snapshot(snapshot: BattleSnapshot):
                     raise ValueError("speed must be an integer")
             else:
                 _integer(value, field.name, 1 if field.name == "max_health" else 0)
+        if snapshot.rules_version != RULES_VERSION and (
+                actor.damage_kind != "physical" or actor.projectile_element is not None or
+                actor.presentation_kind != "melee"):
+            raise ValueError("Legacy battle cannot contain attack profiles")
         _integer(actor.attack_range_min, "attack_range_min", 1)
         _integer(actor.attack_range_max, "attack_range_max", actor.attack_range_min)
         if actor.attack_range_max >= snapshot.rules.lane_count:
@@ -542,13 +549,20 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 continue
             attack, defense = definition.stats, definitions[target.combatant_id].stats
             emit("attack", actor.combatant_id, target.combatant_id,
-                 **({"ranged": True} if definition.attack_range_max > 1 else {}))
+                 **({"ranged": True} if definition.attack_range_max > 1 else {}),
+                 **({"damage_kind": definition.damage_kind,
+                     "presentation_kind": definition.presentation_kind,
+                     "element": definition.projectile_element}
+                    if snapshot.rules_version == RULES_VERSION and definition.damage_kind == "magical" else {}))
             if random_integer(state.rng, 0, 9999) >= max(5, min(100, attack.accuracy - defense.evasion)) * 100:
                 emit("miss", actor.combatant_id, target.combatant_id)
                 continue
             critical = random_integer(state.rng, 0, 9999) < max(0, min(100, attack.critical_chance)) * 100
             multiplier = attack.critical_damage_bp if critical else 10000
-            damage = max(1, (max(2, 2 * attack.attack - defense.defense) * multiplier + 10000) // 20000)
+            power, mitigation = ((attack.magic, defense.magic_defense)
+                                 if definition.damage_kind == "magical"
+                                 else (attack.attack, defense.defense))
+            damage = max(1, (max(2, 2 * power - mitigation) * multiplier + 10000) // 20000)
             if critical:
                 emit("critical", actor.combatant_id, target.combatant_id, damage=damage)
             applied = min(target.health, damage)
@@ -579,7 +593,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
 def _decode(cls, value):
     """Strict JSON-shaped reconstruction, including nested dataclasses."""
     origin, args = get_origin(cls), get_args(cls)
-    if origin in (types.UnionType,):
+    if origin in (types.UnionType, Union):
         for option in args:
             try:
                 return _decode(option, value)
@@ -610,11 +624,24 @@ def _decode(cls, value):
 
 def snapshot_to_json(snapshot: BattleSnapshot) -> str:
     validate_snapshot(snapshot)
-    return json.dumps(asdict(snapshot), sort_keys=True, separators=(",", ":"))
+    data = asdict(snapshot)
+    if snapshot.rules_version != RULES_VERSION:
+        for actor in data["combatants"]:
+            for field in ("damage_kind", "projectile_element", "presentation_kind"):
+                actor.pop(field)
+    return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
 
 def snapshot_from_json(data: str) -> BattleSnapshot:
-    snapshot = _decode(BattleSnapshot, json.loads(data))
+    value = json.loads(data)
+    if isinstance(value, dict) and value.get("rules_version") in ("melee-v1", "ranged-v1"):
+        for actor in value.get("combatants", []):
+            for field, default in (("damage_kind", "physical"), ("projectile_element", None),
+                                   ("presentation_kind", "melee")):
+                if field in actor:
+                    raise ValueError("Unexpected legacy attack profile")
+                actor[field] = default
+    snapshot = _decode(BattleSnapshot, value)
     validate_snapshot(snapshot)
     return snapshot
 

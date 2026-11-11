@@ -189,9 +189,14 @@ def build_snapshot(battle, hero):
     attack_range_max = weapon.attack_range_max if weapon else 1
     movement_policy = hero.movement_policy or (
         "maintain_range" if attack_range_max > 1 else "approach")
+    magical = bool(weapon and weapon.basic_attack_kind == "magical" and
+                   attack_range_max > 1 and hero.hero_class.name == "Wizard")
     actors = [CombatantSnapshot("hero", "hero", "hero", hero.pk, hero.name,
         _stats(hero, equipment), 1, attack_range_max, hero.current_health,
-        hero.current_mana, 0, movement_policy, None)]
+        hero.current_mana, 0, movement_policy, None,
+        damage_kind="magical" if magical else "physical",
+        projectile_element=(weapon.element or None) if magical else None,
+        presentation_kind="projectile" if magical else "melee")]
     for entry in entries:
         monster = entry.monster
         rewards = RewardSnapshot(monster.experience_reward, tuple(

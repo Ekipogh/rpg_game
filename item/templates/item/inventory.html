@@ -202,7 +202,7 @@
                             </div>
                             <p class="text-muted dark:!text-gray-400 small mb-2">{{ weapon.description|default:'A reliable weapon for combat.' }}</p>
                             <div class="bg-light dark:!bg-gray-700 rounded p-2 mb-3">
-                              <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
+                              <small class="text-muted dark:!text-gray-300">ATK +{{ weapon.attack_bonus|default:0 }}, ACC +{{ weapon.accuracy_bonus|default:0 }}, MAG +{{ weapon.magic_bonus|default:0 }} • {{ weapon.weapon_type|default:'sword'|title }}</small>
                             </div>
                             <div class="d-flex gap-2">
                               <button class="btn btn-primary btn-sm flex-fill dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-blue-600 dark:text-white" data-category="weapon" data-slot="{{ weapon.equipment_slot|default:'weapon' }}" data-item-name="{{ weapon.name|escape }}" data-item-description="{{ weapon.description|default:'A reliable weapon for combat.'|escape }}" data-item-icon="⚔️" data-badge-class="bg-danger" {% if not weapon.can_equip %}disabled title="{{ weapon.equip_block_reason }}"{% endif %} onclick="event.stopPropagation(); equipItem({{ weapon.id }}, this)">
@@ -648,7 +648,7 @@
         let statsLine = ''
         if (category === 'weapon') {
           const weaponType = escapeHtml(item.weapon_type || 'sword')
-          statsLine = `ATK +${item.attack_bonus || 0}, ACC +${item.accuracy_bonus || 0} • ${weaponType.replace(/\b\w/g, c => c.toUpperCase())}`
+          statsLine = `ATK +${item.attack_bonus || 0}, ACC +${item.accuracy_bonus || 0}, MAG +${item.magic_bonus || 0} • ${weaponType.replace(/\b\w/g, c => c.toUpperCase())}`
         } else if (category === 'armor') {
           const armorType = escapeHtml(item.armor_type || 'leather')
           statsLine = `DEF +${item.defense_bonus || 0}, HP +${item.health_bonus || 0} • ${armorType.replace(/\b\w/g, c => c.toUpperCase())}`

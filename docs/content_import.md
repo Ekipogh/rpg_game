@@ -68,3 +68,26 @@ paths exclude battle definitions without a configured roster of one to three
 monsters. Unconfigured definitions remain registered so saved encounters can
 still be read.
 Stats and rewards still require gameplay balance testing.
+
+
+Wizard basic attacks use the existing Wizard class and starting loadout. Bundled
+channeling staffs explicitly configure `basic_attack_kind: magical`,
+`magic_bonus` matching their existing ATK bonus, and `attack_range_max: 4`.
+These are initial balance values.
+Weapon elements affect projectile color only. MAG (including weapon/accessory
+bonuses) attacks MDEF using the same integer formula, accuracy, critical RNG,
+and timing as physical attacks, with no mana cost. Only a Wizard with an
+explicitly magical weapon of range greater than one uses this profile; other
+weapons/classes fall back to physical damage. Maintain Range still seeks maximum
+range; Approach stops in range and Hold stays stationary.
+
+Deploy with `python manage.py migrate`, then
+`python manage.py import_rpg_content --dry-run` and
+`python manage.py import_rpg_content`. Restart the web process and battle worker.
+The migration defaults existing weapons to physical; importing opts catalog
+staffs into magic without changing equipped item identities. New battles use
+`magic-v1` with strict attack-profile fields in schema 1. Legacy `melee-v1` and
+`ranged-v1` snapshots retain their wire shape and physical rules, and continue
+without re-reading equipment. Existing battles retain their original stats.
+Projectile animations are cosmetic and honor reduced motion; they never delay
+HP reconciliation or introduce travel time into damage.

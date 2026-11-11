@@ -389,3 +389,63 @@ class CombatTests(TestCase):
         state.outcome.loot *= 2
         with self.assertRaises(ValueError):
             validate_state(snapshot, state)
+
+
+class MagicalAttackTests(TestCase):
+    def magic_snapshot(self, **stats):
+        base = fixture(adjacent=True)
+        hero = replace(base.combatants[0], damage_kind='magical',
+                       presentation_kind='projectile', projectile_element='fire',
+                       attack_range_max=4, initial_mana=0,
+                       stats=replace(base.combatants[0].stats, magic=20, **stats))
+        enemy = replace(base.combatants[1],
+                        stats=replace(base.combatants[1].stats, magic_defense=10))
+        return replace(base, combatants=(hero, enemy))
+
+    def damage(self, snapshot):
+        result = advance(snapshot, create_battle(snapshot), 1000)
+        event = next(e for e in result.events if e.event_type == 'damage' and e.actor_id == 'hero')
+        return event.payload['damage'], result
+
+    def test_magical_formula_metadata_and_zero_mana(self):
+        snapshot = self.magic_snapshot()
+        damage, result = self.damage(snapshot)
+        self.assertEqual(damage, 15)
+        attack = next(e for e in result.events if e.event_type == 'attack' and e.actor_id == 'hero')
+        self.assertEqual(attack.payload, dict(ranged=True, damage_kind='magical',
+                                            presentation_kind='projectile', element='fire'))
+        self.assertEqual(result.state.combatants['hero'].mana, 0)
+        self.assertEqual(self.damage(self.magic_snapshot(attack=999))[0], 15)
+        hero, enemy = snapshot.combatants
+        for defense, mdef, expected in [(999, 10, 15), (0, 20, 10)]:
+            changed = replace(snapshot, combatants=(hero, replace(enemy,
+                stats=replace(enemy.stats, defense=defense, magic_defense=mdef))))
+            self.assertEqual(self.damage(changed)[0], expected)
+        changed = replace(snapshot, combatants=(replace(hero, stats=replace(hero.stats, magic=30)), enemy))
+        self.assertEqual(self.damage(changed)[0], 25)
+
+    def test_magical_replay_miss_critical_and_checkpoint(self):
+        for accuracy, crit in [(100, 100), (5, 0)]:
+            snapshot = self.magic_snapshot(accuracy=accuracy, critical_chance=crit)
+            state = create_battle(snapshot)
+            whole = advance(snapshot, state, 3000)
+            first = advance(snapshot, state, 1000)
+            resumed = advance(snapshot_from_json(snapshot_to_json(snapshot)),
+                state_from_json(snapshot, state_to_json(snapshot, first.state)), 3000)
+            self.assertEqual(first.events + resumed.events, whole.events)
+            self.assertEqual(resumed.state, whole.state)
+            self.assertTrue(any(e.event_type == ('critical' if crit else 'miss') for e in whole.events))
+
+    def test_legacy_wire_shape_and_physical_replay(self):
+        for version in ('melee-v1', 'ranged-v1'):
+            snapshot = replace(fixture(adjacent=True), rules_version=version)
+            wire = snapshot_to_json(snapshot)
+            self.assertNotIn('damage_kind', wire)
+            loaded = snapshot_from_json(wire)
+            self.assertEqual(loaded, snapshot)
+            self.assertEqual(advance(loaded, create_battle(loaded), 3000),
+                             advance(snapshot, create_battle(snapshot), 3000))
+            invalid = json.loads(wire)
+            invalid['combatants'][0]['damage_kind'] = 'magical'
+            with self.assertRaises(ValueError):
+                snapshot_from_json(json.dumps(invalid))

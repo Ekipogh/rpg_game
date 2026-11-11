@@ -46,11 +46,13 @@ def item_detail(request, item_id):
     # Add type-specific attributes and methods
     if isinstance(item, Weapon):
         item_info.update({
+            'magic_bonus': item.magic_bonus,
+            'basic_attack_kind': item.basic_attack_kind,
             'attack_bonus': item.attack_bonus,
             'accuracy_bonus': item.accuracy_bonus,
             'weapon_type': item.weapon_type,
             'equipment_slot': item.equipment_slot,
-            'attack_description': f"ATK +{item.attack_bonus}, ACC +{item.accuracy_bonus}",
+            'attack_description': item.get_stats(),
             'can_attack': True,
             'icon_class': 'fas fa-sword',
             'stat_color': 'text-danger',  # Red for attack
@@ -182,6 +184,8 @@ def serialize_inventory_item(item: Item, hero=None) -> dict:
     # Add type-specific attributes
     if isinstance(item, Weapon):
         payload.update({
+            'magic_bonus': item.magic_bonus,
+            'basic_attack_kind': item.basic_attack_kind,
             'attack_bonus': item.attack_bonus,
             'accuracy_bonus': item.accuracy_bonus,
             'weapon_type': item.weapon_type,
@@ -340,7 +344,7 @@ def equip_weapon(hero: Hero, weapon: Weapon) -> Tuple[str, Optional[Item], bool]
     weapon_slot.item = weapon
     weapon_slot.save()
 
-    result = f"Equipped {weapon.name}! Attack power increased by {weapon.attack_bonus}!"
+    result = f"Equipped {weapon.name}! {weapon.get_stats()}"
     if old_weapon:
         result += f" (Unequipped {old_weapon.name})"
 
