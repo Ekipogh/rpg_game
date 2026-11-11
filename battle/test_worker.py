@@ -66,6 +66,33 @@ class WorkerTests(TestCase):
         EquipmentSlot.objects.create(equipment=equipment, slot='accessory', item=bow)
         self.assertEqual(build_snapshot(battle, self.hero).combatants[0].attack_range_max, 1)
 
+    def test_wizard_profile_and_equipment_are_frozen(self):
+        self.hero.hero_class.name = 'Wizard'
+        self.hero.hero_class.save()
+        equipment = Equipment.objects.create(hero=self.hero)
+        staff = Weapon.objects.create(name='Fire staff', basic_attack_kind='magical',
+            magic_bonus=7, accuracy_bonus=3, attack_range_max=4, element='fire')
+        slot = EquipmentSlot.objects.create(equipment=equipment, slot='weapon', item=staff)
+        battle = self.adopt()
+        snapshot = build_snapshot(battle, self.hero)
+        actor = snapshot.combatants[0]
+        self.assertEqual((actor.damage_kind, actor.projectile_element, actor.presentation_kind),
+                         ('magical', 'fire', 'projectile'))
+        self.assertEqual(actor.stats.magic, self.hero.magic + 7)
+        self.assertEqual(actor.stats.accuracy, self.hero.accuracy + 3)
+        wire = snapshot_to_json(snapshot)
+        staff.magic_bonus = 999
+        staff.save()
+        slot.item = Weapon.objects.create(name='Sword')
+        slot.save()
+        self.assertEqual(snapshot_to_json(snapshot), wire)
+        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].damage_kind, 'physical')
+        slot.item = staff
+        slot.save()
+        self.hero.hero_class.name = 'Warrior'
+        self.hero.hero_class.save()
+        self.assertEqual(build_snapshot(battle, self.hero).combatants[0].damage_kind, 'physical')
+
     def test_saved_policy_overrides_weapon_default(self):
         equipment = Equipment.objects.create(hero=self.hero)
         bow = Weapon.objects.create(name='Preference Bow', attack_range_max=4)

@@ -13,8 +13,8 @@ notes:
 - hero_class_restriction is a HeroClass lookup by key; null means unrestricted.
 - initial_equipment is seed metadata, not a HeroClass model field. Apply it during hero creation by creating Equipment
   and EquipmentSlot records.
-- 'Weapon magic bonuses are not supported by the current Weapon model: wizard staffs give modest ATK and elemental
-  damage, while wizard accessories give MAG.'
+- 'Wizard staffs use magical ranged basic attacks with MAG bonuses and elemental
+  presentation only; wizard accessories also give MAG.'
 - Accessory passive_effects and armor health_bonus require combat-engine support to have an effect.
 - Equipment drop chances are independent rolls; original loot, coins, monsters and encounters are preserved.
 items:
@@ -1295,6 +1295,9 @@ items:
   accuracy_bonus: 1
   element: fire
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 3
+  attack_range_max: 4
   equipment_slot: weapon
 - key: briarwood_wizard_1_armor
   model: Armor
@@ -1378,6 +1381,9 @@ items:
   accuracy_bonus: 1
   element: fire
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 4
+  attack_range_max: 4
   equipment_slot: weapon
 - key: briarwood_wizard_2_armor
   model: Armor
@@ -1461,6 +1467,9 @@ items:
   accuracy_bonus: 1
   element: fire
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 5
+  attack_range_max: 4
   equipment_slot: weapon
 - key: drowned_fen_wizard_3_armor
   model: Armor
@@ -1544,6 +1553,9 @@ items:
   accuracy_bonus: 1
   element: ice
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 6
+  attack_range_max: 4
   equipment_slot: weapon
 - key: quarry_wizard_4_armor
   model: Armor
@@ -1627,6 +1639,9 @@ items:
   accuracy_bonus: 2
   element: ice
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 7
+  attack_range_max: 4
   equipment_slot: weapon
 - key: watchtower_wizard_5_armor
   model: Armor
@@ -1712,6 +1727,9 @@ items:
   accuracy_bonus: 2
   element: ice
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 8
+  attack_range_max: 4
   equipment_slot: weapon
 - key: mire_wizard_6_armor
   model: Armor
@@ -1797,6 +1815,9 @@ items:
   accuracy_bonus: 2
   element: lightning
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 9
+  attack_range_max: 4
   equipment_slot: weapon
 - key: frost_wizard_7_armor
   model: Armor
@@ -1882,6 +1903,9 @@ items:
   accuracy_bonus: 2
   element: lightning
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 10
+  attack_range_max: 4
   equipment_slot: weapon
 - key: cinder_wizard_8_armor
   model: Armor
@@ -1967,6 +1991,9 @@ items:
   accuracy_bonus: 2
   element: lightning
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 11
+  attack_range_max: 4
   equipment_slot: weapon
 - key: obsidian_wizard_9_armor
   model: Armor
@@ -2052,6 +2079,9 @@ items:
   accuracy_bonus: 3
   element: earth
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 12
+  attack_range_max: 4
   equipment_slot: weapon
 - key: starfall_wizard_10_armor
   model: Armor
@@ -2137,6 +2167,9 @@ items:
   accuracy_bonus: 3
   element: earth
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 13
+  attack_range_max: 4
   equipment_slot: weapon
 - key: graveward_wizard_11_armor
   model: Armor
@@ -2222,6 +2255,9 @@ items:
   accuracy_bonus: 3
   element: earth
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 14
+  attack_range_max: 4
   equipment_slot: weapon
 - key: prism_wizard_12_armor
   model: Armor
@@ -2307,6 +2343,9 @@ items:
   accuracy_bonus: 3
   element: wind
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 15
+  attack_range_max: 4
   equipment_slot: weapon
 - key: clockwork_wizard_13_armor
   model: Armor
@@ -2392,6 +2431,9 @@ items:
   accuracy_bonus: 3
   element: wind
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 16
+  attack_range_max: 4
   equipment_slot: weapon
 - key: rift_wizard_14_armor
   model: Armor
@@ -2477,6 +2519,9 @@ items:
   accuracy_bonus: 4
   element: wind
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 17
+  attack_range_max: 4
   equipment_slot: weapon
 - key: pale_oath_wizard_15_armor
   model: Armor
@@ -2562,6 +2607,9 @@ items:
   accuracy_bonus: 4
   element: holy
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 18
+  attack_range_max: 4
   equipment_slot: weapon
 - key: storm_wizard_16_armor
   model: Armor
@@ -2647,6 +2695,9 @@ items:
   accuracy_bonus: 4
   element: holy
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 19
+  attack_range_max: 4
   equipment_slot: weapon
 - key: eclipse_wizard_17_armor
   model: Armor
@@ -2732,6 +2783,9 @@ items:
   accuracy_bonus: 4
   element: holy
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 20
+  attack_range_max: 4
   equipment_slot: weapon
 - key: abyss_wizard_18_armor
   model: Armor
@@ -2817,6 +2871,9 @@ items:
   accuracy_bonus: 4
   element: dark
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 21
+  attack_range_max: 4
   equipment_slot: weapon
 - key: seraphic_wizard_19_armor
   model: Armor
@@ -2902,6 +2959,9 @@ items:
   accuracy_bonus: 5
   element: dark
   weapon_type: staff
+  basic_attack_kind: magical
+  magic_bonus: 22
+  attack_range_max: 4
   equipment_slot: weapon
 - key: world_end_wizard_20_armor
   model: Armor

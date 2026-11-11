@@ -54,6 +54,9 @@ class Weapon(Item):
         default=1, validators=[MinValueValidator(1), MaxValueValidator(8)]
     )
 
+    basic_attack_kind = models.CharField(max_length=10, default="physical",
+        choices=[("physical", "Physical"), ("magical", "Magical")])
+    magic_bonus = models.IntegerField(default=0)
     attack_bonus = models.IntegerField(default=0)  # +ATK
     accuracy_bonus = models.IntegerField(default=0)  # +ACC
     element = models.CharField(
@@ -81,6 +84,9 @@ class Weapon(Item):
         constraints = [models.CheckConstraint(
             condition=models.Q(attack_range_max__gte=1, attack_range_max__lte=8),
             name="weapon_valid_attack_range",
+        ), models.CheckConstraint(
+            condition=models.Q(basic_attack_kind__in=["physical", "magical"]),
+            name="weapon_valid_basic_attack_kind",
         )]
 
     @property
@@ -89,6 +95,7 @@ class Weapon(Item):
 
     def get_stats(self):
         stats = f"ATK +{self.attack_bonus}, ACC +{self.accuracy_bonus}, Range 1?{self.attack_range_max}"
+        stats += f", MAG +{self.magic_bonus}, {self.basic_attack_kind.capitalize()} basic attack"
         if self.element:
             stats += f", Element: {self.element.capitalize()}"
         return stats

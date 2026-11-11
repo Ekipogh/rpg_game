@@ -154,6 +154,8 @@ class Hero(models.Model):
     def magic_mod(self):
         """Calculate magic modifier from equipment and buffs"""
         mod = 0
+        if self.weapon:
+            mod += getattr(self.weapon, "magic_bonus", 0)
         if self.accessory:
             mod += getattr(self.accessory, "magic_bonus", 0)
         return mod
