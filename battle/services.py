@@ -16,7 +16,7 @@ from django.utils import timezone
 from hero.dungeon import _snapshot, generate_paths
 from hero.encounters import ENCOUNTER_DEFINITIONS, Encounter
 from hero.models import Hero
-from item.models import EquipmentSlot, Item, Instant, Weapon
+from item.models import EquipmentSlot, Item, Instant, Weapon, Armor, Accessory
 from item.services import receive_item
 from .engine import (
     BattleCommandInput, BattleRules, BattleSnapshot, CombatStats,
@@ -196,7 +196,13 @@ def build_snapshot(battle, hero):
         hero.current_mana, 0, movement_policy, None,
         damage_kind="magical" if magical else "physical",
         projectile_element=(weapon.element or None) if magical else None,
-        presentation_kind="projectile" if magical else "melee")]
+        presentation_kind="projectile" if magical else "melee",
+        elemental_resistances_bp={key: round(value * 10000) for slot in slots
+            if slot.slot == "armor" and isinstance(slot.item, Armor)
+            for key, value in slot.item.elemental_resistances.items()},
+        status_immunities=tuple(name for slot in slots
+            if slot.slot == "accessory" and isinstance(slot.item, Accessory)
+            for name in slot.item.status_immunities))]
     for entry in entries:
         monster = entry.monster
         rewards = RewardSnapshot(monster.experience_reward, tuple(
