@@ -124,6 +124,22 @@ class ElementalTests(TestCase):
         self.assertEqual(chain[0].target_id, 'enemy:1')
         self.assertEqual(chain[0].payload['applied'], 18)
 
+    def test_static_charge_immunity_protects_secondary_recipient(self):
+        for enemies in (2, 3):
+            with self.subTest(enemies=enemies):
+                snapshot, state = self.setup_battle('lightning', enemies=enemies)
+                hero, primary, secondary, *others = snapshot.combatants
+                snapshot = replace(snapshot, combatants=(hero, primary,
+                    replace(secondary, status_immunities=('static_charge',)), *others))
+                with patch('battle.engine.random_integer', return_value=0):
+                    result = advance(snapshot, state, 1000)
+                self.assertLess(result.state.combatants['enemy:0'].health, 1000)
+                self.assertEqual(result.state.combatants['enemy:1'].health, 1000)
+                self.assertFalse(any(e.payload.get('effect') == 'static_charge'
+                                     for e in result.events))
+                if enemies == 3:
+                    self.assertEqual(result.state.combatants['enemy:2'].health, 1000)
+
     def test_stagger_cap_and_boss_adjustment(self):
         for boss, expected in ((False, 1000), (True, 800)):
             snapshot, state = self.setup_battle('earth', boss=boss)
@@ -167,6 +183,44 @@ class ElementalTests(TestCase):
             result = advance(snapshot, state, 1500)
         self.assertEqual(result.state.combatants['enemy:0'].lane, 1)
         self.assertEqual(result.state.combatants['enemy:0'].next_movement_at_ms, 1834)
+
+    def test_chill_expiry_restores_remaining_movement_delay(self):
+        snapshot, state = self.setup_battle('ice')
+        state.combatants['enemy:0'].movement_policy = 'approach'
+        state.combatants['enemy:0'].next_movement_at_ms = 1500
+        state.combatants['hero'].lane = 8
+        with patch('battle.engine.random_integer', return_value=0):
+            chilled = advance(snapshot, state, 1000)
+        # Prevent reapplications so the original Chill expires at 4000 ms.
+        chilled.state.combatants['hero'].next_attack_at_ms = 10000
+        before_expiry = advance(snapshot, chilled.state, 3999)
+        target = before_expiry.state.combatants['enemy:0']
+        self.assertEqual(target.next_movement_at_ms, 5168)
+        self.assertEqual([e.simulation_time_ms for e in before_expiry.events
+                          if e.event_type == 'move'], [1834, 3501])
+        restored = state_from_json(snapshot, state_to_json(snapshot, before_expiry.state))
+        expired = advance(snapshot, restored, 4000)
+        target = expired.state.combatants['enemy:0']
+        self.assertNotIn('chilled', target.statuses)
+        self.assertEqual(target.next_movement_at_ms, 4701)
+        resumed = advance(snapshot, expired.state, 5701)
+        self.assertEqual([e.simulation_time_ms for e in resumed.events
+                          if e.event_type == 'move'], [4701, 5701])
+        whole = advance(snapshot, chilled.state, 5701)
+        self.assertEqual(whole.state, resumed.state)
+        self.assertEqual(whole.events, before_expiry.events + expired.events + resumed.events)
+
+    def test_chill_expiry_at_movement_timestamp_keeps_action_due(self):
+        snapshot, state = self.setup_battle('ice')
+        target = state.combatants['enemy:0']
+        target.movement_policy = 'approach'
+        target.statuses['chilled'] = StatusInstance('chilled', 'hero', 1500)
+        target.next_movement_at_ms = 1500
+        state.combatants['hero'].lane = 8
+        state.combatants['hero'].next_attack_at_ms = 10000
+        result = advance(snapshot, state, 1500)
+        self.assertEqual(result.state.combatants['enemy:0'].lane, 2)
+        self.assertEqual(result.state.combatants['enemy:0'].next_movement_at_ms, 2500)
 
     def test_withering_changes_actual_attack_damage(self):
         snapshot, state = self.setup_battle('dark')

@@ -542,6 +542,14 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 target_for(other)
         return applied
 
+    def remove_status(actor, name):
+        if name == "chilled":
+            # Preserve movement progress, converting the remaining slowed delay
+            # back to normal speed. Round up so movement never happens early.
+            remaining = actor.next_movement_at_ms - state.simulation_time_ms
+            actor.next_movement_at_ms = state.simulation_time_ms + (remaining * 60 + 99) // 100
+        del actor.statuses[name]
+
     def effect(actor, target, damage, applied):
         element = definitions[actor.combatant_id].projectile_element
         if not element or not applied:
@@ -572,7 +580,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 duration = 3000
                 if "chilled" in target.statuses and not boss and "frozen" not in immunities:
                     name, duration = "frozen", 1500
-                    del target.statuses["chilled"]
+                    remove_status(target, "chilled")
                 elif "frozen" in target.statuses:
                     return
             else:
@@ -596,7 +604,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
             candidates = [c for c in actors if c.health and c is not target and
                           definitions[c.combatant_id].team == definitions[target.combatant_id].team and abs(c.lane - target.lane) <= 3]
             secondary = min(candidates, key=lambda c: (abs(c.lane - target.lane), c.combatant_id), default=None)
-            if secondary:
+            if secondary and "static_charge" not in definitions[secondary.combatant_id].status_immunities:
                 deal(actor.combatant_id, secondary, resisted(secondary, (damage * 35 + 50) // 100, "lightning"), element="lightning", effect="static_charge", critical=False)
 
     def execute(command):
@@ -644,7 +652,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                     deal(status.source_id, actor, resisted(actor, status.potency, "fire"), element="fire", effect="burning", critical=False)
                     status.next_tick_at_ms += 1000
                 if name in actor.statuses and status.expires_at_ms <= timestamp:
-                    del actor.statuses[name]
+                    remove_status(actor, name)
                     emit("status_expired", target=actor.combatant_id, status=name)
             target_for(actor)
         finish_if_needed()
