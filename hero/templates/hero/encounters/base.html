@@ -6,9 +6,11 @@
 {% endblock %}
 {% block content %}
   <div class="container py-4 text-gray-900 dark:text-gray-100" style="max-width: 720px;">
-    {% for message in messages %}
+    <div class="message-overlay">
+      {% for message in messages %}
       <div class="alert alert-info" role="status">{{ message }}</div>
     {% endfor %}
+    </div>
     <h1>
       {% block encounter_heading %}
         Encounter

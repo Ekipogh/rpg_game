@@ -6,9 +6,12 @@
 {% endblock %}
 {% block title %}{{ hero.name }} - Home{% endblock %}
 {% block content %}
-    {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
+    <div class="message-overlay">
+      {% for message in messages %}<div class="alert alert-info" role="status" onclick="closeMessageAlert()">{{ message }}</div>{% endfor %}
+    </div>
     {% csrf_token %}
     {% unicorn 'home-screen' %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript">
         // fronted healing over time logic
         // for demonstration purposes only
