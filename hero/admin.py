@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.urls import path
+
+from hero.content_admin import import_content
 
 from hero.models import Hero, HeroClass, Monster, MonsterLoot
 
@@ -10,6 +13,13 @@ class HeroAdmin(admin.ModelAdmin):
 
 
 class HeroClassAdmin(admin.ModelAdmin):
+    change_list_template = "admin/hero/hero_class_change_list.html"
+
+    def get_urls(self):
+        return [path("import-content/", self.admin_site.admin_view(
+            lambda request: import_content(request, self.admin_site)
+        ), name="hero_content_import")] + super().get_urls()
+
     list_display = (
         "name",
         "base_health",
