@@ -73,3 +73,22 @@ body {
     object-fit: contain;
     image-rendering: pixelated;
 }
+
+/* Feedback floats above the page without moving its content. */
+.message-overlay {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1080;
+    width: min(42rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    pointer-events: none;
+}
+
+.message-overlay .alert {
+    margin-bottom: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 20%);
+    pointer-events: auto;
+}

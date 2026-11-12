@@ -4,7 +4,9 @@
       <div class="fight-brand">Dungeon encounter</div>
       <span class="fight-floor">Floor {{ floor }}</span>
     </header>
-    {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
+    <div class="message-overlay">
+      {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
+    </div>
     <div class="fight-layout">
       <div class="fight-main">
         <section class="fight-card fight-stage-card" aria-labelledby="fight-title">
