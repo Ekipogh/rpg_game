@@ -52,6 +52,7 @@
       case 'miss': return `${a} misses ${b}.`;
       case 'critical': return `${a} lands a critical hit.`;
       case 'damage': return `${b} takes ${p.applied} damage (${p.health} HP remaining).`;
+      case 'consumable_use': return `${a} uses ${p.name}: +${p.health_change} HP, +${p.mana_change} MP.`;
       case 'status_applied': return `${b} gains ${p.status}.`;
       case 'status_expired': return `${b}: ${p.status} expires.`;
       case 'heal': return `${b} recovers ${p.applied} HP.`;

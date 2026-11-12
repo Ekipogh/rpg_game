@@ -121,6 +121,29 @@ class WorkerTests(TestCase):
         discover_battles(self.token)
         return Battle.objects.get(hero=self.hero)
 
+    def test_consumable_during_active_battle_updates_checkpoint_and_worker_continues(self):
+        from item.models import Consumable
+        self.hero.current_health = 400
+        self.hero.current_mana = 10
+        self.hero.save()
+        potion = Consumable.objects.create(name='Restoration', heal_amount=30, mana_restore=15)
+        self.hero.add_to_inventory(potion, 2)
+        battle = self.adopt()
+        process_battle(battle.pk, self.token, 0)
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        response = self.client.post(f'/item/{potion.pk}/use/')
+        self.assertEqual(response.status_code, 200, response.content)
+        self.hero.refresh_from_db()
+        self.assertEqual((self.hero.current_health, self.hero.current_mana), (430, 25))
+        self.assertEqual(InventoryItem.objects.get(item=potion).quantity, 1)
+        battle.refresh_from_db()
+        battle.full_clean()
+        event = battle.events.get(event_type='consumable_use')
+        self.assertEqual(event.payload['health_change'], 30)
+        self.assertEqual(process_battle(battle.pk, self.token, 0), 'ACTIVE')
+
     def test_discovery_skips_idle_expeditions_before_bounding_candidates(self):
         choices = create_run()
         choices['phase'] = 'choices'

@@ -31,6 +31,33 @@ LEASE_SECONDS = 15
 MAX_BATCH_MS = 1000
 
 
+def sync_consumable_resources(hero, item, before):
+    """Record manual restoration at a checkpoint boundary under the item write lock."""
+    battle = Battle.objects.filter(hero=hero, status__in=['ACTIVE', 'PAUSED_ERROR']).first()
+    if battle is None or battle.checkpoint is None:
+        return
+    snapshot = snapshot_from_json(json.dumps(battle.snapshot))
+    state = state_from_json(snapshot, json.dumps(battle.checkpoint))
+    if state.phase != 'active':
+        raise BattleConflict('Battle is already complete')
+    actor = state.combatants['hero']
+    if (actor.health, actor.mana) != before[:2]:
+        raise BattleConflict('Hero resources changed outside the combat engine')
+    if actor.health <= 0:
+        raise BattleConflict('Cannot use consumables after defeat')
+    actor.health, actor.mana = hero.current_health, hero.current_mana
+    state.last_event_sequence += 1
+    battle.checkpoint = json.loads(state_to_json(snapshot, state))
+    battle.last_event_sequence = state.last_event_sequence
+    battle.revision += 1
+    battle.full_clean()
+    BattleEvent.objects.create(battle=battle, sequence=state.last_event_sequence,
+        simulation_time_ms=state.simulation_time_ms, event_type='consumable_use',
+        actor_id='hero', target_id='hero', payload={'name': item.name,
+            'health_change': actor.health - before[0], 'mana_change': actor.mana - before[1]})
+    battle.save(update_fields=['checkpoint', 'last_event_sequence', 'revision', 'updated_at'])
+
+
 def loot_report(drops):
     """Group awarded stacks by item for display; never roll or grant rewards."""
     quantities = {}

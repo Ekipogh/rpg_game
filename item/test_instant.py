@@ -94,3 +94,26 @@ class InstantItemTests(TestCase):
         self.assertEqual(self.client.post(url).status_code, 400)
         self.hero.refresh_from_db()
         self.assertEqual(self.hero.money, 27)
+
+    def test_consumables_preserve_dungeon_run_in_encounter_and_choices(self):
+        from hero.dungeon import create_run
+        from hero.encounters import Encounter
+        item = Consumable.objects.create(name='Dungeon potion', heal_amount=10, mana_restore=5)
+        self.hero.add_to_inventory(item, 2)
+        session = self.client.session
+        session['hero_id'] = self.hero.pk
+        session.save()
+        for phase in ('encounter', 'choices'):
+            with self.subTest(phase=phase):
+                run = create_run()
+                run['current_encounter'] = Encounter.create('spike_pit', 1).to_dict()
+                run['phase'] = phase
+                Hero.objects.filter(pk=self.hero.pk).update(
+                    dungeon_run=run, is_in_combat=True, current_health=50, current_mana=20)
+                response = self.client.post(reverse('use_item_api', args=[item.pk]))
+                self.assertEqual(response.status_code, 200, response.content)
+                self.hero.refresh_from_db()
+                self.assertEqual((self.hero.current_health, self.hero.current_mana), (60, 25))
+                self.assertEqual(self.hero.dungeon_run, run)
+                self.assertTrue(self.hero.is_in_combat)
+        self.assertFalse(InventoryItem.objects.filter(item=item).exists())
