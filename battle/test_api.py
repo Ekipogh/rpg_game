@@ -40,6 +40,29 @@ class BattleApiTests(TestCase):
     def start_worker(self):
         process_battle(self.battle.pk, 'test-worker', 0)
 
+    def test_fight_items_are_owned_consumables_and_refresh_after_use(self):
+        from item.models import Consumable, Instant, Weapon, InventoryItem
+        potion = Consumable.objects.create(name='Fight potion', heal_amount=10, mana_restore=5)
+        self.hero.add_to_inventory(potion, 2)
+        self.hero.add_to_inventory(Weapon.objects.create(name='Spare sword'))
+        other_potion = Consumable.objects.create(name='Other potion')
+        self.other.add_to_inventory(other_potion)
+        instant = Instant.objects.create(name='Automatic item')
+        self.hero.refresh_from_db()
+        InventoryItem.objects.create(inventory=self.hero.inventory, item=instant, quantity=1)
+        Hero.objects.filter(pk=self.hero.pk).update(current_health=50, current_mana=10)
+        self.start_worker()
+        items = self.client.get(self.state_url).json()['items']
+        self.assertEqual(items, [{'id': potion.pk, 'name': 'Fight potion', 'quantity': 2,
+            'heal_amount': 10, 'mana_restore': 5,
+            'use_url': reverse('use_item_api', args=[potion.pk])}])
+        for remaining in (1, 0):
+            response = self.client.post(items[0]['use_url'])
+            self.assertEqual(response.status_code, 200, response.content)
+            current = self.client.get(self.state_url).json()
+            self.assertEqual([i['quantity'] for i in current['items']], [remaining] if remaining else [])
+        process_battle(self.battle.pk, 'test-worker', 0)
+
     def test_entry_creates_pending_battle_atomically_and_resumes_once(self):
         self.assertEqual(self.battle.status, 'PENDING')
         self.hero.refresh_from_db()

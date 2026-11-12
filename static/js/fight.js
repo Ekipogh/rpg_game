@@ -18,6 +18,7 @@
   }
   let sequence = 0, revision = -1, timer, busy = false, done = false;
   let latest = null, pending = null, connected = false;
+  let usingItem = false;
   const names = new Map();
   const log = find('log');
   const text = (name, value) => { find(name).textContent = value; };
@@ -31,6 +32,9 @@
     const enabled = connected && latest?.worker_available && latest.status === 'ACTIVE' && !pending;
     root.querySelectorAll('[data-policy], [data-enemy]').forEach(button => {
       button.disabled = !enabled || button.dataset.dead === 'true';
+    });
+    root.querySelectorAll('[data-use-item]').forEach(button => {
+      button.disabled = !connected || !latest?.worker_available || latest.status !== 'ACTIVE' || usingItem;
     });
   }
   async function read(url, options) {
@@ -115,8 +119,38 @@
     find('older').hidden = !(Number(log.querySelector('[data-sequence]')?.dataset.sequence) > 1);
     if (atBottom) log.scrollTop = log.scrollHeight;
   }
+  function renderItems(itemList = []) {
+    const items = find('items');
+    if (items) {
+      const existing = new Map(Array.from(items.children, button => [button.dataset.useItem, button]));
+      const present = new Set(itemList.map(item => String(item.id)));
+      for (const [id, button] of existing) {
+        if (!present.has(id)) button.remove();
+      }
+      for (const item of itemList) {
+        const id = String(item.id);
+        let button = existing.get(id);
+        if (!button) {
+          button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn fight-policy-button';
+          button.dataset.useItem = id;
+          button.addEventListener('click', () => {
+            const current = latest.items?.find(entry => String(entry.id) === id);
+            if (current) useItem(current);
+          });
+          items.append(button);
+        }
+        const label = `${item.name} × ${item.quantity}`;
+        if (button.textContent !== label) button.textContent = label;
+        button.title = `Restores ${item.heal_amount} HP and ${item.mana_restore} MP`;
+      }
+      find('item-empty').hidden = Boolean(itemList.length);
+    }
+  }
   function render(data) {
     latest = data;
+    renderItems(data.items);
     text('status', statusNames[data.status] || data.status);
     text('connection', data.error || (!data.worker_available && data.status !== 'FINISHED' ? 'Combat is paused while the battle server reconnects.' : ''));
     const stage = find('combatants');
@@ -207,6 +241,25 @@
     } finally {
       busy = false;
       if (!done) timer = setTimeout(poll, more ? 0 : 500);
+    }
+  }
+  async function useItem(item) {
+    if (usingItem || !connected || latest?.status !== 'ACTIVE') return;
+    usingItem = true;
+    controls();
+    text('item-status', `Using ${item.name}…`);
+    try {
+      const data = await read(item.use_url, {method: 'POST', headers: {
+        'X-CSRFToken': root.querySelector('[name=csrfmiddlewaretoken]').value
+      }});
+      text('item-status', data.message || `Used ${item.name}.`);
+    } catch (error) {
+      text('item-status', error.message);
+    } finally {
+      // Refresh stock from the server; never retry a potentially delivered use.
+      usingItem = false;
+      await poll();
+      controls();
     }
   }
   async function transmit() {

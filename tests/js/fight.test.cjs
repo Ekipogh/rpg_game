@@ -4,6 +4,57 @@ const {test} = require('node:test');
 const vm = require('node:vm');
 const source = readFileSync(require('node:path').join(__dirname, '../../static/js/fight.js'), 'utf8');
 
+test('item polling preserves focused buttons and updates stock and click data in place', () => {
+  const functionSource = source.slice(source.indexOf('  function renderItems('), source.indexOf('  function render(data)'));
+  const items = {children: [], append(button) { this.children.push(button); }};
+  const empty = {};
+  let created = 0, activeElement = null, used = [];
+  const context = {
+    find: name => name === 'items' ? items : empty,
+    latest: {items: []},
+    useItem: item => used.push(item),
+    document: {createElement() {
+      created++;
+      return {dataset: {}, textContent: '', listeners: [],
+        addEventListener(event, callback) { this.listeners.push(callback); },
+        focus() { activeElement = this; },
+        remove() {
+          items.children.splice(items.children.indexOf(this), 1);
+          if (activeElement === this) activeElement = null;
+        }};
+    }},
+  };
+  vm.createContext(context);
+  vm.runInContext(functionSource + '; this.renderItems = renderItems;', context);
+  const potion = {id: 1, name: 'Potion', quantity: 5, heal_amount: 10, mana_restore: 0};
+  const mana = {id: 2, name: 'Mana', quantity: 2, heal_amount: 0, mana_restore: 20};
+  const render = list => { context.latest = {items: list}; context.renderItems(list); };
+  render([potion, mana]);
+  const [first, second] = items.children;
+  first.focus(); // Focus, or a pointer-down, survives the next polling update.
+  render([{...potion}, {...mana}]);
+  assert.equal(items.children[0], first);
+  assert.equal(items.children[1], second);
+  assert.equal(activeElement, first);
+  assert.equal(created, 2);
+  const changed = {...potion, quantity: 4, use_url: '/updated/'};
+  render([changed, mana]);
+  assert.equal(activeElement, first);
+  assert.equal(first.textContent, 'Potion × 4');
+  assert.equal(first.listeners.length, 1);
+  first.listeners[0]();
+  assert.equal(used[0], changed);
+  second.focus();
+  render([mana, {...potion, id: 3}]);
+  assert.equal(items.children[0], second);
+  assert.equal(activeElement, second);
+  assert.equal(created, 3);
+  assert.equal(empty.hidden, true);
+  render([]);
+  assert.equal(items.children.length, 0);
+  assert.equal(empty.hidden, false);
+});
+
 function waitingPage(hidden = false) {
   const timers = new Map();
   const listeners = {};
