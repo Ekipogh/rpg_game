@@ -18,6 +18,7 @@
   }
   let sequence = 0, revision = -1, timer, busy = false, done = false;
   let latest = null, pending = null, connected = false;
+  let usingItem = false;
   const names = new Map();
   const log = find('log');
   const text = (name, value) => { find(name).textContent = value; };
@@ -31,6 +32,9 @@
     const enabled = connected && latest?.worker_available && latest.status === 'ACTIVE' && !pending;
     root.querySelectorAll('[data-policy], [data-enemy]').forEach(button => {
       button.disabled = !enabled || button.dataset.dead === 'true';
+    });
+    root.querySelectorAll('[data-use-item]').forEach(button => {
+      button.disabled = !connected || !latest?.worker_available || latest.status !== 'ACTIVE' || usingItem;
     });
   }
   async function read(url, options) {
@@ -117,6 +121,21 @@
   }
   function render(data) {
     latest = data;
+    const items = find('items');
+    if (items) {
+      items.replaceChildren();
+      for (const item of data.items || []) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn fight-policy-button';
+        button.dataset.useItem = item.id;
+        button.textContent = `${item.name} × ${item.quantity}`;
+        button.title = `Restores ${item.heal_amount} HP and ${item.mana_restore} MP`;
+        button.addEventListener('click', () => useItem(item));
+        items.append(button);
+      }
+      find('item-empty').hidden = Boolean(data.items?.length);
+    }
     text('status', statusNames[data.status] || data.status);
     text('connection', data.error || (!data.worker_available && data.status !== 'FINISHED' ? 'Combat is paused while the battle server reconnects.' : ''));
     const stage = find('combatants');
@@ -207,6 +226,25 @@
     } finally {
       busy = false;
       if (!done) timer = setTimeout(poll, more ? 0 : 500);
+    }
+  }
+  async function useItem(item) {
+    if (usingItem || !connected || latest?.status !== 'ACTIVE') return;
+    usingItem = true;
+    controls();
+    text('item-status', `Using ${item.name}…`);
+    try {
+      const data = await read(item.use_url, {method: 'POST', headers: {
+        'X-CSRFToken': root.querySelector('[name=csrfmiddlewaretoken]').value
+      }});
+      text('item-status', data.message || `Used ${item.name}.`);
+    } catch (error) {
+      text('item-status', error.message);
+    } finally {
+      // Refresh stock from the server; never retry a potentially delivered use.
+      usingItem = false;
+      await poll();
+      controls();
     }
   }
   async function transmit() {

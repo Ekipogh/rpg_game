@@ -3,7 +3,6 @@
     <header class="fight-topbar">
       <div class="fight-brand">Dungeon encounter</div>
       <span class="fight-floor">Floor {{ floor }}</span>
-      <a href="{% url 'inventory' %}" class="btn btn-outline-secondary">Use consumables</a>
     </header>
     <div class="message-overlay">
       {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
@@ -46,6 +45,12 @@
         </section>
       </div>
       <aside class="fight-sidebar">
+        <section class="fight-card fight-items-card" aria-labelledby="fight-items-title">
+          <h2 id="fight-items-title">Items</h2>
+          <div class="d-grid gap-2" data-items></div>
+          <p data-item-empty>No consumables available.</p>
+          <p data-item-status role="status"></p>
+        </section>
         <section class="fight-card fight-action-card" aria-labelledby="movement-policy-title">
           <p class="fight-eyebrow">Combat movement</p>
           <h2 id="movement-policy-title">Movement policy</h2>

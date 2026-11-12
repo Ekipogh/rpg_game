@@ -14,6 +14,7 @@ from django.views.decorators.http import require_GET, require_POST
 from .models import Battle, BattleWorkerLease
 from .services import BattleConflict, LEASE_NAME, submit_command, loot_report
 from .engine import CombatStats, BattleRules, attack_interval_ms
+from item.models import Consumable, Instant, InventoryItem
 
 
 def selected_battle(request, battle_id):
@@ -71,7 +72,15 @@ def state_view(request, battle_id):
                 battle.events.filter(event_type='instant_use').values_list('payload', flat=True))
             result = {**result, 'loot': loot_report(result.get('loot', [])), 'money_change': money_change}
         available = bool(lease and lease.owner_token and lease.expires_at and lease.expires_at > timezone.now())
+        items = []
+        for stock in InventoryItem.objects.filter(inventory_id=battle.hero.inventory_id, quantity__gt=0).select_related('item'):
+            item = stock.item.get_real_instance()
+            if isinstance(item, Consumable) and not isinstance(item, Instant):
+                items.append({'id': item.pk, 'name': item.name, 'quantity': stock.quantity,
+                    'heal_amount': item.heal_amount, 'mana_restore': item.mana_restore,
+                    'use_url': reverse('use_item_api', args=[item.pk])})
         data = {'id': battle.pk, 'revision': battle.revision, 'status': battle.status,
+            'items': items,
             'simulation_time_ms': state.get('simulation_time_ms', 0), 'combatants': actors,
             'lane_count': snapshot.get('rules', {}).get('lane_count', 9),
             'last_event_sequence': battle.last_event_sequence, 'worker_available': available,
