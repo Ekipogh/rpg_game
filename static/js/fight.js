@@ -52,6 +52,10 @@
       case 'miss': return `${a} misses ${b}.`;
       case 'critical': return `${a} lands a critical hit.`;
       case 'damage': return `${b} takes ${p.applied} damage (${p.health} HP remaining).`;
+      case 'status_applied': return `${b} gains ${p.status}.`;
+      case 'status_expired': return `${b}: ${p.status} expires.`;
+      case 'heal': return `${b} recovers ${p.applied} HP.`;
+      case 'stagger': return `${b}'s next attack is delayed by ${p.delay_ms} ms.`;
       case 'defeat': return `${a} is defeated.`;
       case 'instant_use': return `${a} immediately uses ${p.name} × ${p.quantity}.${p.money_change ? ` +${p.money_change} money.` : ''}${p.health_change ? ` +${p.health_change} HP.` : ''}${p.mana_change ? ` +${p.mana_change} MP.` : ''}`;
       case 'target_change': return event.target_id ? `${a} targets ${b}.` : `${a} has no target.`;
@@ -134,7 +138,7 @@
       card.style.gridColumn = actor.lane + 1;
       card.style.gridRow = '1';
       card.children[0].textContent = actor.name;
-      card.children[1].textContent = `${actor.health}/${actor.max_health} HP`;
+      card.children[1].textContent = `${actor.health}/${actor.max_health} HP${Object.keys(actor.statuses || {}).length ? " | " + Object.keys(actor.statuses).join(", ") : ""}`;
       card.children[2].textContent = `${actor.mana}/${actor.max_mana} MP ? Range ${actor.attack_range_min ?? 1}?${actor.attack_range_max ?? 1}`;
       if (actor.team === 'enemy') {
         card.type = 'button'; card.dataset.enemy = actor.combatant_id;

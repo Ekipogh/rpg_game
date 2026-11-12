@@ -13,7 +13,7 @@ from battle_daemon import BattleDaemon, main
 from hero.dungeon import create_run, apply_action
 from hero.encounters import Encounter
 from hero.models import Hero, HeroClass, Monster, MonsterLoot
-from item.models import Item, InventoryItem, Equipment, EquipmentSlot, Weapon, Accessory
+from item.models import Item, InventoryItem, Equipment, EquipmentSlot, Weapon, Accessory, Armor
 from .models import Battle, BattleCommand, BattleWorkerLease, EncounterMonster
 from .services import (LeaseLost, acquire_lease, release_lease, discover_battles,
                        process_battle, retry_battle, build_snapshot)
@@ -92,6 +92,21 @@ class WorkerTests(TestCase):
         self.hero.hero_class.name = 'Warrior'
         self.hero.hero_class.save()
         self.assertEqual(build_snapshot(battle, self.hero).combatants[0].damage_kind, 'physical')
+
+    def test_elemental_defenses_are_snapshotted_from_equipped_slots(self):
+        equipment = Equipment.objects.create(hero=self.hero)
+        armor = Armor.objects.create(name='Ice armor', elemental_resistances={'fire': 0, 'ice': 0.5})
+        charm = Accessory.objects.create(name='Burn ward', status_immunities=['burn', 'frozen'])
+        EquipmentSlot.objects.create(equipment=equipment, slot='armor', item=armor)
+        EquipmentSlot.objects.create(equipment=equipment, slot='accessory', item=charm)
+        snapshot = build_snapshot(self.adopt(), self.hero)
+        actor = snapshot.combatants[0]
+        self.assertEqual(actor.elemental_resistances_bp, {'fire': 0, 'ice': 5000})
+        self.assertEqual(actor.status_immunities, ('burn', 'frozen'))
+        wire = snapshot_to_json(snapshot)
+        armor.elemental_resistances = {'fire': 1.5}
+        armor.save()
+        self.assertEqual(snapshot_to_json(snapshot), wire)
 
     def test_saved_policy_overrides_weapon_default(self):
         equipment = Equipment.objects.create(hero=self.hero)

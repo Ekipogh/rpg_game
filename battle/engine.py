@@ -4,7 +4,7 @@ Version identifiers cover scheduling, formulas, serialization, and RNG behavior.
 Commit AdvanceResult state, events, and command receipts as one persistence unit.
 """
 
-from dataclasses import dataclass, asdict, fields
+from dataclasses import dataclass, asdict, fields, field
 from copy import deepcopy
 import hashlib
 import json
@@ -13,7 +13,7 @@ import types
 from typing import Literal, Union
 
 SCHEMA_VERSION = 1
-RULES_VERSION = "magic-v1"
+RULES_VERSION = "elemental-v1"
 RNG_VERSION = "sha256-counter-v1"
 
 Team = Literal["hero", "enemy"]
@@ -76,6 +76,9 @@ class CombatantSnapshot:
     projectile_element: Literal["fire", "ice", "lightning", "earth", "wind", "holy", "dark"] | None = None
     presentation_kind: Literal["melee", "projectile"] = "melee"
 
+    elemental_resistances_bp: dict[str, int] = field(default_factory=dict)
+    status_immunities: tuple[str, ...] = ()
+
 
 @dataclass(frozen=True)
 class BattleRules:
@@ -110,6 +113,15 @@ class BattleSnapshot:
 
 
 @dataclass
+class StatusInstance:
+    name: Literal["burning", "chilled", "frozen", "withering"]
+    source_id: str
+    expires_at_ms: int
+    next_tick_at_ms: int | None = None
+    potency: int = 0
+
+
+@dataclass
 class CombatantState:
     combatant_id: str
 
@@ -123,6 +135,9 @@ class CombatantState:
 
     next_attack_at_ms: int | None
     next_movement_at_ms: int | None
+
+    statuses: dict[str, StatusInstance] = field(default_factory=dict)
+    stagger_delay_ms: int = 0
 
 
 @dataclass
@@ -215,7 +230,7 @@ def validate_snapshot(snapshot: BattleSnapshot):
     # Also enforce annotated shapes for callers constructing dataclasses directly.
     _decode(BattleSnapshot, asdict(snapshot))
     if (snapshot.schema_version != SCHEMA_VERSION or
-            snapshot.rules_version not in ("melee-v1", "ranged-v1", RULES_VERSION) or snapshot.rng_version != RNG_VERSION):
+            snapshot.rules_version not in ("melee-v1", "ranged-v1", "magic-v1", RULES_VERSION) or snapshot.rng_version != RNG_VERSION):
         raise ValueError("Unsupported snapshot version")
     for name in ("battle_id", "encounter_id", "encounter_definition_key", "initial_rng_seed"):
         if not getattr(snapshot, name).strip():
@@ -245,10 +260,16 @@ def validate_snapshot(snapshot: BattleSnapshot):
                     raise ValueError("speed must be an integer")
             else:
                 _integer(value, field.name, 1 if field.name == "max_health" else 0)
-        if snapshot.rules_version != RULES_VERSION and (
+        if snapshot.rules_version not in ("magic-v1", RULES_VERSION) and (
                 actor.damage_kind != "physical" or actor.projectile_element is not None or
                 actor.presentation_kind != "melee"):
             raise ValueError("Legacy battle cannot contain attack profiles")
+        for element, multiplier in actor.elemental_resistances_bp.items():
+            if element not in ("fire", "ice", "lightning", "earth", "wind", "holy", "dark"):
+                raise ValueError("Unknown resistance")
+            _integer(multiplier, "resistance multiplier")
+        if snapshot.rules_version != RULES_VERSION and (actor.elemental_resistances_bp or actor.status_immunities):
+            raise ValueError("Legacy elemental metadata")
         _integer(actor.attack_range_min, "attack_range_min", 1)
         _integer(actor.attack_range_max, "attack_range_max", actor.attack_range_min)
         if actor.attack_range_max >= snapshot.rules.lane_count:
@@ -321,6 +342,28 @@ def validate_state(snapshot: BattleSnapshot, state: BattleState):
                 _integer(timer, "action timer", state.simulation_time_ms + 1)
             elif timer is not None:
                 raise ValueError("Dead or finished combatants cannot have timers")
+        _integer(actor.stagger_delay_ms, "stagger delay")
+        if actor.stagger_delay_ms > 1000:
+            raise ValueError("Stagger cap exceeded")
+        if snapshot.rules_version != RULES_VERSION and (actor.statuses or actor.stagger_delay_ms):
+            raise ValueError("Legacy statuses")
+        for name, status in actor.statuses.items():
+            if name != status.name or status.source_id not in definitions or not actor.health or state.phase != "active":
+                raise ValueError("Invalid status owner or source")
+            _integer(status.expires_at_ms, "status expiry", state.simulation_time_ms + 1)
+            _integer(status.potency, "status potency")
+            if name == "withering" and status.potency not in (8, 15):
+                raise ValueError("Invalid Withering potency")
+            if name in ("chilled", "frozen") and status.potency:
+                raise ValueError("Invalid movement status potency")
+            if name == "frozen" and "chilled" in actor.statuses:
+                raise ValueError("Freeze replaces Chill")
+            if name == "burning":
+                _integer(status.next_tick_at_ms, "burn tick", state.simulation_time_ms + 1)
+                if status.next_tick_at_ms > status.expires_at_ms:
+                    raise ValueError("Tick after expiry")
+            elif status.next_tick_at_ms is not None:
+                raise ValueError("Unexpected status tick")
         for target in (actor.selected_target_id, actor.current_target_id):
             if target is not None and (target not in definitions or
                     definitions[target].team == definition.team or
@@ -476,8 +519,93 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                                      state.simulation_time_ms, xp, tuple(drops))
         for actor in actors:
             actor.next_attack_at_ms = actor.next_movement_at_ms = None
+            actor.statuses.clear()
         emit("battle_complete", result=state.outcome.result, experience=xp,
              loot=[asdict(drop) for drop in drops])
+
+    elemental = snapshot.rules_version == RULES_VERSION
+
+    def resisted(target, damage, element):
+        # Round half up; immunity remains exactly zero.
+        return (damage * definitions[target.combatant_id].elemental_resistances_bp.get(element, 10000) + 5000) // 10000
+
+    def deal(source, target, damage, **metadata):
+        applied = min(target.health, damage)
+        target.health -= applied
+        emit("damage", source, target.combatant_id, damage=damage, applied=applied,
+             health=target.health, **metadata)
+        if not target.health:
+            target.statuses.clear()
+            target.next_attack_at_ms = target.next_movement_at_ms = None
+            emit("defeat", target.combatant_id)
+            for other in actors:
+                target_for(other)
+        return applied
+
+    def remove_status(actor, name):
+        if name == "chilled":
+            # Preserve movement progress, converting the remaining slowed delay
+            # back to normal speed. Round up so movement never happens early.
+            remaining = actor.next_movement_at_ms - state.simulation_time_ms
+            actor.next_movement_at_ms = state.simulation_time_ms + (remaining * 60 + 99) // 100
+        del actor.statuses[name]
+
+    def effect(actor, target, damage, applied):
+        element = definitions[actor.combatant_id].projectile_element
+        if not element or not applied:
+            return
+        # Radiance uses actual damage, including a lethal hit.
+        if element == "holy":
+            healed = min(definitions[actor.combatant_id].stats.max_health - actor.health, (applied * 15 + 50) // 100)
+            if actor.health and healed:
+                actor.health += healed
+                emit("heal", actor.combatant_id, actor.combatant_id, applied=healed, health=actor.health)
+            return
+        if not target.health or random_integer(state.rng, 0, 9999) >= {
+                "fire": 3000, "ice": 2500, "lightning": 3000, "earth": 2000,
+                "wind": 2000, "dark": 2500}[element]:
+            return
+        boss = snapshot.battle_tier == "boss" and definitions[target.combatant_id].team == "enemy"
+        immunities = definitions[target.combatant_id].status_immunities
+        name = {"fire": "burning", "ice": "chilled", "dark": "withering",
+                "earth": "stagger", "wind": "gust", "lightning": "static_charge"}[element]
+        if name in immunities or (name == "burning" and "burn" in immunities):
+            return
+        now = state.simulation_time_ms
+        if element in ("fire", "ice", "dark"):
+            duration, potency, tick = 4000, 0, None
+            if element == "fire":
+                potency, tick = (damage * 20 + 50) // 100, now + 1000
+            elif element == "ice":
+                duration = 3000
+                if "chilled" in target.statuses and not boss and "frozen" not in immunities:
+                    name, duration = "frozen", 1500
+                    remove_status(target, "chilled")
+                elif "frozen" in target.statuses:
+                    return
+            else:
+                potency = 8 if boss else 15
+            if name == "chilled" and "chilled" not in target.statuses:
+                remaining = target.next_movement_at_ms - now
+                target.next_movement_at_ms = now + (remaining * 100 + 59) // 60
+            target.statuses[name] = StatusInstance(name, actor.combatant_id, now + duration, tick, potency)
+            emit("status_applied", actor.combatant_id, target.combatant_id, status=name, expires_at_ms=now + duration)
+        elif element == "earth":
+            delay = min(200 if boss else 400, 1000 - target.stagger_delay_ms)
+            target.stagger_delay_ms += delay
+            target.next_attack_at_ms += delay
+            emit("stagger", actor.combatant_id, target.combatant_id, delay_ms=delay, next_attack_at_ms=target.next_attack_at_ms)
+        elif element == "wind" and not boss:
+            lane = target.lane + (1 if target.lane > actor.lane else -1)
+            if 0 <= lane < snapshot.rules.lane_count and not any(c.health and c.lane == lane for c in actors):
+                old, target.lane = target.lane, lane
+                emit("move", target.combatant_id, from_lane=old, to_lane=lane, effect="gust")
+        elif element == "lightning":
+            candidates = [c for c in actors if c.health and c is not target and
+                          definitions[c.combatant_id].team == definitions[target.combatant_id].team and abs(c.lane - target.lane) <= 3]
+            secondary = min(candidates, key=lambda c: (abs(c.lane - target.lane), c.combatant_id), default=None)
+            if secondary and "static_charge" not in definitions[secondary.combatant_id].status_immunities:
+                deal(actor.combatant_id, secondary, resisted(secondary, (damage * 35 + 50) // 100, "lightning"), element="lightning", effect="static_charge", critical=False)
 
     def execute(command):
         reason = None
@@ -506,6 +634,8 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
     end = min(until_simulation_ms, snapshot.rules.max_simulation_ms)
     while state.phase == "active":
         due = [timer for c in actors for timer in (c.next_attack_at_ms, c.next_movement_at_ms) if timer is not None]
+        due.extend(t for c in actors for status in c.statuses.values()
+                   for t in (status.expires_at_ms, status.next_tick_at_ms) if t is not None)
         if index < len(pending):
             due.append(pending[index].execute_at_ms)
         timestamp = min(due)
@@ -517,11 +647,25 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
             execute(pending[index])
             index += 1
         for actor in actors:
+            for name, status in list(actor.statuses.items()):
+                if status.next_tick_at_ms == timestamp:
+                    deal(status.source_id, actor, resisted(actor, status.potency, "fire"), element="fire", effect="burning", critical=False)
+                    status.next_tick_at_ms += 1000
+                if name in actor.statuses and status.expires_at_ms <= timestamp:
+                    remove_status(actor, name)
+                    emit("status_expired", target=actor.combatant_id, status=name)
             target_for(actor)
+        finish_if_needed()
+        if state.phase == "finished":
+            break
         for actor in actors:
             if actor.next_movement_at_ms != timestamp:
                 continue
             actor.next_movement_at_ms = timestamp + snapshot.rules.movement_interval_ms
+            if "frozen" in actor.statuses:
+                continue
+            if "chilled" in actor.statuses:
+                actor.next_movement_at_ms = timestamp + (snapshot.rules.movement_interval_ms * 100 + 59) // 60
             target = target_for(actor)
             definition = definitions[actor.combatant_id]
             distance = abs(actor.lane - target.lane) if target else 0
@@ -544,6 +688,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                 continue
             definition = definitions[actor.combatant_id]
             actor.next_attack_at_ms = timestamp + attack_interval_ms(definition.stats, snapshot.rules)
+            actor.stagger_delay_ms = 0
             target = target_for(actor)
             if target is None or not definition.attack_range_min <= abs(actor.lane - target.lane) <= definition.attack_range_max:
                 continue
@@ -553,7 +698,7 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
                  **({"damage_kind": definition.damage_kind,
                      "presentation_kind": definition.presentation_kind,
                      "element": definition.projectile_element}
-                    if snapshot.rules_version == RULES_VERSION and definition.damage_kind == "magical" else {}))
+                    if snapshot.rules_version in ("magic-v1", RULES_VERSION) and definition.damage_kind == "magical" else {}))
             if random_integer(state.rng, 0, 9999) >= max(5, min(100, attack.accuracy - defense.evasion)) * 100:
                 emit("miss", actor.combatant_id, target.combatant_id)
                 continue
@@ -562,21 +707,19 @@ def advance(snapshot: BattleSnapshot, state: BattleState, until_simulation_ms: i
             power, mitigation = ((attack.magic, defense.magic_defense)
                                  if definition.damage_kind == "magical"
                                  else (attack.attack, defense.defense))
+            if "withering" in actor.statuses:
+                power = power * (100 - actor.statuses["withering"].potency) // 100
             damage = max(1, (max(2, 2 * power - mitigation) * multiplier + 10000) // 20000)
+            if elemental and definition.damage_kind == "magical" and definition.projectile_element:
+                damage = resisted(target, damage, definition.projectile_element)
             if critical:
                 emit("critical", actor.combatant_id, target.combatant_id, damage=damage)
-            applied = min(target.health, damage)
-            target.health -= applied
-            emit("damage", actor.combatant_id, target.combatant_id, damage=damage,
-                 applied=applied, health=target.health, critical=critical)
-            if not target.health:
-                target.next_attack_at_ms = target.next_movement_at_ms = None
-                emit("defeat", target.combatant_id)
-                for other in actors:
-                    target_for(other)
-                finish_if_needed()
-                if state.phase == "finished":
-                    break
+            applied = deal(actor.combatant_id, target, damage, critical=critical)
+            if elemental and definition.damage_kind == "magical":
+                effect(actor, target, damage, applied)
+            finish_if_needed()
+            if state.phase == "finished":
+                break
         if state.simulation_time_ms == end:
             break
     # Commands after an early finish are rejected without advancing terminal time.
@@ -625,10 +768,14 @@ def _decode(cls, value):
 def snapshot_to_json(snapshot: BattleSnapshot) -> str:
     validate_snapshot(snapshot)
     data = asdict(snapshot)
-    if snapshot.rules_version != RULES_VERSION:
+    if snapshot.rules_version not in ("magic-v1", RULES_VERSION):
         for actor in data["combatants"]:
             for field in ("damage_kind", "projectile_element", "presentation_kind"):
                 actor.pop(field)
+    if snapshot.rules_version != RULES_VERSION:
+        for actor in data["combatants"]:
+            actor.pop("elemental_resistances_bp")
+            actor.pop("status_immunities")
     return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
 
@@ -641,6 +788,12 @@ def snapshot_from_json(data: str) -> BattleSnapshot:
                 if field in actor:
                     raise ValueError("Unexpected legacy attack profile")
                 actor[field] = default
+    if isinstance(value, dict) and value.get("rules_version") in ("melee-v1", "ranged-v1", "magic-v1"):
+        for actor in value.get("combatants", []):
+            for key, default in (("elemental_resistances_bp", {}), ("status_immunities", [])):
+                if key in actor:
+                    raise ValueError("Unexpected legacy elemental metadata")
+                actor[key] = default
     snapshot = _decode(BattleSnapshot, value)
     validate_snapshot(snapshot)
     return snapshot
@@ -648,10 +801,22 @@ def snapshot_from_json(data: str) -> BattleSnapshot:
 
 def state_to_json(snapshot: BattleSnapshot, state: BattleState) -> str:
     validate_state(snapshot, state)
-    return json.dumps(asdict(state), sort_keys=True, separators=(",", ":"))
+    data = asdict(state)
+    if snapshot.rules_version != RULES_VERSION:
+        for actor in data["combatants"].values():
+            actor.pop("statuses")
+            actor.pop("stagger_delay_ms")
+    return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
 
 def state_from_json(snapshot: BattleSnapshot, data: str) -> BattleState:
-    state = _decode(BattleState, json.loads(data))
+    value = json.loads(data)
+    if snapshot.rules_version != RULES_VERSION:
+        for actor in value.get("combatants", {}).values():
+            for key, default in (("statuses", {}), ("stagger_delay_ms", 0)):
+                if key in actor:
+                    raise ValueError("Unexpected legacy status state")
+                actor[key] = default
+    state = _decode(BattleState, value)
     validate_state(snapshot, state)
     return state
