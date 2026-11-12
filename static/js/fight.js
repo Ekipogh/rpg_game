@@ -119,23 +119,38 @@
     find('older').hidden = !(Number(log.querySelector('[data-sequence]')?.dataset.sequence) > 1);
     if (atBottom) log.scrollTop = log.scrollHeight;
   }
-  function render(data) {
-    latest = data;
+  function renderItems(itemList = []) {
     const items = find('items');
     if (items) {
-      items.replaceChildren();
-      for (const item of data.items || []) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'btn fight-policy-button';
-        button.dataset.useItem = item.id;
-        button.textContent = `${item.name} × ${item.quantity}`;
-        button.title = `Restores ${item.heal_amount} HP and ${item.mana_restore} MP`;
-        button.addEventListener('click', () => useItem(item));
-        items.append(button);
+      const existing = new Map(Array.from(items.children, button => [button.dataset.useItem, button]));
+      const present = new Set(itemList.map(item => String(item.id)));
+      for (const [id, button] of existing) {
+        if (!present.has(id)) button.remove();
       }
-      find('item-empty').hidden = Boolean(data.items?.length);
+      for (const item of itemList) {
+        const id = String(item.id);
+        let button = existing.get(id);
+        if (!button) {
+          button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn fight-policy-button';
+          button.dataset.useItem = id;
+          button.addEventListener('click', () => {
+            const current = latest.items?.find(entry => String(entry.id) === id);
+            if (current) useItem(current);
+          });
+          items.append(button);
+        }
+        const label = `${item.name} × ${item.quantity}`;
+        if (button.textContent !== label) button.textContent = label;
+        button.title = `Restores ${item.heal_amount} HP and ${item.mana_restore} MP`;
+      }
+      find('item-empty').hidden = Boolean(itemList.length);
     }
+  }
+  function render(data) {
+    latest = data;
+    renderItems(data.items);
     text('status', statusNames[data.status] || data.status);
     text('connection', data.error || (!data.worker_available && data.status !== 'FINISHED' ? 'Combat is paused while the battle server reconnects.' : ''));
     const stage = find('combatants');
