@@ -266,8 +266,6 @@ def use_item_api(request, item_id):
                 # Recheck ownership under the same write lock as consumption.
                 Hero.objects.filter(pk=hero.pk).update(money=F('money'))
                 hero.refresh_from_db()
-                if hero.is_in_combat:
-                    return JsonResponse({'error': 'Consumables cannot be used during a dungeon run.'}, status=400)
                 if not hero.inventory_id or not InventoryItem.objects.filter(
                         inventory_id=hero.inventory_id, item=item, quantity__gt=0).exists():
                     return JsonResponse({'error': 'Item not found in inventory'}, status=400)

@@ -44,6 +44,9 @@ def apply_consumable_effects(hero, item, quantity=1):
     if updates:
         type(current).objects.filter(pk=current.pk).update(**updates)
         current.refresh_from_db()
+    if not isinstance(item, Instant) and (current.current_health != before[0] or current.current_mana != before[1]):
+        from battle.services import sync_consumable_resources
+        sync_consumable_resources(current, item, before)
     _sync(hero, current)
     return {'health_change': current.current_health - before[0],
             'mana_change': current.current_mana - before[1],

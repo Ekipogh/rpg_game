@@ -3,6 +3,7 @@
     <header class="fight-topbar">
       <div class="fight-brand">Dungeon encounter</div>
       <span class="fight-floor">Floor {{ floor }}</span>
+      <a href="{% url 'inventory' %}" class="btn btn-outline-secondary">Use consumables</a>
     </header>
     <div class="message-overlay">
       {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
