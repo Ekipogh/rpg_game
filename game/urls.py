@@ -20,8 +20,12 @@ from django.contrib import admin
 from .health import health
 from django.urls import include, path
 from item.views import inventory_view  # Import the inventory view directly
+from item import shop_views
 
 urlpatterns = [
+    path('shop/', shop_views.shop_view, name='shop'),
+    path('shop/buy/<int:target_id>/', shop_views.trade, {'action': 'buy'}, name='shop_buy'),
+    path('shop/sell/<int:target_id>/', shop_views.trade, {'action': 'sell'}, name='shop_sell'),
     path('health/', health, name='health'),
     path('admin/', admin.site.urls),
     path('', include('hero.urls')),
