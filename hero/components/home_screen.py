@@ -20,8 +20,7 @@ class HomeScreenView(UnicornView):
 
     def navigate_to_shop(self):
         """Handle navigation to shop screen"""
-        # Add navigation logic here
-        pass
+        return redirect('shop')
 
     def navigate_to_inventory(self):
         return redirect('inventory')
