@@ -7,6 +7,19 @@ are imported directly; elemental resistances are damage multipliers.
 
 Install requirements and apply migrations before importing:
 
+For a deployed game, sign in to Django admin with a superuser account, open
+**Hero classes**, and select **Import RPG content**. Upload `rpg_content.yaml`
+and choose **Validate only**. Once validation succeeds, upload the same file
+again and choose **Apply content**. The result or validation error appears on
+the page. The direct URL is `/admin/hero/heroclass/import-content/`.
+This uses the same transactional importer as the command below, requires no
+server shell, and records successful applies in the Django admin log with the
+acting user. Uploads are limited to 2 MiB and temporary files are removed after
+each request. Take a database backup before applying. Deploy this admin tool
+once before using it; migrations remain part of deployment, and new encounter
+keys still require a code release. The upload changes database content, not the
+release's bundled YAML file. Later CLI imports use their selected file.
+
 ```powershell
 .venv/Scripts/python.exe -m pip install -r requirements.txt
 .venv/Scripts/python.exe manage.py migrate

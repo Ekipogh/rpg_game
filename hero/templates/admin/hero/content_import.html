@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'admin:hero_heroclass_changelist' %}">Hero classes</a> &rsaquo; Import RPG content</div>
+{% endblock %}
+{% block content %}
+<p>Upload your rpg_content.yaml to update classes, items, monsters, loot and encounter rosters.</p>
+<p>Choose <strong>Validate only</strong> first: it checks the complete import and rolls back all changes.
+Then upload the same file and choose <strong>Apply content</strong> to save it. Invalid catalogs roll back entirely.</p>
+<p>Back up the database before applying. Existing heroes' stats, inventories and saved battles are retained.
+New encounter keys require a code deployment; this tool updates registered encounters only.</p>
+{% if output %}<div class="messagelist"><div class="success"><pre>{{ output }}</pre></div></div>{% endif %}
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Run import" class="default">
+</form>
+{% endblock %}
