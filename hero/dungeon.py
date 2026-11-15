@@ -134,7 +134,8 @@ def choose_path(run, index):
 def _snapshot(hero):
     # Compare every input to the calculation, plus JSON state, before writing.
     fields = ('dungeon_revision', 'dungeon_run', 'current_health', 'max_health',
-              'current_mana', 'max_mana', 'experience', 'is_in_combat')
+              'current_mana', 'max_mana', 'experience', 'is_in_combat', 'level',
+              'attack', 'defense', 'magic', 'magic_defense', 'speed', 'hero_class_id')
     return Hero.objects.filter(pk=hero.pk, **{field: getattr(hero, field) for field in fields})
 
 
@@ -183,9 +184,17 @@ def apply_action(hero_id, action, expected_revision, choice=None):
             return 'invalid'
     except (ValueError, KeyError, TypeError):
         return 'invalid'
+    original = _snapshot(hero)
+    hero.current_health = health
+    level_up = hero.apply_experience(xp - hero.experience) if action == 'resolve' else None
+    if level_up and run:
+        run['last_result']['level_up'] = level_up
+        run['last_result']['health_change'] += hero.current_health - health
+        run['hero_level'] = hero.level
+        run.update(generate_paths(run['current_floor'] + 1, run=run))
     with transaction.atomic():
-        updated = _snapshot(hero).update(
-            dungeon_run=run, current_health=health, experience=xp, is_in_combat=bool(run),
+        updated = original.update(
+            dungeon_run=run, **hero.progression_values(), is_in_combat=bool(run),
             dungeon_revision=F('dungeon_revision') + 1)
         if updated:
             hero.refresh_from_db()

@@ -214,8 +214,10 @@
       find('result').hidden = false;
       const result = data.result;
       const loot = result?.loot?.length ? `Loot received: ${result.loot.map(drop => `${drop.name} × ${drop.quantity}`).join(', ')}.` : 'No loot received.';
+      const progression = result?.level_up;
+      const levelMessage = progression ? (progression.new_level === progression.previous_level + 1 ? ` Level up! You reached level ${progression.new_level}.` : ` Level up! You advanced from level ${progression.previous_level} to level ${progression.new_level}.`) : '';
       const money = result?.money_change ? ` +${result.money_change} money.` : '';
-      text('result', data.outcome === 'VICTORY' ? `Victory! +${result?.experience || 0} XP. ${loot}` : 'Defeat. You returned home with 1 HP; previously earned rewards are retained.');
+      text('result', data.outcome === 'VICTORY' ? `Victory! +${result?.experience || 0} XP. ${loot}${levelMessage}` : 'Defeat. You returned home with 1 HP; previously earned rewards are retained.');
       const link = find('continue'); link.hidden = false; link.href = data.next_url;
       link.textContent = data.next_url.includes('dungeon') ? 'Choose your next path' : 'Return home';
     }

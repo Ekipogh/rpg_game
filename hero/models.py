@@ -51,7 +51,7 @@ class Hero(models.Model):
         "item.Inventory", on_delete=models.CASCADE, null=True, blank=True
     )
 
-    def level_up(self):
+    def level_up(self, *, save=True):
         """Increase stats based on hero class bonuses"""
         import random
 
@@ -92,19 +92,42 @@ class Hero(models.Model):
         self.current_health = self.max_health
         self.current_mana = self.max_mana
 
-        self.save()
+        if save:
+            self.save()
+
+    def apply_experience(self, amount):
+        """Apply reward progression in memory; caller persists atomically."""
+        self.experience += amount
+        previous_level = self.level
+        if amount > 0:
+            while self.level > 0 and self.experience >= self.next_level_xp:
+                self.level_up(save=False)
+        if self.level != previous_level:
+            return {"previous_level": previous_level, "new_level": self.level}
+        return None
+
+    def progression_values(self):
+        return {field: getattr(self, field) for field in (
+            "level", "experience", "max_health", "current_health", "max_mana",
+            "current_mana", "attack", "defense", "magic", "magic_defense", "speed")}
+
+    @property
+    def current_level_xp(self):
+        """Cumulative XP at the start of the current level."""
+        return 50 * self.level * (self.level - 1) if self.level > 0 else 0
 
     @property
     def next_level_xp(self):
-        """Calculate XP needed for next level"""
-        return 100 * self.level  # Simple formula: 100 XP per level
+        """Cumulative threshold; advancing costs 100 times the current level."""
+        return 50 * self.level * (self.level + 1)
 
     @property
     def experience_percentage(self):
         """Calculate experience percentage for progress bar"""
-        if self.next_level_xp == 0:
+        span = self.next_level_xp - self.current_level_xp
+        if span <= 0:
             return 0
-        return min((self.experience / self.next_level_xp) * 100, 100)
+        return max(0, min((self.experience - self.current_level_xp) / span * 100, 100))
 
     @property
     def health_percentage(self):

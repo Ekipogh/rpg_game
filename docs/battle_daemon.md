@@ -47,7 +47,7 @@ defeat returns home at 1 HP. XP and loot are awarded on victory and retained on
 later run failure. Instant loot applies its full-stack effects immediately; it
 never enters inventory. A money purse adds money at receipt. Resource effects
 apply after combat damage, within the same resolution transaction. The result
-report includes money gained, and the combat log records immediate item use. Automatic leveling is unchanged.
+report includes money gained, and the combat log records immediate item use. Positive XP rewards automatically grant every eligible level using a cumulative next-level threshold of `50 * level * (level + 1)` (100 times the current level in additional XP). Class growth is applied per level, health and mana are fully restored, and encounter results announce the new level.
 
 The worker applies queued `BattleCommand` rows in sequence order at the next
 processed simulation boundary. The command UUID is the idempotency key; commands
@@ -117,3 +117,11 @@ The worker saves an accepted player movement policy on the hero, so later battle
 reuse it. Until the player chooses a policy, melee weapons and unarmed heroes
 default to Approach, while weapons with range greater than one default to Maintain
 Range. Changing weapons does not replace an explicit saved preference.
+
+
+The XP bar measures progress between `50 * level * (level - 1)` and the next
+threshold, while its label shows total XP. Monster rewards are unchanged.
+Migration `hero.0028_quadratic_experience` preserves existing levels and maps
+old progress above `100 * (level - 1)` proportionally into the new level's XP
+span. Earned overflow is retained; totals below the old level baseline are
+raised to the new baseline. Stats and resources are unchanged by conversion.
