@@ -47,3 +47,20 @@ class HealingRestartTests(TestCase):
             saved = json.loads(state.read_text())
             self.assertEqual(saved['7']['last_heal'], '2026-11-08T00:00:00')
             self.assertEqual(saved['8']['last_heal'], '2026-11-08T00:00:00')
+
+
+class HttpsSettingsTests(TestCase):
+    def test_proxy_detection_and_secure_cookies_are_opt_in(self):
+        import os
+        import runpy
+        from django.test import RequestFactory
+        for enabled in ('True', 'False'):
+            with self.subTest(enabled=enabled), patch.dict(os.environ, {'DJANGO_HTTPS': enabled}):
+                config = runpy.run_path(str(Path(__file__).with_name('settings.py')))
+                active = enabled == 'True'
+                self.assertEqual(config['SESSION_COOKIE_SECURE'], active)
+                self.assertEqual(config['CSRF_COOKIE_SECURE'], active)
+                with override_settings(SECURE_PROXY_SSL_HEADER=config.get('SECURE_PROXY_SSL_HEADER')):
+                    request = RequestFactory().get('/', HTTP_X_FORWARDED_PROTO='https')
+                    self.assertEqual(request.is_secure(), active)
+                    self.assertFalse(RequestFactory().get('/health/').is_secure())

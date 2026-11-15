@@ -146,3 +146,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Uploaded files live alongside the persistent database.
 MEDIA_ROOT = DATA_DIR / "media"
 MEDIA_URL = "/media/"
+
+# Only enable behind our loopback-only Gunicorn / header-overwriting Nginx proxy.
+HTTPS_ENABLED = os.environ.get('DJANGO_HTTPS', 'False').lower() in ('true', '1', 'yes', 'on')
+if HTTPS_ENABLED:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = HTTPS_ENABLED
+CSRF_COOKIE_SECURE = HTTPS_ENABLED
+# Nginx redirects public HTTP; keep direct loopback readiness checks on HTTP.
