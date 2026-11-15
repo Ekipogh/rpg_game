@@ -26,7 +26,16 @@ mkdir "$RPG_DATA_DIR"
 export DJANGO_DEBUG=False DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 export DJANGO_SECRET_KEY=build-only-not-a-production-secret
 "$PY" -X utf8 manage.py check
-"$PY" -X utf8 manage.py makemigrations --check --dry-run
+if ! "$PY" -X utf8 manage.py makemigrations --check --dry-run; then
+    cat >&2 <<'MESSAGE'
+Release migration check failed. Generate and review migrations using the pinned
+dependencies, then commit them before rebuilding:
+    python manage.py makemigrations
+    python manage.py makemigrations --check --dry-run
+This build uses git archive HEAD; uncommitted migrations are not included.
+MESSAGE
+    exit 1
+fi
 "$PY" -X utf8 manage.py test
 "$PY" -m unittest discover -s deployment/tests -v
 "$PY" -m pip freeze > "$BUILD_DIR/package/requirements-resolved.txt"

@@ -146,7 +146,7 @@ and production use the same framework versions. Transitive dependencies are
 resolved at build time; every artifact records and retains its tested versions.
 When upgrading dependencies, generate and commit any required migrations before
 building. In particular, django-polymorphic 4.9+ removes the older explicit
-base-manager options, recorded in item migration 0014. Gunicorn is explicitly
+base-manager options, recorded in item migration 0018. Gunicorn is explicitly
 included in `requirements-production.txt`.
 
 The TeamCity deployment configuration permits one running deployment; the helper
