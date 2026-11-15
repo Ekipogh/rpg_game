@@ -33,6 +33,28 @@ class HeroModelTest(TestCase):
         self.assertEqual(self.hero.current_health, self.hero.max_health)
         self.assertEqual(self.hero.current_mana, self.hero.max_mana)
 
+    def test_reward_progression_thresholds_and_class_growth(self):
+        from unittest.mock import patch
+        for xp, level in ((99, 1), (100, 2), (299, 2), (300, 3), (599, 3), (600, 4), (777, 4)):
+            with self.subTest(xp=xp):
+                hero = Hero(hero_class=self.hero_class, current_health=1, current_mana=0)
+                before = hero.progression_values()
+                with patch('random.randint', side_effect=lambda low, high: high):
+                    result = hero.apply_experience(xp)
+                self.assertEqual((hero.level, hero.experience), (level, xp))
+                for field, prefix in (('attack', 'atk'), ('defense', 'def'),
+                        ('magic', 'mag'), ('magic_defense', 'mdef'), ('speed', 'spd'),
+                        ('max_health', 'hp'), ('max_mana', 'mp')):
+                    self.assertEqual(getattr(hero, field), before[field] +
+                        (level - 1) * getattr(self.hero_class, prefix + '_gain_max'))
+                if level > 1:
+                    self.assertEqual(result, {'previous_level': 1, 'new_level': level})
+                    self.assertEqual(hero.current_health, hero.max_health)
+                    self.assertEqual(hero.current_mana, hero.max_mana)
+                else:
+                    self.assertIsNone(result)
+                self.assertIsNone(hero.apply_experience(0))
+
     def test_experience_percentage(self):
         self.hero.experience = 50
         self.assertEqual(self.hero.experience_percentage, 50)
@@ -42,6 +64,18 @@ class HeroModelTest(TestCase):
         self.assertEqual(self.hero.experience_percentage, 0)
         self.hero.level = 0
         self.assertEqual(self.hero.experience_percentage, 0)
+
+    def test_cumulative_curve_and_progress_within_level(self):
+        for level, start, end in ((1, 0, 100), (2, 100, 300),
+                (5, 1000, 1500), (10, 4500, 5500), (20, 19000, 21000)):
+            with self.subTest(level=level):
+                self.hero.level = level
+                self.assertEqual(self.hero.current_level_xp, start)
+                self.assertEqual(self.hero.next_level_xp, end)
+                for xp, percent in ((start - 1, 0), (start, 0),
+                        ((start + end) // 2, 50), (end, 100), (end + 1, 100)):
+                    self.hero.experience = xp
+                    self.assertEqual(self.hero.experience_percentage, percent)
 
     def test_health_percentage(self):
         self.hero.max_health = 200

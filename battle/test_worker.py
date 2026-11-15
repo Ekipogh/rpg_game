@@ -251,6 +251,54 @@ class WorkerTests(TestCase):
         self.assertEqual(battle.snapshot['combatants'][1]['initial_health'], 10)
         battle.full_clean()
 
+    def test_leveling_rolls_back_with_failed_reward_commit(self):
+        Hero.objects.filter(pk=self.hero.pk).update(experience=90)
+        battle = self.adopt()
+        process_battle(battle.pk, self.token, 0)
+        self.hero.refresh_from_db()
+        before = self.hero.progression_values()
+        with patch('battle.services.generate_paths', side_effect=RuntimeError('reward failure')):
+            with self.assertRaises(RuntimeError):
+                self.fight(battle)
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.progression_values(), before)
+        battle.refresh_from_db()
+        self.assertIsNone(battle.level_up)
+        self.assertIsNone(battle.resolved_at)
+        self.assertEqual(self.fight(battle), 'FINISHED')
+        self.hero.refresh_from_db()
+        self.assertEqual((self.hero.level, self.hero.experience), (2, 107))
+
+    def test_leveling_rewards_persist_without_changing_combat_limits(self):
+        from django.urls import reverse
+        for key in ('goblin_ambush', 'ogre_guard', 'dungeon_guardian'):
+            with self.subTest(key=key):
+                run = create_run()
+                run['current_encounter'] = Encounter.create(key, 1).to_dict()
+                Hero.objects.filter(pk=self.hero.pk).update(
+                    level=1, experience=590, dungeon_run=run, current_health=1000, max_health=1000)
+                EncounterMonster.objects.get_or_create(
+                    encounter_definition_key=key, monster=self.monster)
+                discover_battles(self.token)
+                battle = Battle.objects.get(hero=self.hero, status='PENDING')
+                self.assertEqual(self.fight(battle), 'FINISHED')
+                self.hero.refresh_from_db()
+                battle.refresh_from_db()
+                self.assertEqual((self.hero.level, self.hero.experience), (4, 607))
+                self.assertEqual(self.hero.current_health, self.hero.max_health)
+                self.assertEqual(self.hero.current_mana, self.hero.max_mana)
+                self.assertEqual(battle.level_up, {'previous_level': 1, 'new_level': 4})
+                battle.full_clean()
+                session = self.client.session
+                session['hero_id'] = self.hero.pk
+                session.save()
+                response = self.client.get(reverse('battle:state', args=[battle.pk]))
+                self.assertEqual(response.json()['result']['level_up'], battle.level_up)
+                before = self.hero.progression_values()
+                process_battle(battle.pk, self.token, 1000)
+                self.hero.refresh_from_db()
+                self.assertEqual(self.hero.progression_values(), before)
+
     def test_victory_resources_rewards_and_resolution_once(self):
         item = Item.objects.create(name='Loot')
         MonsterLoot.objects.create(monster=self.monster, item=item, drop_chance=100, min_quantity=2, max_quantity=2)

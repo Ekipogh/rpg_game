@@ -271,7 +271,6 @@ def _resolve(battle, hero, snapshot, state):
             run["regular_victories"] = 0
         elif encounter.battle_tier == "enemy":
             run["regular_victories"] = run.get("regular_victories", 0) + 1
-        run.update(generate_paths(run["current_floor"] + 1, run=run))
     if not _snapshot(hero).update(current_health=max(1, hero_state.health),
             current_mana=hero_state.mana, experience=F("experience") + outcome.experience,
             dungeon_run=run, is_in_combat=bool(run),
@@ -294,7 +293,18 @@ def _resolve(battle, hero, snapshot, state):
                     "name": item.name, "quantity": drop.quantity, **effects})
     if outcome.result == "victory":
         hero_state.health, hero_state.mana = hero.current_health, hero.current_mana
+    # Progression belongs to reward persistence, outside the immutable combat state.
+    # The checkpoint write already credited XP; present the pre-reward total
+    # to the shared reward helper without changing the persisted total.
+    hero.experience -= outcome.experience
+    battle.level_up = hero.apply_experience(outcome.experience)
+    if battle.level_up:
+        Hero.objects.filter(pk=hero.pk).update(**hero.progression_values())
     if run:
+        run["hero_level"] = hero.level
+        run.update(generate_paths(run["current_floor"] + 1, run=run))
+        if battle.level_up:
+            run["last_result"]["level_up"] = battle.level_up
         run["last_result"]["money_change"] = money_change
         run["last_result"]["health_change"] = hero.current_health - snapshot.combatants[0].initial_health
         Hero.objects.filter(pk=hero.pk).update(dungeon_run=run)

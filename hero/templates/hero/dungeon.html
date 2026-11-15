@@ -16,6 +16,9 @@
         {% if result %}
         <div class="alert alert-info" role="status">
           <p>{{ result.title }}: HP {{ result.health_change }}, XP +{{ result.experience_change }}.</p>
+          {% if result.level_up %}
+          <p>Level up! {% if result.level_up.new_level == result.level_up.previous_level|add:1 %}You reached level {{ result.level_up.new_level }}.{% else %}You advanced from level {{ result.level_up.previous_level }} to level {{ result.level_up.new_level }}.{% endif %}</p>
+          {% endif %}
           {% if result.loot %}
           <p class="mb-1">Loot received:</p>
           <ul>

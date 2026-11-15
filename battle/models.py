@@ -25,6 +25,7 @@ class Battle(models.Model):
     )
     snapshot = models.JSONField(null=True, blank=True)
     checkpoint = models.JSONField(null=True, blank=True)
+    level_up = models.JSONField(null=True, blank=True)
     revision = models.PositiveBigIntegerField(default=0)
     next_due_at = models.DateTimeField(null=True, blank=True)
     last_event_sequence = models.PositiveBigIntegerField(default=0)

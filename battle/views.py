@@ -70,7 +70,7 @@ def state_view(request, battle_id):
         if result is not None:
             money_change = sum(payload.get('money_change', 0) for payload in
                 battle.events.filter(event_type='instant_use').values_list('payload', flat=True))
-            result = {**result, 'loot': loot_report(result.get('loot', [])), 'money_change': money_change}
+            result = {**result, 'loot': loot_report(result.get('loot', [])), 'money_change': money_change, 'level_up': battle.level_up}
         available = bool(lease and lease.owner_token and lease.expires_at and lease.expires_at > timezone.now())
         items = []
         for stock in InventoryItem.objects.filter(inventory_id=battle.hero.inventory_id, quantity__gt=0).select_related('item'):

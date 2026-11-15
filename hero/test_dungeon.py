@@ -30,6 +30,20 @@ class DungeonTests(TestCase):
         self.hero.refresh_from_db()
         return result
 
+    def test_treasure_levels_once_and_renders_notification(self):
+        self.start('forgotten_cache')
+        Hero.objects.filter(pk=self.hero.pk).update(experience=90, current_health=40)
+        self.hero.refresh_from_db()
+        revision = self.hero.dungeon_revision
+        self.assertEqual(self.act('resolve'), 'success')
+        self.assertEqual((self.hero.level, self.hero.experience), (2, 100))
+        self.assertEqual(self.hero.current_health, self.hero.max_health)
+        self.assertEqual(self.hero.dungeon_run['hero_level'], 2)
+        self.assertContains(self.client.get(reverse('dungeon')), 'You reached level 2.')
+        self.assertEqual(apply_action(self.hero.pk, 'resolve', revision), 'stale')
+        self.hero.refresh_from_db()
+        self.assertEqual((self.hero.level, self.hero.experience), (2, 100))
+
     def test_effects_and_pure_transitions(self):
         cases = [('spike_pit', (3, 8), 94, 0),
                  ('forgotten_cache', None, 100, 20), ('wandering_healer', None, 100, 0)]

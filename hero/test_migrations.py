@@ -59,3 +59,40 @@ class MonsterLootQuantityMigrationTest(TransactionTestCase):
     def test_negative_experience_reward_is_normalized_before_field_alteration(self):
         monster = self.MigratedMonster.objects.get(name='Migration test monster')
         self.assertEqual(monster.experience_reward, 0)
+
+
+class QuadraticExperienceMigrationTest(TransactionTestCase):
+    def test_conversion_preserves_levels_stats_and_fractional_progress(self):
+        executor = MigrationExecutor(connection)
+        before = [('hero', '0027_hero_movement_policy')]
+        after = [('hero', '0028_quadratic_experience')]
+        executor.migrate(before)
+        self.addCleanup(self.restore_latest)
+        apps = executor.loader.project_state(before).apps
+        Hero = apps.get_model('hero', 'Hero')
+        HeroClass = apps.get_model('hero', 'HeroClass')
+        hero_class = HeroClass.objects.create(name='Migration class')
+        cases = [(1, 50, 50), (2, 150, 200), (12, 1198, 7776),
+                 (5, 400, 1000), (5, 300, 1000), (2, 350, 600), (0, 25, 25)]
+        ids = []
+        for index, (level, xp, expected) in enumerate(cases):
+            ids.append(Hero.objects.create(name=f'Curve hero {index}',
+                hero_class=hero_class, level=level, experience=xp,
+                attack=37, current_health=23, current_mana=11).pk)
+        executor = MigrationExecutor(connection)
+        executor.migrate(after)
+        Hero = executor.loader.project_state(after).apps.get_model('hero', 'Hero')
+        for pk, (level, xp, expected) in zip(ids, cases):
+            hero = Hero.objects.get(pk=pk)
+            self.assertEqual((hero.level, hero.experience), (level, expected))
+            self.assertEqual((hero.attack, hero.current_health, hero.current_mana), (37, 23, 11))
+        executor = MigrationExecutor(connection)
+        executor.migrate(before)
+        Hero = executor.loader.project_state(before).apps.get_model('hero', 'Hero')
+        for pk, (level, xp, expected) in zip(ids, cases):
+            self.assertEqual(Hero.objects.get(pk=pk).experience,
+                             max(xp, 100 * (level - 1)) if level > 0 else xp)
+
+    def restore_latest(self):
+        executor = MigrationExecutor(connection)
+        executor.migrate(executor.loader.graph.leaf_nodes())
