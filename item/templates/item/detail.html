@@ -86,7 +86,7 @@
             <div class="flex-grow-1">
               <h1 class="mb-3 fw-bold text-gray-900 dark:text-white">{{ item.name }}</h1>
               <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="badge text-bg-primary dark:bg-blue-600 dark:text-white fs-6">{{ item.item_type|default:'Item'|title }}</span>
+                <span class="badge text-bg-primary dark:bg-blue-600 dark:text-white fs-6 item-type">{{ item.item_type|default:'Item'|title }}</span>
                 {% if item.value %}
                   <span class="badge text-bg-light border dark:!bg-gray-700 dark:!text-gray-300 dark:border-gray-600 fs-6">{{ item.value|currency_coins }}</span>
                 {% endif %}
@@ -127,7 +127,7 @@
                 <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">⚔️</span>Weapon Statistics</h5>
               </div>
               <div class="card-body">
-                <p class="text-muted dark:!text-gray-300">{{ item.get_stats }}</p>
+                <p class="text-muted dark:!text-gray-300 mb-2">{{ item.get_stats }}</p>
                 <div class="weapon-stats">
                   <div class="weapon-stat">
                     <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
