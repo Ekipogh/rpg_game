@@ -1,0 +1,45 @@
+{% load static item_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop - RPG Game</title>
+  <script src="{% static 'js/theme.js' %}"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/base.css' %}" rel="stylesheet">
+  <link href="{% static 'css/shop.css' %}" rel="stylesheet">
+</head>
+<body class="shop-page">
+<main class="container shop-main py-4">
+  <nav class="d-flex gap-2 mb-3"><a class="btn btn-outline-secondary dark:text-gray-100" href="{% url 'home' %}">Home</a><a class="btn btn-outline-secondary dark:text-gray-100" href="{% url 'inventory' %}">Inventory</a></nav>
+  <header class="shop-header">
+    <div><h1>Shop</h1><p class="shop-muted">{{ hero.name }} · Level {{ hero.level }} · {{ hero.hero_class.name }}</p></div>
+    <div class="shop-balance"><span class="shop-muted">Balance:</span><div>{{ hero.money|currency_coins }}</div></div>
+  </header>
+  <p class="shop-refresh shop-muted">Stock refreshes <time datetime="{{ shop.expires_at|date:'c' }}">{{ shop.expires_at|date:'H:i T' }}</time>. Reload after this time for new offers.</p>
+  {% if hero.is_in_combat %}<p class="alert alert-warning">Shopping is unavailable during combat.</p>{% endif %}
+  {% for message in messages %}<p role="status" class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">{{ message }}</p>{% endfor %}
+  <h2>Buy</h2><div class="shop-grid mb-4">
+  {% for row in offers %}<article class="shop-card">
+    <h3 class="h5"><a href="{% url 'item_detail' row.item.pk %}">{{ row.item.name }}</a></h3>
+    <p>{{ row.item.description }}</p><p>{{ row.item.get_stats }}</p>
+    <p>Level {{ row.item.level_requirement }} · {{ row.item.item_type|title }}</p>
+    <div class="shop-price"><span class="shop-muted">Price each</span>{{ row.offer.price|currency_coins }}</div><p class="shop-muted">Remaining: {{ row.offer.remaining }}</p>
+    <form method="post" action="{% url 'shop_buy' row.offer.pk %}">{% csrf_token %}
+      <label>Quantity <input class="form-control" type="number" name="quantity" value="1" min="1" max="{{ row.offer.remaining }}" required {% if row.reason %}disabled{% endif %}></label>
+      <button class="btn btn-primary" {% if row.reason %}disabled{% endif %}>Buy</button>
+    </form>{% if row.reason %}<p class="mt-2 mb-0">{{ row.reason }}</p>{% endif %}
+  </article>{% empty %}<p>No items are available for your class and level.</p>{% endfor %}</div>
+  <h2>Sell</h2><p>Sell spare inventory items for half their value, rounded down. Unequip equipped items before selling them.</p>
+  <div class="shop-grid">
+  {% for row in sales %}<article class="shop-card">
+    <h3 class="h5"><a href="{% url 'item_detail' row.stock.item.pk %}">{{ row.stock.item.name }}</a></h3>
+    <p>{{ row.stock.item.get_stats }}</p><p>Level {{ row.stock.item.level_requirement }} · Owned: {{ row.stock.quantity }}</p>
+    <div class="shop-price"><span class="shop-muted">Sale price each</span>{{ row.price|currency_coins }}</div>
+    <form method="post" action="{% url 'shop_sell' row.stock.item.pk %}">{% csrf_token %}
+      <label>Quantity <input class="form-control" type="number" name="quantity" value="1" min="1" max="{{ row.stock.quantity }}" required {% if row.reason %}disabled{% endif %}></label>
+      <button class="btn btn-success" {% if row.reason %}disabled{% endif %}>Sell</button>
+    </form>{% if row.reason %}<p class="mt-2 mb-0">{{ row.reason }}</p>{% endif %}
+  </article>{% empty %}<p>No spare items to sell.</p>{% endfor %}</div>
+</main>
+</body></html>

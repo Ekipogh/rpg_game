@@ -252,6 +252,23 @@ class InventoryItem(models.Model):
         unique_together = ("inventory", "item")
 
 
+class ShopState(models.Model):
+    hero = models.OneToOneField("hero.Hero", on_delete=models.CASCADE)
+    expires_at = models.DateTimeField()
+    level = models.IntegerField()
+    hero_class_id_at_generation = models.IntegerField()
+
+
+class ShopOffer(models.Model):
+    shop = models.ForeignKey(ShopState, on_delete=models.CASCADE, related_name="offers")
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    price = models.PositiveIntegerField()
+    remaining = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["shop", "item"], name="unique_shop_item")]
+
+
 class Equipment(models.Model):
     id = models.AutoField(primary_key=True)
     # One-to-one: each Hero has exactly one Equipment set; access via hero.equipment

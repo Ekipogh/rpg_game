@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 
 from hero.models import Hero
 from game.currency import format_currency, render_currency
+from item.services import _locked_hero
 from item.models import (
     Inventory, InventoryItem, Item, Weapon, Armor,
     Consumable, Equipment, EquipmentSlot, EquipmentSlots, Accessory, Instant
@@ -233,12 +234,6 @@ def use_item_api(request, item_id):
     try:
         if isinstance(item, Instant):
             return JsonResponse({'error': 'This item is used automatically when received.'}, status=400)
-        # Check if item is in inventory for equipment items
-        if isinstance(item, (Weapon, Armor, Accessory)):
-            inventory = get_or_create_inventory(hero)
-            if not InventoryItem.objects.filter(inventory=inventory, item=item).exists():
-                return JsonResponse({'error': 'Item not found in inventory'}, status=400)
-
         slot_type = None
         did_change = False
         unequipped_item = None
@@ -257,10 +252,25 @@ def use_item_api(request, item_id):
             None
         )
 
+        remaining_quantity = None
         if handler_info:
-            handler, slot_type = handler_info
-            result, unequipped_item, did_change = handler(hero, item)
-            action_type = 'equipped'
+            with transaction.atomic():
+                # Match selling's hero lock before checking ownership or changing slots.
+                hero = _locked_hero(hero)
+                inventory = get_or_create_inventory(hero)
+                if not InventoryItem.objects.filter(
+                        inventory=inventory, item=item, quantity__gt=0).exists():
+                    return JsonResponse({'error': 'Item not found in inventory'}, status=400)
+                handler, slot_type = handler_info
+                result, unequipped_item, did_change = handler(hero, item)
+                action_type = 'equipped'
+                if did_change:
+                    remaining_quantity = remove_inventory_item(inventory, item)
+                    if remaining_quantity is None:
+                        # Raise through atomic so the slot change is rolled back.
+                        raise ValueError('Item not found in inventory')
+                    if unequipped_item and unequipped_item.id != item.id:
+                        add_inventory_item(inventory, unequipped_item)
         elif isinstance(item, Consumable):
             with transaction.atomic():
                 # Recheck ownership under the same write lock as consumption.
@@ -273,17 +283,6 @@ def use_item_api(request, item_id):
             action_type = 'consumed'
         else:
             result = f"Used {item.name}"
-
-        # Remove from inventory if equipped successfully
-        remaining_quantity = None
-        if action_type == 'equipped' and did_change:
-            inventory = get_or_create_inventory(hero)
-            remaining_quantity = remove_inventory_item(inventory, item)
-            if remaining_quantity is None:
-                return JsonResponse({'error': 'Item not found in inventory'}, status=400)
-
-            if unequipped_item and unequipped_item.id != item.id:
-                add_inventory_item(inventory, unequipped_item)
 
         return JsonResponse({
             'success': True,
@@ -522,25 +521,27 @@ def unequip_item_api(request, slot_type):
     hero = get_object_or_404(Hero, id=hero_id)
 
     try:
-        equipment = _get_or_create_equipment_with_slots(hero)
-        equipment_slot = EquipmentSlot.objects.get(equipment=equipment, slot=slot_type)
+        with transaction.atomic():
+            hero = _locked_hero(hero)
+            equipment = _get_or_create_equipment_with_slots(hero)
+            equipment_slot = EquipmentSlot.objects.get(equipment=equipment, slot=slot_type)
 
-        if equipment_slot.item:
-            unequipped_item = equipment_slot.item
-            equipment_slot.item = None
-            equipment_slot.save()
+            if equipment_slot.item:
+                unequipped_item = equipment_slot.item
+                equipment_slot.item = None
+                equipment_slot.save()
 
-            inventory = get_or_create_inventory(hero)
-            add_inventory_item(inventory, unequipped_item)
+                inventory = get_or_create_inventory(hero)
+                add_inventory_item(inventory, unequipped_item)
 
-            return JsonResponse({
-                'success': True,
-                'message': f'Unequipped {unequipped_item.name} from {slot_type} slot',
-                'slot_type': slot_type,
-                'unequipped_item': serialize_inventory_item(unequipped_item, hero),
-            })
-        else:
-            return JsonResponse({'error': f'No item equipped in {slot_type} slot'}, status=400)
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Unequipped {unequipped_item.name} from {slot_type} slot',
+                    'slot_type': slot_type,
+                    'unequipped_item': serialize_inventory_item(unequipped_item, hero),
+                })
+            else:
+                return JsonResponse({'error': f'No item equipped in {slot_type} slot'}, status=400)
 
     except Equipment.DoesNotExist:
         return JsonResponse({'error': 'No equipment found for hero'}, status=400)
