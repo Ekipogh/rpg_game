@@ -47,12 +47,12 @@ class ItemTests(TestCase):
         accessory = Accessory.objects.create(
             name="Lucky Ring",
             critical_bonus=5,
-            status_immunities=["poison"],
+            status_resistances={"burning": 25},
             accessory_type="ring"
         )
         self.assertEqual(accessory.name, "Lucky Ring")
         self.assertEqual(accessory.critical_bonus, 5)
-        self.assertEqual(accessory.status_immunities, ["poison"])
+        self.assertEqual(accessory.status_resistances, {"burning": 25})
         self.assertEqual(accessory.equipment_slot, EquipmentSlots.ACCESSORY.value)
 
     def test_equipment_slot_choices(self):

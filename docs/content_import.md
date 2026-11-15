@@ -3,7 +3,15 @@ with their configured base stats, growth ranges, and starting equipment, plus
 235 polymorphic items, 48 monsters across levels
 1–20, 452 loot entries, and 48 battle encounters. Copper, silver, and gold coins
 credit 1, 10, and 100 money on receipt. Monster loot quantities and percentages
-are imported directly; elemental resistances are damage multipliers.
+are imported directly; armor elemental resistances are damage multipliers.
+Accessory `status_resistances` maps status names to integer percentages (0-100),
+for example `{burning: 20}` gives a 20% chance to block Burning after it triggers.
+The catalog assigns region-themed resistances from 5% at level 1 to 40% at level 20.
+Deploy migration `item.0019` before importing this catalog; it renames the old
+immunity field and converts existing immunity lists to 100% resistance.
+Old YAML files using `status_immunities` must be updated before import.
+Existing battle snapshots retain their original rules; new battles use the
+updated equipment percentages.
 
 Install requirements and apply migrations before importing:
 

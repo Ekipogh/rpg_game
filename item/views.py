@@ -74,6 +74,7 @@ def item_detail(request, item_id):
     elif isinstance(item, Accessory):
         item_info.update({
             'critical_bonus': item.critical_bonus,
+            'status_resistances': item.status_resistances,
             'defense_bonus': item.defense_bonus,
             'speed_bonus': item.speed_bonus,
             'magic_bonus': item.magic_bonus,
@@ -158,6 +159,7 @@ def add_inventory_item(inventory: Inventory, item: Item) -> None:
 
 def serialize_inventory_item(item: Item, hero=None) -> dict:
     """Serialize item to JSON format for API responses"""
+    from item.templatetags.item_extras import accessory_stats
     # Determine category based on item type
     category_map = {
         Weapon: 'weapon',
@@ -199,7 +201,9 @@ def serialize_inventory_item(item: Item, hero=None) -> dict:
         })
     elif isinstance(item, Accessory):
         payload.update({
+            'accessory_stats': accessory_stats(item),
             'critical_bonus': item.critical_bonus,
+            'status_resistances': item.status_resistances,
             'accessory_type': item.accessory_type,
         })
     elif isinstance(item, Consumable):

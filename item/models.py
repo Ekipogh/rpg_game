@@ -1,5 +1,6 @@
 import enum
 from django.db import models, transaction
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from polymorphic.models import PolymorphicModel
 
@@ -134,15 +135,15 @@ class Armor(Item):
 
 
 class Accessory(Item):
-    """Accessory equipment (BATTLE_SYSTEM.md: +CRIT, Status immunities, Passive effects)"""
+    """Accessory equipment (BATTLE_SYSTEM.md: +CRIT, Status resistances, Passive effects)"""
 
     defense_bonus = models.IntegerField(default=0)  # +DEF
     speed_bonus = models.IntegerField(default=0)  # +SPD
     magic_bonus = models.IntegerField(default=0)  # +MAG
     magic_defense_bonus = models.IntegerField(default=0)  # +MDEF
     critical_bonus = models.IntegerField(default=0)  # +CRIT (percentage)
-    # Status immunities stored as JSON list: ["poison", "burn"]
-    status_immunities = models.JSONField(default=list, blank=True)
+    # Percentage chance to block an elemental status: {"burning": 20}
+    status_resistances = models.JSONField(default=dict, blank=True)
     # Passive effects stored as JSON: {"atk_percent": 10, "def_flat": 5}
     passive_effects = models.JSONField(default=dict, blank=True)
     accessory_type = models.CharField(max_length=50, default="ring")
@@ -152,6 +153,21 @@ class Accessory(Item):
         default=EquipmentSlots.ACCESSORY.value,
     )
 
+    def clean(self):
+        super().clean()
+        values = self.status_resistances
+        if not isinstance(values, dict) or any(
+                not isinstance(name, str) or not name.strip() or
+                type(value) is not int or not 0 <= value <= 100
+                for name, value in values.items()):
+            raise ValidationError({"status_resistances": "Use a mapping of status names to integer percentages from 0 to 100."})
+        supported = {"burning", "chilled", "frozen", "static_charge", "stagger", "gust", "withering"}
+        # Preserve historical names, but reject introducing unsupported names.
+        previous = type(self).objects.filter(pk=self.pk).values_list("status_resistances", flat=True).first() if self.pk else {}
+        unknown = set(values) - supported - set(previous or {})
+        if unknown:
+            raise ValidationError({"status_resistances": f"Unsupported statuses: {', '.join(sorted(unknown))}"})
+
     @property
     def item_type(self):
         return ItemTypes.ACCESSORY.value
@@ -160,10 +176,10 @@ class Accessory(Item):
         stats = []
         if self.critical_bonus > 0:
             stats.append(f"CRIT +{self.critical_bonus}%")
-        if self.status_immunities:
-            stats.append(
-                f"Immune: {', '.join([s.capitalize() for s in self.status_immunities])}"
-            )
+        if self.status_resistances:
+            stats.append("Status resistance: " + ", ".join(
+                f"{name.replace('_', ' ').title()} {value}%"
+                for name, value in self.status_resistances.items()))
         if self.passive_effects:
             for effect, value in self.passive_effects.items():
                 stats.append(f"{effect.replace('_', ' ').title()}: +{value}")

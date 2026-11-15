@@ -218,6 +218,12 @@ def build_snapshot(battle, hero):
         "maintain_range" if attack_range_max > 1 else "approach")
     magical = bool(weapon and weapon.basic_attack_kind == "magical" and
                    attack_range_max > 1 and hero.hero_class.name == "Wizard")
+    status_resistances = {}
+    for slot in slots:
+        if slot.slot == "accessory" and isinstance(slot.item, Accessory):
+            slot.item.full_clean()
+            for name, percent in slot.item.status_resistances.items():
+                status_resistances[name] = min(100, status_resistances.get(name, 0) + percent)
     actors = [CombatantSnapshot("hero", "hero", "hero", hero.pk, hero.name,
         _stats(hero, equipment), 1, attack_range_max, hero.current_health,
         hero.current_mana, 0, movement_policy, None,
@@ -227,9 +233,7 @@ def build_snapshot(battle, hero):
         elemental_resistances_bp={key: round(value * 10000) for slot in slots
             if slot.slot == "armor" and isinstance(slot.item, Armor)
             for key, value in slot.item.elemental_resistances.items()},
-        status_immunities=tuple(name for slot in slots
-            if slot.slot == "accessory" and isinstance(slot.item, Accessory)
-            for name in slot.item.status_immunities))]
+        status_resistances=status_resistances)]
     for entry in entries:
         monster = entry.monster
         rewards = RewardSnapshot(monster.experience_reward, tuple(

@@ -28,17 +28,25 @@
         height: 90px;
         font-size: 3rem;
       }
-      .weapon-stats {
+      .weapon-stats,
+      .accessory-stats {
         display: grid;
         grid-template-columns: repeat(5, minmax(7rem, 1fr));
         gap: 0.75rem;
         overflow-x: auto;
       }
-      .weapon-stats .card-body {
+      .accessory-stats {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(7rem, 1fr);
+      }
+      .weapon-stats .card-body,
+      .accessory-stats .card-body {
         padding: 0.75rem 0.5rem;
         overflow-wrap: anywhere;
       }
-      .weapon-stats h3 {
+      .weapon-stats h3,
+      .accessory-stats h3 {
         font-size: 1.25rem;
       }
       .weapon-icon {
@@ -263,6 +271,79 @@
                     <p class="text-muted dark:!text-gray-400">This item's true effects remain hidden. Its magical properties may only be revealed through use or further study.</p>
                   </div>
                 {% endif %}
+              </div>
+            </div>
+          </div>
+        {% elif item.item_type == 'accessory' %}
+          <!-- Accessory Stats -->
+          <div class="col-12 mb-4">
+            <div class="card shadow-sm !bg-white dark:!bg-gray-800 border-0 dark:border-gray-700">
+              <div class="card-header bg-light dark:!bg-gray-700">
+                <h5 class="card-title mb-0 text-gray-900 dark:text-white"><span class="me-2">💍</span>Accessory Statistics</h5>
+              </div>
+              <div class="card-body">
+                <div class="accessory-stats">
+                  {% if item.defense_bonus > 0 %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Defense Bonus</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.defense_bonus|default:0 }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% if item.speed_bonus > 0 %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Speed Bonus</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.speed_bonus|default:0 }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% if item.magic_bonus > 0 %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Magic Bonus</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.magic_bonus|default:0 }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% if item.magic_defense_bonus > 0 %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Magic Defense Bonus</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.magic_defense_bonus|default:0 }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% if item.critical_bonus > 0 %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">Critical Bonus</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">+{{ item.critical_bonus|default:0 }}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% for status, percent in item.status_resistances.items %}
+                    <div class="accessory-stat">
+                      <div class="card bg-light dark:!bg-gray-700 text-center h-100 border-0 dark:border-gray-600">
+                        <div class="card-body">
+                          <small class="text-muted dark:!text-gray-300 text-uppercase fw-semibold">{{ status|status_label }} Resistance</small>
+                          <h3 class="mb-0 fw-bold text-gray-900 dark:text-white">{{ percent }}%</h3>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
