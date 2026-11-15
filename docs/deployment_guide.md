@@ -71,8 +71,52 @@ The resulting layout is:
 Setup prints the game URL using the selected public port, for example
 `http://192.168.1.50:9090/`. Setup does not change the firewall. If UFW is enabled,
 allow the configured public port only from your
-trusted LAN as appropriate. This setup uses HTTP for local use; configure TLS and
-Django's HTTPS/cookie settings before exposing it beyond the trusted local network.
+trusted LAN as appropriate. For HTTPS, use the TLS setup below.
+
+## HTTPS with an existing certificate
+
+Install a certificate and private key on the server, then run setup from the
+updated checkout. For example (replace the agent account and game hostname):
+
+```bash
+sudo bash deployment/setup-ubuntu.sh teamcity rpg.ekinuc.local 80 8000 /etc/nginx/ssl/nuceki.local.crt /etc/nginx/ssl/nuceki.local.key
+```
+
+The certificate must cover `rpg.ekinuc.local` in its Subject Alternative Names;
+its filename does not establish coverage. Clients must trust its issuing CA.
+Setup uses `nginx-https.conf.template`, redirects HTTP to HTTPS on port 443,
+serves static/media over TLS, and proxies to loopback Gunicorn. The optional
+seventh argument changes the HTTPS port; redirects include that port.
+Certificates are supplied by you; setup does not issue or renew them.
+Keep the private key readable only by root and reload Nginx after renewal.
+
+TLS paths and the HTTPS port are saved in `/etc/rpg_game/environment` and reused
+when omitted on later setup runs. Custom `deployment/nginx-config` still takes
+precedence and must include the TLS certificate/key and HTTPS port placeholders
+when TLS is enabled. Substitution also supports `${RPG_GAME_HOST}` and
+`${RPG_HTTPS_AUTHORITY}`; Nginx request variables are preserved.
+Existing HTTP installs retain their saved HTTP port unless you explicitly pass 80.
+Ensure `DJANGO_ALLOWED_HOSTS` includes the game hostname on existing installs.
+
+Deploy the updated application and restart `rpg_game` if it is already running.
+Setup sets `DJANGO_HTTPS=True`, which enables secure session/CSRF cookies and
+trusts the HTTPS header overwritten by Nginx, following
+[Django's proxy settings](https://docs.djangoproject.com/en/5.2/ref/settings/#secure-proxy-ssl-header).
+Gunicorn must remain loopback-only. Public redirects happen in Nginx so deployment
+readiness continues to work over loopback HTTP. Local development remains HTTP.
+Allow the HTTP and HTTPS ports through your firewall as appropriate.
+
+Verify on the server and in a browser:
+
+```bash
+sudo nginx -t
+curl -I http://rpg.ekinuc.local/health/
+curl --fail --cacert /path/to/issuing-ca.crt https://rpg.ekinuc.local/health/
+```
+
+Check the redirect Location, login, admin and game actions over HTTPS. For a
+publicly trusted certificate, omit `--cacert`. Other services may share port 80/443
+with distinct `server_name` values.
 
 ## TeamCity configuration
 
@@ -172,6 +216,9 @@ Edit `/etc/rpg_game/environment` as root. Settings consume:
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames/IPs, including localhost and 127.0.0.1 for readiness checks. Do not include ports or URL schemes. |
 | `RPG_DATA_DIR` | Database and daemon-state directory; setup uses `/var/lib/rpg_game`. Defaults to the project directory for existing development workflows. |
 | `RPG_HTTP_PORT` | Nginx's public port; new installations default to 8080. Set through setup to regenerate the Nginx configuration. |
+| `DJANGO_HTTPS` | Enable trusted proxy HTTPS detection and secure cookies; setup sets this when TLS certificates are supplied. |
+| `RPG_HTTPS_PORT` | TLS listener, defaults to 443. |
+| `RPG_SSL_CERTIFICATE` / `RPG_SSL_KEY` | Absolute server-side TLS file paths, supplied as setup arguments 5 and 6. |
 | `RPG_APP_PORT` | Gunicorn's loopback port and the deployment readiness-check port; new installations default to 8000. Set through setup to update Nginx's upstream too. |
 
 The file is read by systemd and Bash, so use Bash-compatible `KEY=value` syntax

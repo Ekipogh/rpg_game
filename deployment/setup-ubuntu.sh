@@ -1,9 +1,9 @@
 #!/bin/bash
-# sudo bash deployment/setup-ubuntu.sh TEAMCITY_AGENT_USER GAME_HOSTNAME [HTTP_PORT] [APP_PORT]
+# sudo bash deployment/setup-ubuntu.sh TEAMCITY_AGENT_USER GAME_HOSTNAME [HTTP_PORT] [APP_PORT] [SSL_CERTIFICATE SSL_KEY [HTTPS_PORT]]
 # Supported baseline: Ubuntu 26.04, with an existing TeamCity agent account.
 set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo 'Run this script with sudo.' >&2; exit 1; }
-[[ $# -ge 2 && $# -le 4 ]] || { echo "Usage: $0 AGENT_USER GAME_HOSTNAME_OR_IP [HTTP_PORT] [APP_PORT]" >&2; exit 1; }
+[[ $# -ge 2 && $# -le 7 && $# -ne 5 ]] || { echo "Usage: $0 AGENT_USER GAME_HOSTNAME_OR_IP [HTTP_PORT] [APP_PORT] [SSL_CERTIFICATE SSL_KEY [HTTPS_PORT]]" >&2; exit 1; }
 AGENT_USER="$1"
 GAME_HOST="$2"
 [[ "$AGENT_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || { echo 'Invalid agent user'; exit 1; }
@@ -14,23 +14,46 @@ source /etc/os-release
 [[ "$ID" == ubuntu && "$VERSION_ID" == 26.04 ]] || { echo 'This setup supports Ubuntu 26.04 (Python 3.14).'; exit 1; }
 RPG_HTTP_PORT=8080
 RPG_APP_PORT=8000
+RPG_HTTPS_PORT=443
+RPG_SSL_CERTIFICATE=
+RPG_SSL_KEY=
 if [[ -f /etc/rpg_game/environment ]]; then
     source /etc/rpg_game/environment
 fi
 RPG_HTTP_PORT="${3:-$RPG_HTTP_PORT}"
 RPG_APP_PORT="${4:-$RPG_APP_PORT}"
-for port in "$RPG_HTTP_PORT" "$RPG_APP_PORT"; do
+RPG_SSL_CERTIFICATE="${5:-$RPG_SSL_CERTIFICATE}"
+RPG_SSL_KEY="${6:-$RPG_SSL_KEY}"
+RPG_HTTPS_PORT="${7:-$RPG_HTTPS_PORT}"
+DJANGO_HTTPS=False
+if [[ -n "$RPG_SSL_CERTIFICATE" || -n "$RPG_SSL_KEY" ]]; then
+    for file in "$RPG_SSL_CERTIFICATE" "$RPG_SSL_KEY"; do
+        [[ "$file" =~ ^/[a-zA-Z0-9_./-]+$ && -r "$file" && -s "$file" ]] || { echo "Invalid or unreadable TLS file: $file" >&2; exit 1; }
+    done
+    DJANGO_HTTPS=True
+fi
+for port in "$RPG_HTTP_PORT" "$RPG_APP_PORT" "$RPG_HTTPS_PORT"; do
     [[ "$port" =~ ^[1-9][0-9]{0,4}$ ]] && (( port <= 65535 )) || { echo "Invalid port: $port (use 1-65535, without leading zeros)" >&2; exit 1; }
 done
 [[ "$RPG_HTTP_PORT" != "$RPG_APP_PORT" ]] || { echo 'HTTP and application ports must differ.' >&2; exit 1; }
 # Gunicorn runs without privileges and cannot bind to privileged ports.
 (( RPG_APP_PORT >= 1024 )) || { echo 'APP_PORT must be 1024 or greater.' >&2; exit 1; }
-export RPG_HTTP_PORT RPG_APP_PORT
+if [[ "$DJANGO_HTTPS" == True ]]; then
+    [[ "$RPG_HTTPS_PORT" != "$RPG_HTTP_PORT" && "$RPG_HTTPS_PORT" != "$RPG_APP_PORT" ]] || { echo 'HTTPS, HTTP and application ports must differ.' >&2; exit 1; }
+fi
+export RPG_HTTP_PORT RPG_APP_PORT RPG_HTTPS_PORT RPG_SSL_CERTIFICATE RPG_SSL_KEY
+export RPG_GAME_HOST="$GAME_HOST"
+RPG_HTTPS_AUTHORITY="$GAME_HOST"
+[[ "$RPG_HTTPS_PORT" == 443 ]] || RPG_HTTPS_AUTHORITY="$GAME_HOST:$RPG_HTTPS_PORT"
+export RPG_HTTPS_AUTHORITY
 SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
 for file in deploy.py rpg_game.service rpg_game-battle.service rpg_game-healing.service nginx.conf.template; do
     [[ -f "$SOURCE_DIR/$file" ]] || { echo "Missing $SOURCE_DIR/$file"; exit 1; }
 done
 NGINX_TEMPLATE="$SOURCE_DIR/nginx.conf.template"
+if [[ "$DJANGO_HTTPS" == True ]]; then
+    NGINX_TEMPLATE="$SOURCE_DIR/nginx-https.conf.template"
+fi
 if [[ -f "$SOURCE_DIR/nginx-config" ]]; then
     NGINX_TEMPLATE="$SOURCE_DIR/nginx-config"
     echo 'Using custom Nginx template.'
@@ -38,6 +61,11 @@ fi
 for placeholder in '${RPG_HTTP_PORT}' '${RPG_APP_PORT}'; do
     grep -Fq "$placeholder" "$NGINX_TEMPLATE" || { echo "Nginx template must contain $placeholder" >&2; exit 1; }
 done
+if [[ "$DJANGO_HTTPS" == True ]]; then
+    for placeholder in '${RPG_HTTPS_PORT}' '${RPG_SSL_CERTIFICATE}' '${RPG_SSL_KEY}'; do
+        grep -Fq "$placeholder" "$NGINX_TEMPLATE" || { echo "TLS Nginx template must contain $placeholder" >&2; exit 1; }
+    done
+fi
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y python3.14 python3.14-venv git curl nginx sudo util-linux ca-certificates gettext-base
@@ -63,6 +91,8 @@ fi
 # Replace only port settings; preserve the existing secret and other settings.
 sed -i '/^[[:space:]]*\(export[[:space:]]\+\)\?RPG_\(HTTP\|APP\)_PORT=/d' /etc/rpg_game/environment
 printf '\nRPG_HTTP_PORT=%s\nRPG_APP_PORT=%s\n' "$RPG_HTTP_PORT" "$RPG_APP_PORT" >> /etc/rpg_game/environment
+sed -i '/^RPG_HTTPS_PORT=/d; /^RPG_SSL_CERTIFICATE=/d; /^RPG_SSL_KEY=/d; /^DJANGO_HTTPS=/d' /etc/rpg_game/environment
+printf '\nRPG_HTTPS_PORT=%s\nRPG_SSL_CERTIFICATE=%s\nRPG_SSL_KEY=%s\nDJANGO_HTTPS=%s\n' "$RPG_HTTPS_PORT" "$RPG_SSL_CERTIFICATE" "$RPG_SSL_KEY" "$DJANGO_HTTPS" >> /etc/rpg_game/environment
 chown root:rpg-game /etc/rpg_game/environment
 chmod 0640 /etc/rpg_game/environment
 install -m 0644 "$SOURCE_DIR/deploy.py" /usr/local/lib/rpg_game/deploy.py
@@ -82,7 +112,7 @@ printf '%s ALL=(root) NOPASSWD: /usr/local/sbin/rpg-game-deploy *\n' "$AGENT_USE
 visudo -cf "$SUDO_FILE"
 install -m 0440 "$SUDO_FILE" /etc/sudoers.d/rpg-game-deploy
 # Restrict substitution to our ports so Nginx's $host/$scheme variables survive.
-envsubst '${RPG_HTTP_PORT} ${RPG_APP_PORT}' < "$NGINX_TEMPLATE" > /etc/nginx/sites-available/rpg_game
+envsubst '${RPG_HTTP_PORT} ${RPG_APP_PORT} ${RPG_HTTPS_PORT} ${RPG_SSL_CERTIFICATE} ${RPG_SSL_KEY} ${RPG_GAME_HOST} ${RPG_HTTPS_AUTHORITY}' < "$NGINX_TEMPLATE" > /etc/nginx/sites-available/rpg_game
 ln -sfn /etc/nginx/sites-available/rpg_game /etc/nginx/sites-enabled/rpg_game
 nginx -t
 systemctl daemon-reload
@@ -93,7 +123,11 @@ fi
 systemctl enable rpg_game rpg_game-battle rpg_game-healing
 systemctl enable --now nginx
 systemctl reload nginx
-echo "Setup complete. Game URL after deployment: http://$GAME_HOST:$RPG_HTTP_PORT/"
+if [[ "$DJANGO_HTTPS" == True ]]; then
+    echo "Setup complete. Game URL after deployment: https://$RPG_HTTPS_AUTHORITY/"
+else
+    echo "Setup complete. Game URL after deployment: http://$GAME_HOST:$RPG_HTTP_PORT/"
+fi
 echo "Gunicorn and deployment readiness checks use 127.0.0.1:$RPG_APP_PORT."
 echo 'Game data and non-port environment settings were preserved; application services were not started/restarted.'
 echo 'If changing ports on a running installation, restart rpg_game or deploy a release to apply the new backend port.'

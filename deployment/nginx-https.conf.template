@@ -1,0 +1,30 @@
+server {
+    listen ${RPG_HTTP_PORT};
+    server_name ${RPG_GAME_HOST};
+    return 301 https://${RPG_HTTPS_AUTHORITY}$request_uri;
+}
+
+server {
+    listen ${RPG_HTTPS_PORT} ssl;
+    http2 on;
+    ssl_certificate ${RPG_SSL_CERTIFICATE};
+    ssl_certificate_key ${RPG_SSL_KEY};
+    ssl_protocols TLSv1.2 TLSv1.3;
+    server_name ${RPG_GAME_HOST};
+    location /static/ {
+        alias /opt/rpg_game/current/staticfiles/;
+    }
+    location /media/ {
+        alias /var/lib/rpg_game/media/;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:${RPG_APP_PORT};
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_http_version 1.1;
+        proxy_redirect off;
+    }
+}
