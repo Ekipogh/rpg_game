@@ -29,6 +29,44 @@ class ShopTests(TestCase):
     def offer(self, item):
         return shop.stock_for(self.hero).offers.get(item=item)
 
+    def test_equipment_change_rolls_back_if_inventory_removal_fails(self):
+        for item, slot in ((self.weapon, 'weapon'), (self.armor, 'armor'),
+                           (self.accessory, 'accessory')):
+            with self.subTest(slot=slot):
+                receive_item(self.hero, item)
+                equipment, _ = Equipment.objects.get_or_create(hero=self.hero)
+                old = type(item).objects.create(name=f'Old {slot}', value=10)
+                equipment_slot, _ = EquipmentSlot.objects.update_or_create(
+                    equipment=equipment, slot=slot, defaults={'item': old})
+                with patch('item.views.remove_inventory_item', return_value=None):
+                    response = self.client.post(reverse('use_item_api', args=[item.pk]))
+                self.assertEqual(response.status_code, 400)
+                equipment_slot.refresh_from_db()
+                self.assertEqual(equipment_slot.item_id, old.pk)
+                self.assertEqual(InventoryItem.objects.get(
+                    inventory=self.hero.inventory, item=item).quantity, 1)
+                self.assertFalse(InventoryItem.objects.filter(
+                    inventory=self.hero.inventory, item=old).exists())
+
+    def test_equipping_rechecks_ownership_after_acquiring_hero_lock(self):
+        from item.services import _locked_hero
+        receive_item(self.hero, self.weapon)
+
+        def sell_before_lock(hero):
+            shop.sell(hero, self.weapon.pk, 1)
+            return _locked_hero(hero)
+
+        with patch('item.views._locked_hero', side_effect=sell_before_lock) as lock:
+            response = self.client.post(reverse('use_item_api', args=[self.weapon.pk]))
+        lock.assert_called_once()
+        self.assertEqual(response.status_code, 400)
+        self.hero.refresh_from_db()
+        self.assertEqual(self.hero.money, 110)
+        self.assertFalse(EquipmentSlot.objects.filter(
+            equipment__hero=self.hero, item=self.weapon).exists())
+        self.assertFalse(InventoryItem.objects.filter(
+            inventory=self.hero.inventory, item=self.weapon).exists())
+
     def test_selection_and_exclusions(self):
         other = HeroClass.objects.create(name='Other')
         for model, kwargs in [(Instant, {}), (Consumable, {'money_amount': 100}),
@@ -228,3 +266,34 @@ class ShopConcurrencyTests(TransactionTestCase):
         hero.refresh_from_db()
         self.assertEqual(hero.money, 5)
         self.assertFalse(InventoryItem.objects.filter(inventory=hero.inventory).exists())
+
+    def test_equip_and_sale_cannot_both_take_last_copy(self):
+        cls = HeroClass.objects.create(name='Equip Seller')
+        hero = Hero.objects.create(name='Equip Seller', hero_class=cls, money=0)
+        item = Weapon.objects.create(name='Equip sale sword', value=10)
+        receive_item(hero, item)
+        client = Client()
+        session = client.session
+        session['hero_id'] = hero.pk
+        session.save()
+
+        def compete(action):
+            close_old_connections()
+            try:
+                if action == 'equip':
+                    response = client.post(reverse('use_item_api', args=[item.pk]))
+                    return response.status_code == 200 and response.json()['did_change']
+                shop.sell(Hero.objects.get(pk=hero.pk), item.pk, 1)
+                return True
+            except (ValueError, OperationalError):
+                return False
+            finally:
+                close_old_connections()
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(executor.map(compete, ('equip', 'sell')))
+        self.assertEqual(sum(results), 1)
+        hero.refresh_from_db()
+        equipped = EquipmentSlot.objects.filter(equipment__hero=hero, item=item).exists()
+        self.assertEqual(hero.money, 0 if equipped else 5)
+        self.assertFalse(InventoryItem.objects.filter(inventory=hero.inventory, item=item).exists())
