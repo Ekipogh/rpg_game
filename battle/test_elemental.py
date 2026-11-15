@@ -14,7 +14,7 @@ class ElementalTests(TestCase):
         hero = replace(hero, damage_kind='magical', projectile_element=element,
                        stats=replace(hero.stats, magic=50), attack_range_max=8)
         targets = [replace(t, initial_health=1000, stats=replace(t.stats, max_health=1000, attack=0),
-                           initial_movement_policy='hold', status_immunities=immunity,
+                           initial_movement_policy='hold', status_resistances={"burning" if name == "burn" else name: 100 for name in immunity},
                            elemental_resistances_bp={element: resistance}) for t in targets]
         snapshot = replace(snapshot, combatants=(hero, *targets), battle_tier='boss' if boss else 'enemy')
         state = create_battle(snapshot)
@@ -130,7 +130,7 @@ class ElementalTests(TestCase):
                 snapshot, state = self.setup_battle('lightning', enemies=enemies)
                 hero, primary, secondary, *others = snapshot.combatants
                 snapshot = replace(snapshot, combatants=(hero, primary,
-                    replace(secondary, status_immunities=('static_charge',)), *others))
+                    replace(secondary, status_resistances={'static_charge': 100}), *others))
                 with patch('battle.engine.random_integer', return_value=0):
                     result = advance(snapshot, state, 1000)
                 self.assertLess(result.state.combatants['enemy:0'].health, 1000)

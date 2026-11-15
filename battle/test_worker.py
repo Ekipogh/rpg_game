@@ -96,13 +96,13 @@ class WorkerTests(TestCase):
     def test_elemental_defenses_are_snapshotted_from_equipped_slots(self):
         equipment = Equipment.objects.create(hero=self.hero)
         armor = Armor.objects.create(name='Ice armor', elemental_resistances={'fire': 0, 'ice': 0.5})
-        charm = Accessory.objects.create(name='Burn ward', status_immunities=['burn', 'frozen'])
+        charm = Accessory.objects.create(name='Burn ward', status_resistances={'burning': 25, 'frozen': 50})
         EquipmentSlot.objects.create(equipment=equipment, slot='armor', item=armor)
         EquipmentSlot.objects.create(equipment=equipment, slot='accessory', item=charm)
         snapshot = build_snapshot(self.adopt(), self.hero)
         actor = snapshot.combatants[0]
         self.assertEqual(actor.elemental_resistances_bp, {'fire': 0, 'ice': 5000})
-        self.assertEqual(actor.status_immunities, ('burn', 'frozen'))
+        self.assertEqual(actor.status_resistances, {'burning': 25, 'frozen': 50})
         wire = snapshot_to_json(snapshot)
         armor.elemental_resistances = {'fire': 1.5}
         armor.save()

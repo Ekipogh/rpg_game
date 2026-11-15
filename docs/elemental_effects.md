@@ -1,8 +1,8 @@
 # Elemental basic attacks
 
-New encounters use `elemental-v1`. Existing `melee-v1`, `ranged-v1`, and
+New encounters use `elemental-v2`. Existing `elemental-v1` encounters retain their immunity rules and RNG consumption. Existing `melee-v1`, `ranged-v1`, and
 `magic-v1` snapshots retain their formulas, RNG consumption, and serialized
-shapes. No database migration is required: snapshots and checkpoints are JSON.
+shapes. Apply the accessory field/data migration before importing the updated content catalog.
 
 A Wizard's equipped magical ranged weapon supplies the element. Physical
 weapons remain physical, including ranged weapons with an element. These basic
@@ -31,10 +31,17 @@ round half up to an integer; low damage may round to zero, without a minimum
 one override. Burn potency is calculated from the original resisted hit;
 subsequent ticks apply the recipient's resistance again.
 
-Accessory `status_immunities` accepts `burning` (also legacy `burn`), `chilled`,
-`frozen`, `static_charge`, `stagger`, `gust`, and `withering`. Other existing
-immunity names remain harmless. Chilled immunity prevents the Ice progression;
-Frozen immunity permits Chilled but prevents its upgrade.
+Accessory `status_resistances` maps `burning`, `chilled`, `frozen`,
+`static_charge`, `stagger`, `gust`, and `withering` to integer percentages
+from 0 to 100. After an effect triggers, its recipient independently rolls to
+resist it: a 30% trigger with 30% resistance applies 21% of the time. Resistance
+does not reduce the initial damage. Zero and 100% use no extra RNG roll.
+Chilled resistance prevents Ice progression; resisting Frozen retains and
+refreshes Chilled. Lightning checks both the primary and selected secondary
+recipient, without redirecting a resisted chain. Holy healing is unaffected.
+Equipped contributions add, capped at 100%. Existing database immunity lists
+migrate to 100% resistance (`burn` becomes `burning`); unrelated historical
+names remain harmless. Old battle snapshots keep their original wire format.
 
 Statuses and timer changes live in checkpoints, using simulation milliseconds.
 At equal timestamps the engine processes commands, then ticks and expiries in

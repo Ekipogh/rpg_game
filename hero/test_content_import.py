@@ -12,7 +12,7 @@ from battle.models import EncounterMonster
 from hero.encounters import Encounter
 from hero.models import Hero, HeroClass, HeroClassEquipment, Monster, MonsterLoot
 from hero.creation import create_character
-from item.models import Item, Instant, Weapon
+from item.models import Item, Instant, Weapon, Accessory
 
 
 class ContentImportTests(TestCase):
@@ -27,6 +27,7 @@ class ContentImportTests(TestCase):
         self.assertFalse(Weapon.objects.filter(weapon_type='bow').exclude(attack_range_max=4).exists())
         self.assertFalse(Monster.objects.filter(monster_class='archer').exclude(attack_range_max=4).exists())
         self.assertEqual(HeroClassEquipment.objects.count(), 9)
+        self.assertEqual(Accessory.objects.get(name="Copper Charm").status_resistances, {"gust": 5})
         self.assertEqual(Item.objects.count(), 235)
         self.assertEqual(Monster.objects.count(), 48)
         self.assertEqual(MonsterLoot.objects.count(), 452)
@@ -215,3 +216,17 @@ class ContentImportTests(TestCase):
             self.assertEqual(Monster.objects.count(), 0)
             self.assertEqual(HeroClass.objects.count(), 0)
             self.assertEqual(Item.objects.count(), 1 if mutation == "type" else 0)
+
+
+class ResistanceImportValidationTests(TestCase):
+    def test_invalid_status_resistance_rolls_back(self):
+        original = yaml.safe_load((Path(settings.BASE_DIR) / 'rpg_content.yaml').read_text(encoding='utf-8'))
+        for value in ({'burning': 101}, {'burning': True}, {'not_a_status': 20}, ['burning']):
+            data = copy.deepcopy(original)
+            next(row for row in data['items'] if row['model'] == 'Accessory')['status_resistances'] = value
+            with TemporaryDirectory() as directory:
+                path = Path(directory) / 'invalid.yaml'
+                path.write_text(yaml.safe_dump(data), encoding='utf-8')
+                with self.assertRaises(CommandError):
+                    call_command('import_rpg_content', str(path), stdout=StringIO())
+            self.assertEqual(Item.objects.count(), 0)

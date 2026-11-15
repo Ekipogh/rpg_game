@@ -15,6 +15,7 @@ notes:
   and EquipmentSlot records.
 - 'Wizard staffs use magical ranged basic attacks with MAG bonuses and elemental
   presentation only; wizard accessories also give MAG.'
+- Accessory status_resistances are integer percentages (0-100) to block an effect after its normal trigger succeeds.
 - Accessory passive_effects and armor health_bonus require combat-engine support to have an effect.
 - Equipment drop chances are independent rolls; original loot, coins, monsters and encounters are preserved.
 items:
@@ -54,7 +55,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 5
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -115,7 +117,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 6
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -176,7 +179,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    chilled: 8
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -237,7 +241,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 10
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -299,7 +304,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 1
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    stagger: 12
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -361,7 +367,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 1
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    withering: 14
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -423,7 +430,9 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 1
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    chilled: 16
+    frozen: 16
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -485,7 +494,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 1
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    burning: 17
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -547,7 +557,8 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 1
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    burning: 19
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -609,7 +620,8 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 2
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    static_charge: 21
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -671,7 +683,8 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 2
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    withering: 23
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -733,7 +746,10 @@ items:
   magic_bonus: 5
   magic_defense_bonus: 2
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    burning: 25
+    chilled: 25
+    static_charge: 25
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -795,7 +811,8 @@ items:
   magic_bonus: 5
   magic_defense_bonus: 2
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    stagger: 27
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -857,7 +874,8 @@ items:
   magic_bonus: 5
   magic_defense_bonus: 2
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    gust: 28
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -919,7 +937,8 @@ items:
   magic_bonus: 6
   magic_defense_bonus: 3
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    withering: 30
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -981,7 +1000,8 @@ items:
   magic_bonus: 6
   magic_defense_bonus: 3
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    static_charge: 32
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1043,7 +1063,8 @@ items:
   magic_bonus: 6
   magic_defense_bonus: 3
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    withering: 34
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1105,7 +1126,8 @@ items:
   magic_bonus: 7
   magic_defense_bonus: 3
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    withering: 36
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1167,7 +1189,9 @@ items:
   magic_bonus: 7
   magic_defense_bonus: 3
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    burning: 38
+    withering: 38
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1229,7 +1253,14 @@ items:
   magic_bonus: 7
   magic_defense_bonus: 4
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    burning: 40
+    chilled: 40
+    frozen: 40
+    static_charge: 40
+    stagger: 40
+    gust: 40
+    withering: 40
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1324,7 +1355,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 1
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 5
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1366,7 +1398,8 @@ items:
   magic_bonus: 0
   magic_defense_bonus: 0
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    gust: 5
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1410,7 +1443,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 1
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 6
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1452,7 +1486,8 @@ items:
   magic_bonus: 0
   magic_defense_bonus: 0
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    gust: 6
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1496,7 +1531,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 1
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    chilled: 8
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1538,7 +1574,8 @@ items:
   magic_bonus: 0
   magic_defense_bonus: 0
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    chilled: 8
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1582,7 +1619,8 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 2
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 10
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1624,7 +1662,8 @@ items:
   magic_bonus: 0
   magic_defense_bonus: 0
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    stagger: 10
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1669,7 +1708,8 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 2
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 12
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1712,7 +1752,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 0
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    stagger: 12
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1757,7 +1798,8 @@ items:
   magic_bonus: 5
   magic_defense_bonus: 2
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    withering: 14
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1800,7 +1842,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 1
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    withering: 14
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1845,7 +1888,9 @@ items:
   magic_bonus: 5
   magic_defense_bonus: 2
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    chilled: 16
+    frozen: 16
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1888,7 +1933,9 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 1
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    chilled: 16
+    frozen: 16
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -1933,7 +1980,8 @@ items:
   magic_bonus: 6
   magic_defense_bonus: 3
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 17
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -1976,7 +2024,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 1
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    burning: 17
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2021,7 +2070,8 @@ items:
   magic_bonus: 6
   magic_defense_bonus: 3
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 19
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2064,7 +2114,8 @@ items:
   magic_bonus: 1
   magic_defense_bonus: 1
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    burning: 19
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2109,7 +2160,8 @@ items:
   magic_bonus: 7
   magic_defense_bonus: 3
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    static_charge: 21
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2152,7 +2204,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 1
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    static_charge: 21
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2197,7 +2250,8 @@ items:
   magic_bonus: 7
   magic_defense_bonus: 3
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    withering: 23
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2240,7 +2294,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 1
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    withering: 23
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2285,7 +2340,10 @@ items:
   magic_bonus: 8
   magic_defense_bonus: 4
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 25
+    chilled: 25
+    static_charge: 25
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2328,7 +2386,10 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 2
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    burning: 25
+    chilled: 25
+    static_charge: 25
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2373,7 +2434,8 @@ items:
   magic_bonus: 8
   magic_defense_bonus: 4
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 27
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2416,7 +2478,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 2
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    stagger: 27
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2461,7 +2524,8 @@ items:
   magic_bonus: 9
   magic_defense_bonus: 4
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 28
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2504,7 +2568,8 @@ items:
   magic_bonus: 2
   magic_defense_bonus: 2
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    gust: 28
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2549,7 +2614,8 @@ items:
   magic_bonus: 9
   magic_defense_bonus: 4
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    withering: 30
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2592,7 +2658,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 2
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    withering: 30
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2637,7 +2704,8 @@ items:
   magic_bonus: 10
   magic_defense_bonus: 5
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    static_charge: 32
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2680,7 +2748,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 2
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    static_charge: 32
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2725,7 +2794,8 @@ items:
   magic_bonus: 10
   magic_defense_bonus: 5
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    withering: 34
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2768,7 +2838,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 2
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    withering: 34
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2813,7 +2884,8 @@ items:
   magic_bonus: 11
   magic_defense_bonus: 5
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    withering: 36
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2856,7 +2928,8 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 3
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    withering: 36
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2901,7 +2974,9 @@ items:
   magic_bonus: 11
   magic_defense_bonus: 5
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 38
+    withering: 38
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -2944,7 +3019,9 @@ items:
   magic_bonus: 3
   magic_defense_bonus: 3
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    burning: 38
+    withering: 38
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -2989,7 +3066,14 @@ items:
   magic_bonus: 12
   magic_defense_bonus: 6
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 40
+    chilled: 40
+    frozen: 40
+    static_charge: 40
+    stagger: 40
+    gust: 40
+    withering: 40
   passive_effects: {}
   accessory_type: focus
   equipment_slot: accessory
@@ -3032,7 +3116,14 @@ items:
   magic_bonus: 4
   magic_defense_bonus: 3
   critical_bonus: 5
-  status_immunities: []
+  status_resistances:
+    burning: 40
+    chilled: 40
+    frozen: 40
+    static_charge: 40
+    stagger: 40
+    gust: 40
+    withering: 40
   passive_effects: {}
   accessory_type: charm
   equipment_slot: accessory
@@ -3048,7 +3139,8 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 5
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3064,7 +3156,8 @@ items:
   speed_bonus: 1
   magic_bonus: 1
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    gust: 5
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
@@ -3080,7 +3173,8 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 10
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3096,7 +3190,8 @@ items:
   speed_bonus: 2
   magic_bonus: 1
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    stagger: 10
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
@@ -3112,7 +3207,8 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 17
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3128,7 +3224,8 @@ items:
   speed_bonus: 3
   magic_bonus: 2
   critical_bonus: 1
-  status_immunities: []
+  status_resistances:
+    burning: 17
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
@@ -3144,7 +3241,10 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 25
+    chilled: 25
+    static_charge: 25
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3160,7 +3260,10 @@ items:
   speed_bonus: 5
   magic_bonus: 3
   critical_bonus: 2
-  status_immunities: []
+  status_resistances:
+    burning: 25
+    chilled: 25
+    static_charge: 25
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
@@ -3176,7 +3279,8 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    static_charge: 32
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3192,7 +3296,8 @@ items:
   speed_bonus: 6
   magic_bonus: 4
   critical_bonus: 3
-  status_immunities: []
+  status_resistances:
+    static_charge: 32
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
@@ -3208,7 +3313,14 @@ items:
   speed_bonus: 0
   magic_bonus: 0
   critical_bonus: 0
-  status_immunities: []
+  status_resistances:
+    burning: 40
+    chilled: 40
+    frozen: 40
+    static_charge: 40
+    stagger: 40
+    gust: 40
+    withering: 40
   passive_effects: {}
   accessory_type: amulet
   equipment_slot: accessory
@@ -3224,7 +3336,14 @@ items:
   speed_bonus: 7
   magic_bonus: 5
   critical_bonus: 4
-  status_immunities: []
+  status_resistances:
+    burning: 40
+    chilled: 40
+    frozen: 40
+    static_charge: 40
+    stagger: 40
+    gust: 40
+    withering: 40
   passive_effects: {}
   accessory_type: compass
   equipment_slot: accessory
